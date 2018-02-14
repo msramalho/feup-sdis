@@ -58,3 +58,6 @@ fabric.properties
 
 # Sonarlint plugin
 .idea/sonarlint
+*.xml
+*.class
+*.iml
