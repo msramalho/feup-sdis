@@ -1,10 +1,12 @@
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.util.Arrays;
 
 /**
  *
@@ -28,7 +30,9 @@ public class Client {
             return;
         }
         int port = Integer.parseInt(args[1]); // use the specified port
-        byte[] data = args[2].getBytes(); // get the data to send into a byte array
+        String mergedCommands = args[2] + " " +  String.join(" ", Arrays.asList(args).subList(3, args.length)); // merge <opnd>* into a string to send the server
+        System.out.print(mergedCommands); // debug
+        byte[] data = mergedCommands.getBytes(); // get the data to send into a byte array
 
         //socket set up
         InetAddress ip4 = Inet4Address.getByName(args[0]); // DNS from host_name to InetAddress (from ipv4)
@@ -43,6 +47,6 @@ public class Client {
         DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
         socket.receive(inPacket);
         String response = new String(inPacket.getData());
-        System.out.println("Reply: " + response);
+        System.out.println(" : " + response); // debug
     }
 }
