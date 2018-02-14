@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Arrays;
 
 /**
  Server
@@ -55,8 +56,8 @@ public class Server {
         for (String part: parts) //trim extra-whitespaces
             part = part.trim();
 
-        if (parts.length == 3 && parts[0].toUpperCase().equals("REGISTER"))
-            return db.register(new LicensePlate(parts[1], parts[2])).toString();
+        if (parts.length >= 3 && parts[0].toUpperCase().equals("REGISTER"))
+            return db.register(new LicensePlate(parts[1], String.join(" ", Arrays.asList(parts).subList(2, parts.length)))).toString();
         else if (parts.length == 2 && parts[0].toUpperCase().equals("LOOKUP"))
             return db.lookup(parts[1]);
 
