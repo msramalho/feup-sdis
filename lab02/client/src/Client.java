@@ -38,8 +38,6 @@ public class Client {
         mcSocket.leaveGroup(mcGroupIP);
         System.out.println("got answer: " + new String(inPacket.getData()));
 
-
-
         int port = Integer.parseInt((new String(inPacket.getData())).trim()); // use the specified port
         String mergedCommands = args[2] + " " +  String.join(" ", Arrays.asList(args).subList(3, args.length)); // merge <opnd>* into a string to send the server
         System.out.print(mergedCommands); // debug
@@ -59,6 +57,5 @@ public class Client {
         socket.receive(inPacket);
         String response = new String(inPacket.getData());
         System.out.println(" : " + response); // debug
-
     }
 }

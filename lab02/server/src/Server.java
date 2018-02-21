@@ -23,7 +23,7 @@ public class Server {
         InetAddress mcGroupIP = Inet4Address.getByName(args[1]);
         byte[] outData = args[0].getBytes(); //create message with service port
         DatagramPacket messsageToBroadcast = new DatagramPacket(outData, outData.length, mcGroupIP, Integer.parseInt(args[2]));
-
+        System.out.println("Each dot \".\" represents a timeout followed by a multicast message");
 
         // socket and buffers set up
         DatagramSocket socket = new DatagramSocket(Integer.parseInt(args[0]));
@@ -33,9 +33,7 @@ public class Server {
 
         //server cycle
         while(true){
-
             //send multicast message
-            System.out.println("Multicasting...");
             mcSocket.send(messsageToBroadcast);
 
             //receive request (execute the licenseplate service)
@@ -56,14 +54,9 @@ public class Server {
                 DatagramPacket outPacket = new DatagramPacket(outData, outData.length, inPacket.getAddress(), inPacket.getPort());
                 socket.send(outPacket);
             }catch (SocketTimeoutException e){
-                System.out.println("Got Timeout");
+                System.out.print(".");
             }
-
         }
-
-
-
-
     }
 
     //some extra validation could be done in this function
