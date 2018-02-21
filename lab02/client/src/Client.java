@@ -1,11 +1,6 @@
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.net.Inet4Address;
-import java.net.InetAddress;
+import java.net.*;
 import java.util.Arrays;
 
 /**
@@ -27,13 +22,29 @@ public class Client {
             System.out.println("Usage: java Client <host_name> <port_number> <oper> <opnd>*");
             return;
         }
-        int port = Integer.parseInt(args[1]); // use the specified port
+
+        //setup multicast socket and join group
+        MulticastSocket mcSocket = new MulticastSocket(Integer.parseInt(args[1]));
+        InetAddress mcGroupIP = Inet4Address.getByName(args[0]);
+        mcSocket.joinGroup(mcGroupIP);
+
+        //wait for multicast message
+        //receive the response (blocking)
+        byte[] responseBytes =  new byte[256]; // create buffer to receive response
+        DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
+        System.out.print("Waiting for broadcast...");
+        mcSocket.receive(inPacket);
+        System.out.println("got answer: " + new String(inPacket.getData()));
+
+
+
+        int port = Integer.parseInt((new String(inPacket.getData())).trim()); // use the specified port
         String mergedCommands = args[2] + " " +  String.join(" ", Arrays.asList(args).subList(3, args.length)); // merge <opnd>* into a string to send the server
         System.out.print(mergedCommands); // debug
         byte[] data = mergedCommands.getBytes(); // get the data to send into a byte array
 
         //socket set up
-        InetAddress ip4 = Inet4Address.getByName(args[0]); // DNS from host_name to InetAddress (from ipv4)
+        InetAddress ip4 = inPacket.getAddress();// Inet4Address.getByName(args[0]); // DNS from host_name to InetAddress (from ipv4)
         DatagramSocket socket = new DatagramSocket(); // create socket for UDP Unicast
         DatagramPacket outPacket = new DatagramPacket(data, data.length, ip4, port); // create the packet to send through the socket
 
@@ -41,10 +52,13 @@ public class Client {
         socket.send(outPacket); // send the packet
 
         //receive the response (blocking)
-        byte[] responseBytes =  new byte[256]; // create buffer to receive response
-        DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
+        responseBytes =  new byte[256]; // empty the receive buffer
+        inPacket = new DatagramPacket(responseBytes, responseBytes.length);
         socket.receive(inPacket);
         String response = new String(inPacket.getData());
         System.out.println(" : " + response); // debug
+
+        //leave multicast group
+        mcSocket.leaveGroup(mcGroupIP);
     }
 }
