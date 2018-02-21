@@ -34,6 +34,8 @@ public class Client {
         DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
         System.out.print("Waiting for broadcast...");
         mcSocket.receive(inPacket);
+        //leave multicast group
+        mcSocket.leaveGroup(mcGroupIP);
         System.out.println("got answer: " + new String(inPacket.getData()));
 
 
@@ -58,7 +60,5 @@ public class Client {
         String response = new String(inPacket.getData());
         System.out.println(" : " + response); // debug
 
-        //leave multicast group
-        mcSocket.leaveGroup(mcGroupIP);
     }
 }
