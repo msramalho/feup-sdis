@@ -1,18 +1,29 @@
-https://web.fe.up.pt/~pfs/aulas/sd2017/labs/lab2.html
+# Compilation
+ * `javac Server.java` for server
+ * `javac Client.java` for client
+ 
+# Execution
+#### Server
+`java Server <srvc_port> <mcast_addr> <mcast_port>`, where:
+ * `<srvc_port>` is the port number where the server provides the service
+ * `<mcast_addr>` is the IP address of the multicast group used by the server to advertise its service.
+ * `<mcast_port>` is the multicast group port number used by the server to advertise its service.
+#### Client
+`java client <mcast_addr> <mcast_port> <oper> <opnd> *`, where:
+ * `<mcast_addr>` is the IP address of the multicast group used by the server to advertise its service;
+ * `<mcast_port>` is the port number of the multicast group used by the server to advertise its service;
+ * `<oper>` is ''register'' or ''lookup'', depending on the operation to invoke;
+ * `<opnd> *` is the list of operands of the specified operation:
+     * `<plate number> <owner name>`, for register;
+     * `<plate number>`, for lookup.
 
-IPadress, Port
-IPadress must be between 224.0.0.0 and 239.255.255.2525
+Run client for each operation: `java Client <host_name> <port> <operation> <operation_arguments>`
+   * `REGISTER XX-XX-11 Owner_name`
+   * `LOOKUP XX-XX-11`
+ 
+# Explanation
 
-
-cliente subscrevem furpo multicast
-servidor envia mensagem multicast a dizer qual é porto em que o servidor está a fornecer o serviço
-depois o cliente usa multicast para isso
-
-servidor faz multicast periódico e outra é prestar o serviço
-    . pode ser com threads. Classes Timer e TimerTask (java.util), para executar uma tarefa que se repete de t em t. Há também java.util.Concurrent que é mais completa.
-    . ou com unico thread. mas como o receive() é bloqueante, cria-se um deadlock no servidor. contudo dá para usar .setScoketTimeout(int time) para o .receive()
-
-Classes:
-MulticastSocket . igual a unicast, com a restrição de o ip ter de estar na gama, é possível usar DatagramPacket
-cliente- para a receção tem de ser com a MulticastSocket (porque têm o joinGrupo(InetAddres mcastAddr)), para especificar o porto do grupo é preciso um socket associado ao porto correspondente - usar o construtor com o porto (MulticastSocket(int port)). Quando acabar as ações deve usar leaveGroup(InetAddres mcastAddr).
-quem envia pode user o MulticastSocket mesmo sem estar no grupo (multicast é aberto (não é preciso pertencer ao grupo para enviar mensagens)), contudo, o MulticastSocket tem setTimeToLive(int ttl) faz parte do protocolo IP e permite não ficar preso em ciclos E limitar o multicast (usar 1)
+ 1. Client joins broadcast group at (IP, PORT) = (`<mcast_addr>`, `<mcast_port>`) - (`<mcast_addr>` between 224.0.0.0 and 239.255.255.2525)
+ 2. Client waits for the server to bradcast its PORT (the server IP will be available from the `DatagramPacket.getAddress()`)
+ 3. Server eventually broadcasts the port (does not need to join the group)
+ 4. Server serves client (uses single thread due to lab specifications bt two threads would not need timeout)
