@@ -1,4 +1,4 @@
- SDIS 2016/2017: Project 1 -- Distributed Backup Service
+# SDIS 2016/2017: Project 1 -- Distributed Backup Service
 
 SDIS 2016/2017 - 2nd Semester  
 Project 1 -- Distributed Backup Service  
@@ -387,25 +387,12 @@ We will test your implementation also with that of other groups, and possibly ou
 
 A proficient **concurrent** implementation of the subprotocols (without enhancements) is worth a project grade of 70%, as shown in the following table. To achieve concurrency, you can use either multiple threads or Java NIO.
 
-Subprotocol
-
-Weight
-
-Backup
-
-40%
-
-Restore
-
-10%
-
-Delete
-
-5%
-
-Space Reclaim
-
-15%
+| Subprotocol | Weight |
+|---------------|--------|
+| Backup | 40% |
+| Restore | 10% |
+| Delete | 5% |
+| Space Reclaim | 15% |
 
 By implementing each of the 4 suggested enhancements, you will get an additional 5%. (Thus, you will get an additional 20%, if you implement all enhancements.) Please note that your enhanced subprotocols should interoperate with non-enhanced subprotocols, therefore you must be very careful in the design of these enhancements.(Read the appendix on interoperability for some suggestions.)
 
