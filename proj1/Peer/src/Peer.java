@@ -1,6 +1,7 @@
 public class Peer {
     static PeerConfig peerConfig;
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
         try {
             //create peer
             peerConfig = new PeerConfig(args);
@@ -10,11 +11,12 @@ public class Peer {
         }
 
         //initiator peer, receives <filename> <replicationFactor>
-        if (args.length == 9){
-
+        if (args.length == 11) {
+            System.out.println("initiator");
+            String filename = args[7];
+            int replicationFactor = Integer.parseInt(args[8]);
         }
 
-        
 
     }
 }
