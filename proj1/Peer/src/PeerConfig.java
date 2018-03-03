@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.net.*;
 
 public class PeerConfig {
@@ -6,7 +7,7 @@ public class PeerConfig {
     InetAddress sapIp; // service access point IP
     Integer sapPort; // service access point port
     MulticastSocket mcControl; // Multicast Control Socket
-    MulticastSocket mcBackUp_; // Multicast Back Up Socket
+    MulticastSocket mcBackup; // Multicast Back Up Socket
     MulticastSocket mcRestore; // Multicast Restore Socket
 
     public PeerConfig(String[] args) throws Exception {
@@ -17,25 +18,31 @@ public class PeerConfig {
         this.id = Integer.parseInt(args[1]);
         this.loadServiceAccessPoint(args[2]);
 
-        //setup multicast socket and join group for <mccIP> <mccPort>
-        InetAddress mccGroupIP = Inet4Address.getByName(args[3]); //<mccIP>
-        this.mcControl = new MulticastSocket(Integer.parseInt(args[4])); // <mccPort>
-        this.mcControl.joinGroup(mccGroupIP);
+        this.mcControl = PeerConfig.getMCGroup(args[3], args[4]);//setup multicast socket and join group for <mccIP> <mccPort>
+        this.mcBackup = PeerConfig.getMCGroup(args[5], args[6]);//setup multicast socket and join group for <mdbIp> <mdbPort>
+        this.mcRestore = PeerConfig.getMCGroup(args[7], args[8]);//setup multicast socket and join group for <mdrIp> <mdrPort>
 
-        //setup multicast socket and join group for <mdbIp> <mdbPort>
-        InetAddress mdbGroupIP = Inet4Address.getByName(args[5]); //<mdbIp>
-        this.mcBackUp_ = new MulticastSocket(Integer.parseInt(args[6])); // <mdbPort>
-        this.mcBackUp_.joinGroup(mdbGroupIP);
-
-        //setup multicast socket and join group for <mdrIp> <mdrPort>
-        InetAddress mdrGroup = Inet4Address.getByName(args[7]); //<mdrIp>
-        this.mcRestore = new MulticastSocket(Integer.parseInt(args[8])); // <mdrPort>
-        this.mcRestore.joinGroup(mdrGroup);
+        System.out.println(this.mcBackup);
         System.out.println("done");
     }
 
     /**
+     * parse hostname/ip and port and join a multicast group saved in mcsocket
+     * @param hostname the hostname or IP
+     * @param port     the port for the MulticastSocket
+     * @throws IOException
+     */
+    static protected MulticastSocket getMCGroup(String hostname, String port) throws IOException {
+        InetAddress mcGroupIP = Inet4Address.getByName(hostname);
+        MulticastSocket mcsocket = new MulticastSocket(Integer.parseInt(port));
+        mcsocket.setTimeToLive(1);//setTimeToLeave
+        mcsocket.joinGroup(mcGroupIP);
+        return mcsocket;
+    }
+
+    /**
      * Convert the cmd arg <serviceAccessPoint> into variables (this.sapIp, this.sapPort).
+     *
      * @param sap <hostname:Port>, <IP:Port> or just <Port> in which case the IP is from localhost
      * @throws UnknownHostException when Inet4Address.getByName fails for the given IP/hostname
      */
@@ -51,6 +58,17 @@ public class PeerConfig {
         this.sapIp = Inet4Address.getByName(hostname);
     }
 
+
+    public String receiveMulticast() throws IOException {
+        //wait for multicast message
+        //receive the response (blocking)
+        byte[] responseBytes = new byte[256]; // create buffer to receive response
+        DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
+        System.out.print("Waiting for multicast...");
+        this.mcBackup.receive(inPacket);
+        System.out.println("got answer: " + new String(inPacket.getData()));
+        return new String(inPacket.getData());
+    }
 }
 
 
