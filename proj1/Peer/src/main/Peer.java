@@ -33,7 +33,7 @@ public class Peer {
 
         peerConfig.initialize();
 
-        //TODO: create runnable for backupService and the others so that it is listening for changes in the peerConfig.mc****.mcQueue for requests to process - use threadpool, probably peerConfig will have access to the pool so that it assigns
+        //TODO: create runnable for backupService and the others so that it is listening for changes in the peerConfig.mc****.mcQueue for requests to process - use threadpool, probably peerConfig will have access to the pool so that it assigns, decide how to conjugate the blocking deques and a dispatcher of tasks, should MulticastSocket call that??
         /*try {
             Message message = peerConfig.receiveMulticast(peerConfig.mcBackup);
         } catch (IOException e) {

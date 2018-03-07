@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -11,26 +12,26 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 public class MulticastSocketC extends MulticastSocket implements Runnable {
     private InetAddress group;
-    private String name;
     private int selfId; //saves the id of the owner peer to reject own messages
+    private String name;
     public LinkedBlockingDeque<Message> mcQueue; //blocking queue to store unprocessed mcControl packets
+    private Runnable serviceToInvoke;
+    ExecutorService threadPool;
 
-    public MulticastSocketC(int port, InetAddress group, int selfId) throws IOException {
-        this(port, group, selfId, "ANONYMOUS");
-    }
-
-    public MulticastSocketC(int port, InetAddress group, int selfId, String name) throws IOException {
+    public MulticastSocketC(int port, InetAddress group, int selfId, String name, Runnable serviceToInvoke, ExecutorService threadPool) throws IOException {
         super(port);
         this.group = group;
+        this.name = name;
+        this.selfId = selfId;
+        this.serviceToInvoke = serviceToInvoke;
+        this.threadPool = threadPool;
         this.setTimeToLive(1);//setTimeToLeave
         this.joinGroup(this.group);
         this.mcQueue = new LinkedBlockingDeque<>(1024);
-        this.name = name;
-        this.selfId = selfId;
     }
 
     public InetAddress getGroup() {
-        return group;
+        return this.group;
     }
 
     @Override

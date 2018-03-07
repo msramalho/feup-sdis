@@ -1,11 +1,11 @@
 package main;
 
 import util.MulticastSocketC;
-import util.Message;
 
 import java.io.IOException;
 import java.net.*;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PeerConfig {
     String protocolVersion;
@@ -15,37 +15,35 @@ public class PeerConfig {
     MulticastSocketC mcControl; // Multicast Control Socket
     MulticastSocketC mcBackup; // Multicast Back Up Socket
     MulticastSocketC mcRestore; // Multicast Restore Socket
+    ExecutorService threadPool; //global threadpool for services
 
     public PeerConfig(String[] args) throws Exception {
         if (args.length < 7)
             throw new Exception("Usage: <protocolVersion> <peerId> <serviceAccessPoint> <mccIP> <mccPort> <mdbIp> <mdbPort> <mdrIp> <mdrPort>");
 
+        this.threadPool = Executors.newFixedThreadPool(5);//creating a pool of 5 threads
+
         this.protocolVersion = args[0];
         this.id = Integer.parseInt(args[1]);
         this.loadServiceAccessPoint(args[2]);
 
-        this.mcControl = this.getMCGroup(args[3], args[4], "MCControl");//setup multicast socket and join group for <mccIP> <mccPort>
-        this.mcBackup = this.getMCGroup(args[5], args[6], "MCBackup");//setup multicast socket and join group for <mdbIp> <mdbPort>
-        this.mcRestore = this.getMCGroup(args[7], args[8], "MCRestore");//setup multicast socket and join group for <mdrIp> <mdrPort>
-
-        //threads for building the requests queues
-        Thread mccThread = new Thread(this.mcControl);
-        Thread mcbThread = new Thread(this.mcBackup);
-        Thread mcrThread = new Thread(this.mcRestore);
-        mccThread.start();
-        mcbThread.start();
-        mcrThread.start();
+        this.mcControl = this.getMCGroup(args[3], args[4], "MCControl");//setup socket and join group for <mccIP> <mccPort>
+        this.mcBackup = this.getMCGroup(args[5], args[6], "MCBackup");//setup socket and join group for <mdbIp> <mdbPort>
+        this.mcRestore = this.getMCGroup(args[7], args[8], "MCRestore");//setup socket and join group for <mdrIp> <mdrPort>
     }
 
     /**
      * parse hostname/ip and port and join a multicast group saved in mcsocket
+     *
      * @param hostname the hostname or IP
      * @param port     the port for the MulticastSocket
      * @throws IOException
      */
     protected MulticastSocketC getMCGroup(String hostname, String port, String name) throws IOException {
         InetAddress mcGroupIP = Inet4Address.getByName(hostname);
-        MulticastSocketC mcsocket = new MulticastSocketC(Integer.parseInt(port), mcGroupIP, this.id, name);
+        //TODO: replace () -> {} with the right runnable
+        MulticastSocketC mcsocket = new MulticastSocketC(Integer.parseInt(port), mcGroupIP, this.id, name, () -> {
+        }, this.threadPool);
         return mcsocket;
     }
 
@@ -67,8 +65,17 @@ public class PeerConfig {
         this.sapIp = Inet4Address.getByName(hostname);
     }
 
+    public void initialize() {
+        //threads for building the requests queues
+        Thread mccThread = new Thread(this.mcControl);
+        Thread mcbThread = new Thread(this.mcBackup);
+        Thread mcrThread = new Thread(this.mcRestore);
+        mccThread.start();
+        mcbThread.start();
+        mcrThread.start();
+    }
 
-    public synchronized Message receiveMulticast(MulticastSocket mcSocket) throws IOException {
+    /*public synchronized Message receiveMulticast(MulticastSocket mcSocket) throws IOException {
         //wait for multicast message
         //receive the response (blocking)
         byte[] responseBytes = new byte[256]; // create buffer to receive response
@@ -77,7 +84,7 @@ public class PeerConfig {
         mcSocket.receive(inPacket);
         System.out.println("got answer: " + inPacket.getData().length + " bytes");
         return new Message(inPacket.getData());
-    }
+    }*/
 }
 
 
