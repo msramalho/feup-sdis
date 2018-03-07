@@ -33,6 +33,8 @@ public class Peer {
             return;
         }
 
+
+        //TODO: create runnable for backupService and the others so that it is listening for changes in the peerConfig.mc****.mcQueue for requests to process
         /*try {
             Message message = peerConfig.receiveMulticast(peerConfig.mcBackup);
         } catch (IOException e) {
