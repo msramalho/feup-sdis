@@ -1,5 +1,7 @@
 package main;
 
+import util.Message;
+
 import java.io.IOException;
 
 public class Peer {
@@ -9,7 +11,7 @@ public class Peer {
         try {
             peerConfig = new PeerConfig(args);//create peer
         } catch (Exception e) {
-            System.out.println("[Peer] - cannot parse cmd line args");
+            System.err.println("[Peer] - cannot parse cmd line args");
             System.out.println(e.getMessage());
             return;
         }
@@ -32,7 +34,7 @@ public class Peer {
         }
 
         try {
-            String message = peerConfig.receiveMulticast(peerConfig.mcBackup);
+            Message message = peerConfig.receiveMulticast(peerConfig.mcBackup);
         } catch (IOException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
