@@ -59,13 +59,13 @@ public class PeerConfig {
     }
 
 
-    public String receiveMulticast() throws IOException {
+    public String receiveMulticast(MulticastSocket mcSocket) throws IOException {
         //wait for multicast message
         //receive the response (blocking)
         byte[] responseBytes = new byte[256]; // create buffer to receive response
         DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
         System.out.print("Waiting for multicast...");
-        this.mcBackup.receive(inPacket);
+        mcSocket.receive(inPacket);
         System.out.println("got answer: " + new String(inPacket.getData()));
         return new String(inPacket.getData());
     }
