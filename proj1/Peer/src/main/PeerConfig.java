@@ -1,9 +1,12 @@
 package main;
 
 import util.MulticastSocketC;
+import util.Message;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 
 public class PeerConfig {
@@ -14,6 +17,7 @@ public class PeerConfig {
     MulticastSocketC mcControl; // Multicast Control Socket
     MulticastSocketC mcBackup; // Multicast Back Up Socket
     MulticastSocketC mcRestore; // Multicast Restore Socket
+    BlockingQueue mcQueue; //blocking queue to store unprocessed mcControl packets
 
     public PeerConfig(String[] args) throws Exception {
         if (args.length < 7)
@@ -27,8 +31,7 @@ public class PeerConfig {
         this.mcBackup = PeerConfig.getMCGroup(args[5], args[6]);//setup multicast socket and join group for <mdbIp> <mdbPort>
         this.mcRestore = PeerConfig.getMCGroup(args[7], args[8]);//setup multicast socket and join group for <mdrIp> <mdrPort>
 
-        System.out.println(this.mcBackup);
-        System.out.println("done");
+        this.mcQueue = new ArrayBlockingQueue(1024);
     }
 
     /**
@@ -62,15 +65,15 @@ public class PeerConfig {
     }
 
 
-    public String receiveMulticast(MulticastSocket mcSocket) throws IOException {
+    public synchronized Message receiveMulticast(MulticastSocket mcSocket) throws IOException {
         //wait for multicast message
         //receive the response (blocking)
         byte[] responseBytes = new byte[256]; // create buffer to receive response
         DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
-        System.out.print("Waiting for multicast...");
+        System.out.print("[PeerConfig] Waiting for multicast...");
         mcSocket.receive(inPacket);
-        System.out.println("got answer: " + new String(inPacket.getData()));
-        return new String(inPacket.getData());
+        System.out.println("got answer: " + inPacket.getData().length + " bytes");
+        return new Message(inPacket.getData());
     }
 }
 
