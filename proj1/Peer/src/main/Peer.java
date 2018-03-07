@@ -29,12 +29,11 @@ public class Peer {
             byte[] data = "This is the contents of the file".getBytes(); //create message with service port
             BackupChunkWorker bcWorker = new BackupChunkWorker(peerConfig, data, 1, 3);
             bcWorker.run();
-            //socket.setSoTimeout(1000);//set the timeout for receive
-            return;
         }
 
+        peerConfig.initialize();
 
-        //TODO: create runnable for backupService and the others so that it is listening for changes in the peerConfig.mc****.mcQueue for requests to process
+        //TODO: create runnable for backupService and the others so that it is listening for changes in the peerConfig.mc****.mcQueue for requests to process - use threadpool, probably peerConfig will have access to the pool so that it assigns
         /*try {
             Message message = peerConfig.receiveMulticast(peerConfig.mcBackup);
         } catch (IOException e) {
