@@ -5,8 +5,6 @@ import util.Message;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 
 public class PeerConfig {
@@ -17,7 +15,6 @@ public class PeerConfig {
     MulticastSocketC mcControl; // Multicast Control Socket
     MulticastSocketC mcBackup; // Multicast Back Up Socket
     MulticastSocketC mcRestore; // Multicast Restore Socket
-    BlockingQueue mcQueue; //blocking queue to store unprocessed mcControl packets
 
     public PeerConfig(String[] args) throws Exception {
         if (args.length < 7)
@@ -27,11 +24,17 @@ public class PeerConfig {
         this.id = Integer.parseInt(args[1]);
         this.loadServiceAccessPoint(args[2]);
 
-        this.mcControl = PeerConfig.getMCGroup(args[3], args[4]);//setup multicast socket and join group for <mccIP> <mccPort>
-        this.mcBackup = PeerConfig.getMCGroup(args[5], args[6]);//setup multicast socket and join group for <mdbIp> <mdbPort>
-        this.mcRestore = PeerConfig.getMCGroup(args[7], args[8]);//setup multicast socket and join group for <mdrIp> <mdrPort>
+        this.mcControl = this.getMCGroup(args[3], args[4], "MCControl");//setup multicast socket and join group for <mccIP> <mccPort>
+        this.mcBackup = this.getMCGroup(args[5], args[6], "MCBackup");//setup multicast socket and join group for <mdbIp> <mdbPort>
+        this.mcRestore = this.getMCGroup(args[7], args[8], "MCRestore");//setup multicast socket and join group for <mdrIp> <mdrPort>
 
-        this.mcQueue = new ArrayBlockingQueue(1024);
+        //threads for building the requests queues
+        Thread mccThread = new Thread(this.mcControl);
+        Thread mcbThread = new Thread(this.mcBackup);
+        Thread mcrThread = new Thread(this.mcRestore);
+        mccThread.start();
+        mcbThread.start();
+        mcrThread.start();
     }
 
     /**
@@ -40,9 +43,9 @@ public class PeerConfig {
      * @param port     the port for the MulticastSocket
      * @throws IOException
      */
-    static protected MulticastSocketC getMCGroup(String hostname, String port) throws IOException {
+    protected MulticastSocketC getMCGroup(String hostname, String port, String name) throws IOException {
         InetAddress mcGroupIP = Inet4Address.getByName(hostname);
-        MulticastSocketC mcsocket = new MulticastSocketC(Integer.parseInt(port), mcGroupIP);
+        MulticastSocketC mcsocket = new MulticastSocketC(Integer.parseInt(port), mcGroupIP, this.id, name);
         return mcsocket;
     }
 
