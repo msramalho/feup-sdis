@@ -1,5 +1,7 @@
 package main;
 
+import util.MulticastSocketC;
+
 import java.io.IOException;
 import java.net.*;
 
@@ -9,9 +11,9 @@ public class PeerConfig {
     Integer id; // the peer id
     InetAddress sapIp; // service access point IP
     Integer sapPort; // service access point port
-    MulticastSocket mcControl; // Multicast Control Socket
-    MulticastSocket mcBackup; // Multicast Back Up Socket
-    MulticastSocket mcRestore; // Multicast Restore Socket
+    MulticastSocketC mcControl; // Multicast Control Socket
+    MulticastSocketC mcBackup; // Multicast Back Up Socket
+    MulticastSocketC mcRestore; // Multicast Restore Socket
 
     public PeerConfig(String[] args) throws Exception {
         if (args.length < 7)
@@ -35,11 +37,9 @@ public class PeerConfig {
      * @param port     the port for the MulticastSocket
      * @throws IOException
      */
-    static protected MulticastSocket getMCGroup(String hostname, String port) throws IOException {
+    static protected MulticastSocketC getMCGroup(String hostname, String port) throws IOException {
         InetAddress mcGroupIP = Inet4Address.getByName(hostname);
-        MulticastSocket mcsocket = new MulticastSocket(Integer.parseInt(port));
-        mcsocket.setTimeToLive(1);//setTimeToLeave
-        mcsocket.joinGroup(mcGroupIP);
+        MulticastSocketC mcsocket = new MulticastSocketC(Integer.parseInt(port), mcGroupIP);
         return mcsocket;
     }
 
