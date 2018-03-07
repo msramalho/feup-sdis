@@ -41,16 +41,13 @@ public class BackupChunkWorker implements Runnable {
         Message message;
         while (true) {
             try {
-                this.peerConfig.mcControl.setSoTimeout(wait);
-                message = this.peerConfig.receiveMulticast(this.peerConfig.mcControl);
-                if (message.isBackup()) {
-                    replies++;
-                }
-            } catch (SocketException e) {
-                System.out.println(String.format("[BackupChunkWorker] - got Timeout for wait %d, %d replies", wait, replies));
-                return replies;
-            } catch (IOException e) {
-                System.err.println("[BackupChunkWorker] - cannot receiveMulticast from PeerConfig");
+                //this.peerConfig.mcControl.setSoTimeout(wait);
+                message = this.peerConfig.mcControl.mcQueue.take();
+                System.out.println("MESSAGE: " + message.body);
+                if (message.isBackup()) replies++;
+                else this.peerConfig.mcControl.mcQueue.putLast(message); //add back to the queue if it is not ours
+            } catch (InterruptedException e) {
+                System.err.println("[BackupChunkWorker] - PeerConfig.mcQueue.take() ended abruptly");
                 e.printStackTrace();
             }
         }
