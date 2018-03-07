@@ -1,14 +1,17 @@
 package main;
 
+import util.Message;
+
 import java.io.IOException;
 import java.net.*;
-import java.sql.SQLSyntaxErrorException;
 
+//PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
 public class BackupChunkWorker implements Runnable {
-    PeerConfig peerConfig;
-    byte[] chunk;
-    int chunkNo;
-    int replicationDeg;
+    private static int PUTCHUNK_ATTEMPTS = 5;
+    private PeerConfig peerConfig;
+    private byte[] chunk;
+    private int chunkNo;
+    private int replicationDeg;
 
     public BackupChunkWorker(PeerConfig peerConfig, byte[] chunk, int chunkNo, int replicationDeg) {
         this.peerConfig = peerConfig;
@@ -17,21 +20,49 @@ public class BackupChunkWorker implements Runnable {
         this.replicationDeg = replicationDeg;
     }
 
-    /**
-     * PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
-     */
     @Override
     public void run() {
+        //create message to send and convert to byte array
         String message = String.format("PUTCHUNK %s %d %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, this.chunkNo, this.replicationDeg, new String(this.chunk));
         byte[] data = message.getBytes();
 
-        //socket set up
+        //create and send package
+        this.sendChunkPacket(data);
 
+        //wait for responses
+        for (int i = 1; i <= BackupChunkWorker.PUTCHUNK_ATTEMPTS; i++) {
+            int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
+            int replies = this.getRepliesWithTimeout(wait);
+        }
+    }
+
+    private int getRepliesWithTimeout(int wait) {
+        int replies = 0;
+        Message message;
+        while (true) {
+            try {
+                this.peerConfig.mcControl.setSoTimeout(wait);
+                message = this.peerConfig.receiveMulticast(this.peerConfig.mcControl);
+                if (message.isBackup()) {
+                    replies++;
+                }
+            } catch (SocketException e) {
+                System.out.println(String.format("[BackupChunkWorker] - got Timeout for wait %d, %d replies", wait, replies));
+                return replies;
+            } catch (IOException e) {
+                System.err.println("[BackupChunkWorker] - cannot receiveMulticast from PeerConfig");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //simply send the PUTCHUNK packet
+    private synchronized void sendChunkPacket(byte[] data) {
         try {
             DatagramPacket outPacket = new DatagramPacket(data, data.length, this.peerConfig.mcBackup.getGroup(), this.peerConfig.mcBackup.getLocalPort()); // create the packet to send through the socket
             this.peerConfig.mcBackup.send(outPacket);
         } catch (IOException e) {
-            System.out.println("[BackupChunkWorker] - cannot send PUTCHUNK to mcBackup");
+            System.err.println("[BackupChunkWorker] - cannot send PUTCHUNK to mcBackup");
             e.printStackTrace();
         }
     }
