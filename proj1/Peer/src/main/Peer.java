@@ -33,12 +33,12 @@ public class Peer {
             return;
         }
 
-        try {
+        /*try {
             Message message = peerConfig.receiveMulticast(peerConfig.mcBackup);
         } catch (IOException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
-        }
+        }*/
 
 
     }
