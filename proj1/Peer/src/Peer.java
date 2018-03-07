@@ -5,14 +5,20 @@ public class Peer {
 
 
     public static void main(String[] args) {
+
+
         PeerConfig peerConfig;
         try {
-            //create peer
-            peerConfig = new PeerConfig(args);
+            peerConfig = new PeerConfig(args);//create peer
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return;
         }
+
+        InternalState internalState = new InternalState(peerConfig);
+        internalState.saveStorage();
+
+
 
         //initiator peer, receives <filename> <replicationFactor>
         if (args.length == 11) {
@@ -34,11 +40,10 @@ public class Peer {
         }
 
         try {
-            String message = peerConfig.receiveMulticast();
+            String message = peerConfig.receiveMulticast(peerConfig.mcBackup);
         } catch (IOException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
-            return;
         }
 
 
