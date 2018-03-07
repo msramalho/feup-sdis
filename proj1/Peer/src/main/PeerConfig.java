@@ -1,5 +1,8 @@
+package main;
+
 import java.io.IOException;
 import java.net.*;
+
 
 public class PeerConfig {
     String protocolVersion;

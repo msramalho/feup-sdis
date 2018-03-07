@@ -1,3 +1,5 @@
+import main.PeerConfig;
+
 import java.io.IOException;
 
 public class SubProtocols {

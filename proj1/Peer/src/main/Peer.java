@@ -1,11 +1,15 @@
+package main;
+
+import main.PeerConfig;
+
 import java.io.IOException;
 import java.net.*;
+
 
 public class Peer {
 
 
     public static void main(String[] args) {
-
 
         PeerConfig peerConfig;
         try {
@@ -15,8 +19,8 @@ public class Peer {
             return;
         }
 
-        InternalState internalState = new InternalState(peerConfig);
-        internalState.saveStorage();
+        //InternalState internalState = new InternalState(peerConfig);
+        //internalState.saveStorage();
 
 
 

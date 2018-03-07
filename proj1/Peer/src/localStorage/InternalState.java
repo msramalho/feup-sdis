@@ -1,3 +1,6 @@
+package localStorage;
+
+import main.PeerConfig;
 import com.google.gson.Gson;
 
 import java.io.IOException;
