@@ -1,4 +1,5 @@
 @echo off
+cls
 prompt -------
 @echo on
 mkdir bin
