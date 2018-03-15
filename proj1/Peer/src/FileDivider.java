@@ -1,4 +1,6 @@
 
+package LocalFile();
+
 import java.util.ArrayList;
 import java.io.*;
 import java.io.InputStream;
@@ -15,16 +17,32 @@ import java.util.ArrayList;
 import java.util.zip.CRC32;
 import javax.swing.*;
 
+
 public class FileDivider {
-    int chunk_Size;
+    //----- FILE ------
+    String id;
+    String fileName; // path + filename in the current file system
+    ArrayList<LocalChunk> chunks;
+    Integer replicationDegree; //desired replication degree
+    //-----------------
+
+    int chunk_Size = 64000;
     int chunck_id;
     int chunk_name;
-    int file_size;
+
     byte[] temporary = null;
     int totalBytesRead = 0;
 
-    public FileDivider(File file , int chunk_Size){
-        this.chunk_Size = chunk_Size;
+    public FileDivider(String fileName , replica){
+        File file = new File(fileName);
+        this.id = "0001";
+        this.fileName = fileName;
+        replicationDegree = 0;
+
+    }
+
+    public splitFile(){
+
         file_size = (int) file.length();
         System.out.println("[ File Received: Length " + file_size + " ]");
 

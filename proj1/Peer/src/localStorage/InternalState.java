@@ -28,7 +28,7 @@ public class InternalState {
     }
 
     public void saveStorage() {
-        ArrayList<LocalChunk> lcs = new ArrayList<>();
+        /*ArrayList<LocalChunk> lcs = new ArrayList<>();
         lcs.add(new LocalChunk(1, 0));
         lcs.add(new LocalChunk(2, 3));
         lcs.add(new LocalChunk(3, 2));
@@ -41,7 +41,7 @@ public class InternalState {
             Files.write(Paths.get(this.internalStateFilename), json.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
     }
 

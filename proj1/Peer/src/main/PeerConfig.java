@@ -27,9 +27,9 @@ public class PeerConfig {
         this.id = Integer.parseInt(args[1]);
         this.loadServiceAccessPoint(args[2]);
 
-        this.mcControl = this.getMCGroup(args[3], args[4], "MCControl");//setup socket and join group for <mccIP> <mccPort>
-        this.mcBackup = this.getMCGroup(args[5], args[6], "MCBackup");//setup socket and join group for <mdbIp> <mdbPort>
-        this.mcRestore = this.getMCGroup(args[7], args[8], "MCRestore");//setup socket and join group for <mdrIp> <mdrPort>
+        //this.mcControl = this.getMCGroup(args[3], args[4], "MCControl");//setup socket and join group for <mccIP> <mccPort>
+        //this.mcBackup = this.getMCGroup(args[5], args[6], "MCBackup");//setup socket and join group for <mdbIp> <mdbPort>
+        //this.mcRestore = this.getMCGroup(args[7], args[8], "MCRestore");//setup socket and join group for <mdrIp> <mdrPort>
     }
 
     /**
