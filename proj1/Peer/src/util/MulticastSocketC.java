@@ -36,18 +36,22 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
 
     @Override
     public void run() {
-        //wait for multicast message
-        //receive the response (blocking)
-        byte[] responseBytes = new byte[64000]; // create buffer to receive response
-        DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
-        System.out.println(String.format("[MulticastSocketC:%s] Waiting for multicast...", this.name));
-        try {
-            this.receive(inPacket);
-            System.out.println(String.format("[MulticastSocketC:%s] answer: %d bytes", this.name, inPacket.getData().length));
-        } catch (IOException e) {
-            e.printStackTrace();
+        while (true) {
+            //wait for multicast message
+            //receive the response (blocking)
+            byte[] responseBytes = new byte[64000]; // create buffer to receive response
+            DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
+            System.out.println(String.format("[MulticastSocketC:%s] Waiting for multicast...", this.name));
+            try {
+                this.receive(inPacket);
+                System.out.println(String.format("[MulticastSocketC:%s] answer: %d bytes", this.name, inPacket.getData().length));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Message m = new Message(inPacket.getData());
+            System.out.println(new String(inPacket.getData()).trim().substring(0, 30));
+            if (!m.isOwnMessage(this.selfId))
+                this.mcQueue.add(m);//add this message to the blocking queue if it is not ours
         }
-        Message m = new Message(inPacket.getData());
-        if (!m.isOwnMessage(this.selfId)) this.mcQueue.add(m);//add this message to the blocking queue if it is not ours
     }
 }

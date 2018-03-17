@@ -58,6 +58,7 @@ public class BackupChunkWorker implements Runnable {
         try {
             DatagramPacket outPacket = new DatagramPacket(data, data.length, this.peerConfig.mcBackup.getGroup(), this.peerConfig.mcBackup.getLocalPort()); // create the packet to send through the socket
             this.peerConfig.mcBackup.send(outPacket);
+            System.out.println("sent chunk");
         } catch (IOException e) {
             System.err.println("[BackupChunkWorker] - cannot send PUTCHUNK to mcBackup");
             e.printStackTrace();

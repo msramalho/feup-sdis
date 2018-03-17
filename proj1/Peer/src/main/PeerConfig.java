@@ -15,21 +15,21 @@ public class PeerConfig {
     MulticastSocketC mcControl; // Multicast Control Socket
     MulticastSocketC mcBackup; // Multicast Back Up Socket
     MulticastSocketC mcRestore; // Multicast Restore Socket
-    ExecutorService threadPool; //global threadpool for services
+    public ExecutorService threadPool; //global threadpool for services
 
     public PeerConfig(String[] args) throws Exception {
         if (args.length < 7)
             throw new Exception("Usage: <protocolVersion> <peerId> <serviceAccessPoint> <mccIP> <mccPort> <mdbIp> <mdbPort> <mdrIp> <mdrPort>");
 
-        this.threadPool = Executors.newFixedThreadPool(5);//creating a pool of 5 threads
+        this.threadPool = Executors.newFixedThreadPool(16);//creating a pool of 5 threads
 
         this.protocolVersion = args[0];
         this.id = Integer.parseInt(args[1]);
         this.loadServiceAccessPoint(args[2]);
 
-        //this.mcControl = this.getMCGroup(args[3], args[4], "MCControl");//setup socket and join group for <mccIP> <mccPort>
-        //this.mcBackup = this.getMCGroup(args[5], args[6], "MCBackup");//setup socket and join group for <mdbIp> <mdbPort>
-        //this.mcRestore = this.getMCGroup(args[7], args[8], "MCRestore");//setup socket and join group for <mdrIp> <mdrPort>
+        this.mcControl = this.getMCGroup(args[3], args[4], "MCControl");//setup socket and join group for <mccIP> <mccPort>
+        this.mcBackup = this.getMCGroup(args[5], args[6], "MCBackup");//setup socket and join group for <mdbIp> <mdbPort>
+        this.mcRestore = this.getMCGroup(args[7], args[8], "MCRestore");//setup socket and join group for <mdrIp> <mdrPort>
     }
 
     /**

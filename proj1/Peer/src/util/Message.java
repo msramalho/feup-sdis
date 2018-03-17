@@ -6,7 +6,7 @@ import java.util.Arrays;
  * parses a packet string into a queriable object
  */
 public class Message {
-    private String action;
+    public String action;
     private String protocolVersion;
     private int senderId;
     private int fileId;
