@@ -1,5 +1,6 @@
-package localStorage;
-import java.util.ArrayList;
+
+package LocalFile();
+
 import java.util.ArrayList;
 import java.io.*;
 import java.io.InputStream;
@@ -17,33 +18,36 @@ import java.util.zip.CRC32;
 import javax.swing.*;
 
 
-
-public class LocalFile {
-    static Integer CHUCNK_SIZE = 64000;
+public class FileDivider {
+    //----- FILE ------
     String id;
-    String filename; // path + filename in the current file system
+    String fileName; // path + filename in the current file system
     ArrayList<LocalChunk> chunks;
     Integer replicationDegree; //desired replication degree
+    //-----------------
 
-    public LocalFile(String id, String filename, Integer replicationDegree) {
-        this.id = id;
-        this.filename = filename;
-        this.chunks = new ArrayList<LocalChunk>();
-        this.replicationDegree = replicationDegree;
+    int chunk_Size = 64000;
+    int chunck_id;
+    int chunk_name;
+
+    byte[] temporary = null;
+    int totalBytesRead = 0;
+
+    public FileDivider(String fileName , replica){
+        File file = new File(fileName);
+        this.id = "0001";
+        this.fileName = fileName;
+        replicationDegree = 0;
+
     }
 
-    public void splitFile(){
+    public splitFile(){
 
-        byte[] temporary = null;
-        int totalBytesRead = 0;
-
-        System.out.println("LocalFile: " + filename);
-
-        File file = new File(this.filename);
-        int file_size = (int) file.length();
+        file_size = (int) file.length();
         System.out.println("[ File Received: Length " + file_size + " ]");
 
         InputStream inStream = null;
+        int totalBytesRead = 0;
 
         try {
             inStream = new BufferedInputStream(new FileInputStream(file));
@@ -53,16 +57,16 @@ public class LocalFile {
 
                 int bytesRemaining = file_size-totalBytesRead;
 
-                temporary = new byte[LocalFile.CHUCNK_SIZE]; //Temporary Byte Array
+                temporary = new byte[chunk_Size]; //Temporary Byte Array
                 try {
-                    int bytesRead = inStream.read(temporary, 0, LocalFile.CHUCNK_SIZE);
+                    int bytesRead = inStream.read(temporary, 0, chunk_Size);
                     System.out.println("Chunk["+i+"]" + " size: " + bytesRead);
                     i++;
                 } catch (IOException e){
                     System.out.println("[ CAN'T READ Chunk ]");
                 }
 
-                totalBytesRead+=LocalFile.CHUCNK_SIZE;
+                totalBytesRead+=chunk_Size;
             }
 
         } catch (FileNotFoundException ex) {

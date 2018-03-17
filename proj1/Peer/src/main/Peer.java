@@ -1,7 +1,7 @@
 package main;
 
 import util.Message;
-
+import localStorage.LocalFile;
 import java.io.IOException;
 
 public class Peer {
@@ -22,13 +22,20 @@ public class Peer {
         //initiator peer, receives <filename> <replicationFactor>
         if (args.length == 11) {
             System.out.println("initiator");
-            String filename = args[7];
-            int replicationFactor = Integer.parseInt(args[8]);
+            String filename = args[9];
+            int replicationFactor = Integer.parseInt(args[10]);
+
+            // Calling LocalFile for testing
+            LocalFile localFile = new LocalFile("0001", filename, replicationFactor);
+            localFile.splitFile();
+            System.out.println("diogo done: " + filename);
+
+
 
             //setup multicast socket and join group
-            byte[] data = "This is the contents of the file".getBytes(); //create message with service port
-            BackupChunkWorker bcWorker = new BackupChunkWorker(peerConfig, data, 1, 3);
-            bcWorker.run();
+            //byte[] data = "This is the contents of the file".getBytes(); //create message with service port
+            //BackupChunkWorker bcWorker = new BackupChunkWorker(peerConfig, data, 1, 3);
+            //bcWorker.run();
         }
 
         peerConfig.initialize();
