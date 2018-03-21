@@ -1,14 +1,14 @@
 package localStorage;
 
 public class LocalChunk {
+	Integer fileId;
     Integer chunkNumber; // chunk ID
     Integer countAcks; // count the number of ACKs received for this chunk
-    byte[] data;
 
-    public LocalChunk(Integer chunkNumber, Integer countAcks, byte[] data) {
+    public LocalChunk(Integer fileId, Integer chunkNumber, Integer countAcks) {
         this.chunkNumber = chunkNumber;
         this.countAcks = countAcks;
-        this.data = data;
+        this.fileId = fileId;
     }
 
 //    public Json toJson(){

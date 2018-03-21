@@ -50,6 +50,10 @@ public class LocalFile {
                 try {
                     int bytesRead = inStream.read(temporaryChunk, 0, LocalFile.CHUNCK_SIZE);
                     System.out.println("Chunk["+i+"]" + " size: " + bytesRead);
+
+                    LocalChunk chunck1 = new LocalChunk(1,i,0);
+                    chunks.add(chunck1);
+
                     BackupChunkWorker bcWorker = new BackupChunkWorker(peerConfig, temporaryChunk, i, this.replicationDegree);
                     this.peerConfig.threadPool.submit(bcWorker);
                     i++;
@@ -63,5 +67,8 @@ public class LocalFile {
         } catch (FileNotFoundException ex) {
             System.out.println("[ CAN'T READ File ]");
         }
+
+        System.out.println("Size array: " + chunks.size());
+      
     }
 }
