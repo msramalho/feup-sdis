@@ -10,7 +10,7 @@ public class Message {
     private String protocolVersion;
     private int senderId;
     private int fileId;
-    private String[] head;
+    public String[] head;
     public String body;
 
     public Message(byte[] packetMessageBytes) {

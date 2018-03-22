@@ -44,6 +44,7 @@ public class PeerConfig {
         //TODO: replace () -> {} with the right runnable
         MulticastSocketC mcsocket = new MulticastSocketC(Integer.parseInt(port), mcGroupIP, this.id, name, () -> {
         }, this.threadPool);
+        //mcsocket.setTimeToLive(1);
         return mcsocket;
     }
 

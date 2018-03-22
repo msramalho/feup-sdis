@@ -5,17 +5,20 @@ import util.Message;
 import java.io.IOException;
 import java.net.*;
 
+
 //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
 public class BackupChunkWorker implements Runnable {
     private static int PUTCHUNK_ATTEMPTS = 5;
     private PeerConfig peerConfig;
     private byte[] chunk;
+    private String fileId;
     private int chunkNo;
     private int replicationDeg;
 
-    public BackupChunkWorker(PeerConfig peerConfig, byte[] chunk, int chunkNo, int replicationDeg) {
+    public BackupChunkWorker(PeerConfig peerConfig, byte[] chunk, String fileId, int chunkNo, int replicationDeg) {
         this.peerConfig = peerConfig;
         this.chunk = chunk;
+        this.fileId = fileId;
         this.chunkNo = chunkNo;
         this.replicationDeg = replicationDeg;
     }
@@ -23,9 +26,9 @@ public class BackupChunkWorker implements Runnable {
     @Override
     public void run() {
         //create message to send and convert to byte array
-        String message = String.format("PUTCHUNK %s %d %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, this.chunkNo, this.replicationDeg, new String(this.chunk));
+        String message = String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, this.fileId, this.chunkNo, this.replicationDeg, new String(this.chunk).substring(32500));
         byte[] data = message.getBytes();
-
+        System.out.println("size is: " + data.length);
         //create and send package
         this.sendChunkPacket(data);
 
@@ -58,7 +61,7 @@ public class BackupChunkWorker implements Runnable {
         try {
             DatagramPacket outPacket = new DatagramPacket(data, data.length, this.peerConfig.mcBackup.getGroup(), this.peerConfig.mcBackup.getLocalPort()); // create the packet to send through the socket
             this.peerConfig.mcBackup.send(outPacket);
-            System.out.println("sent chunk");
+            System.out.println("[BackupChunkWorker] - sent chunk: " + chunkNo + "(" + data.length + " bytes): " + new String(data).substring(0, 25));
         } catch (IOException e) {
             System.err.println("[BackupChunkWorker] - cannot send PUTCHUNK to mcBackup");
             e.printStackTrace();

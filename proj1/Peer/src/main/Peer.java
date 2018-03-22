@@ -17,7 +17,10 @@ public class Peer {
         //InternalState internalState = new InternalState(peerConfig);
         //internalState.saveStorage();
 
-        //initiator peer, receives <filename> <replicationFactor>
+        //initiator peer, receives <filename> <replicationFactor>x
+
+        peerConfig.initialize();
+
         if (args.length == 11) {
             System.out.println("initiator");
             String filename = args[9];
@@ -34,7 +37,11 @@ public class Peer {
             //peerConfig.threadPool.submit(bcWorker);
         }
 
-        peerConfig.initialize();
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         //TODO: create runnable for backupService and the others so that it is listening for changes in the peerConfig.mc****.mcQueue for requests to process - use threadpool, probably peerConfig will have access to the pool so that it assigns, decide how to conjugate the blocking deques and a dispatcher of tasks, should MulticastSocket call that??
         /*try {

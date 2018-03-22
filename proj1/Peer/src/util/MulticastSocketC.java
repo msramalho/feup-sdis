@@ -36,20 +36,21 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
 
     @Override
     public void run() {
+        System.out.println(String.format("[MulticastSocketC:%s] Waiting for multicast...", this.name));
         while (true) {
             //wait for multicast message
             //receive the response (blocking)
             byte[] responseBytes = new byte[64000]; // create buffer to receive response
             DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
-            System.out.println(String.format("[MulticastSocketC:%s] Waiting for multicast...", this.name));
             try {
                 this.receive(inPacket);
-                System.out.println(String.format("[MulticastSocketC:%s] answer: %d bytes", this.name, inPacket.getData().length));
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             Message m = new Message(inPacket.getData());
-            System.out.println(new String(inPacket.getData()).trim().substring(0, 30));
+            System.out.println(String.format("[MulticastSocketC:%s] answer: %d bytes", this.name, inPacket.getData().length) + " id: " + String.join(",", m.head));
+//            System.out.println("[MulticastSocketC] NEW MESSAGE: " + new String(inPacket.getData()).trim().substring(0, 30) + " >");
             if (!m.isOwnMessage(this.selfId))
                 this.mcQueue.add(m);//add this message to the blocking queue if it is not ours
         }
