@@ -26,7 +26,7 @@ public class BackupChunkWorker implements Runnable {
     @Override
     public void run() {
         //create message to send and convert to byte array
-        String message = String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, this.fileId, this.chunkNo, this.replicationDeg, new String(this.chunk).substring(32500));
+        String message = String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, this.fileId, this.chunkNo, this.replicationDeg, new String(this.chunk));
         byte[] data = message.getBytes();
         System.out.println("size is: " + data.length);
         //create and send package
