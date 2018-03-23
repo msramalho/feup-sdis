@@ -1,7 +1,10 @@
 package src.util;
 
+import src.worker.Dispatcher;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.concurrent.ExecutorService;
@@ -15,15 +18,13 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
     private int selfId; //saves the id of the owner peer to reject own messages
     private String name;
     public LinkedBlockingDeque<Message> mcQueue; //blocking queue to store unprocessed mcControl packets
-    private Runnable serviceToInvoke;
     ExecutorService threadPool;
 
-    public MulticastSocketC(int port, InetAddress group, int selfId, String name, Runnable serviceToInvoke, ExecutorService threadPool) throws IOException {
+    public MulticastSocketC(String hostname, int port, int selfId, String name, ExecutorService threadPool) throws IOException {
         super(port);
-        this.group = group;
+        this.group = Inet4Address.getByName(hostname);
         this.name = name;
         this.selfId = selfId;
-        this.serviceToInvoke = serviceToInvoke;
         this.threadPool = threadPool;
         this.setTimeToLive(1);//setTimeToLeave
         this.joinGroup(this.group);
@@ -31,16 +32,28 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
     }
 
     public InetAddress getGroup() {
-        return this.group;
+        return group;
+    }
+
+    public boolean send(String message) {
+        byte[] data = message.getBytes();
+        try {
+            DatagramPacket outPacket = new DatagramPacket(data, data.length, group, getLocalPort()); // create the packet to send through the socket
+            send(outPacket);
+            debug("sent " + data.length + " bytes");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
     public void run() {
-        System.out.println(String.format("[MulticastSocketC:%s] Waiting for multicast...", this.name));
+        debug("Waiting for multicast...");
         while (true) {
-            //wait for multicast message
-            //receive the response (blocking)
-            byte[] responseBytes = new byte[64000]; // create buffer to receive response
+            //wait for multicast message + receive the response (blocking)
+            byte[] responseBytes = new byte[65000]; // create buffer to receive response
             DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
             try {
                 this.receive(inPacket);
@@ -48,10 +61,20 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
                 e.printStackTrace();
             }
 
+            // processed the received message: either send to queue or add task to threadpool
             Message m = new Message(inPacket.getData());
-            System.out.println(String.format("[MulticastSocketC:%s] answer: %d bytes", this.name, inPacket.getData().length) + " id: " + m.fileId);
-            if (!m.isOwnMessage(this.selfId))
-                this.mcQueue.add(m);//add this message to the blocking queue if it is not ours
+            debug("received message with " + inPacket.getData().length + " bytes");
+            if (!m.isOwnMessage(this.selfId)) {
+                if (m.skipQueue())
+                    threadPool.submit(new Dispatcher(m)); // send a new task to the threadpool
+                else
+                    this.mcQueue.add(m);//add this message to the blocking queue if it may be needed in the future
+            }
         }
+    }
+
+    //send a message with information about which multicastsocket is displaying the message
+    private void debug(String debugMessage) {
+        System.out.println(String.format("[MulticastSocketC:%s] - " + debugMessage, this.name));
     }
 }

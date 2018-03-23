@@ -28,26 +28,10 @@ public class PeerConfig {
         this.id = Integer.parseInt(args[1]);
         this.loadServiceAccessPoint(args[2]);
 
-        this.mcControl = this.getMCGroup(args[3], args[4], () -> {
-        }, "MCControl");//setup socket and join group for <mccIP> <mccPort>
-        this.mcBackup = this.getMCGroup(args[5], args[6], () -> {
-        }, "MCBackup");//setup socket and join group for <mdbIp> <mdbPort>
-        this.mcRestore = this.getMCGroup(args[7], args[8], () -> {
-        }, "MCRestore");//setup socket and join group for <mdrIp> <mdrPort>
-    }
-
-    /**
-     * parse hostname/ip and port and join a multicast group saved in mcsocket
-     *
-     * @param hostname the hostname or IP
-     * @param port     the port for the MulticastSocket
-     * @throws IOException
-     */
-    protected MulticastSocketC getMCGroup(String hostname, String port, Runnable serviceToInvoke, String name) throws IOException {
-        InetAddress mcGroupIP = Inet4Address.getByName(hostname);
-        MulticastSocketC mcsocket = new MulticastSocketC(Integer.parseInt(port), mcGroupIP, this.id, name, serviceToInvoke, this.threadPool);
-        //mcsocket.setTimeToLive(1);
-        return mcsocket;
+        //setup sockets and join group for <mccIP> <mccPort>, <mdbIp> <mdbPort> and <mdrIp> <mdrPort>, respectively
+        this.mcControl = new MulticastSocketC(args[3], Integer.parseInt(args[4]), this.id, "MCControl", this.threadPool);
+        this.mcBackup = new MulticastSocketC(args[5], Integer.parseInt(args[6]), this.id, "MCBackup", this.threadPool);
+        this.mcRestore = new MulticastSocketC(args[7], Integer.parseInt(args[8]), this.id, "MCRestore", this.threadPool);
     }
 
     /**
@@ -77,15 +61,4 @@ public class PeerConfig {
         mcbThread.start();
         mcrThread.start();
     }
-
-    /*public synchronized Message receiveMulticast(MulticastSocket mcSocket) throws IOException {
-        //wait for multicast message
-        //receive the response (blocking)
-        byte[] responseBytes = new byte[256]; // create buffer to receive response
-        DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
-        System.out.print("[PeerConfig] Waiting for multicast...");
-        mcSocket.receive(inPacket);
-        System.out.println("got answer: " + inPacket.getData().length + " bytes");
-        return new Message(inPacket.getData());
-    }*/
 }

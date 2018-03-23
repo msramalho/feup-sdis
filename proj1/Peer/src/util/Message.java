@@ -52,8 +52,25 @@ public class Message {
         return this.senderId == selfId;
     }
 
-    public boolean isBackup() {
-        return this.getAction().equals("BACKUP");
+    public boolean isBackup() { return this.getAction().equals("BACKUP"); }
+
+    public boolean isPutchunk() { return this.getAction().equals("PUTCHUNK"); }
+
+    public boolean isStored() { return this.getAction().equals("STORED"); }
+
+    public boolean skipQueue() {return isPutchunk() || isBackup();}
+
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "action='" + action + '\'' +
+                ", protocolVersion='" + protocolVersion + '\'' +
+                ", senderId=" + senderId +
+                ", fileId='" + fileId + '\'' +
+                ", chunkNo=" + chunkNo +
+                ", replicationDegree=" + replicationDegree +
+                '}';
     }
 
     /**

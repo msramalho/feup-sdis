@@ -23,11 +23,9 @@ public class Peer {
         //initiator peer, receives <filename> <replicationFactor>x
         if (args.length == 11) {
             System.out.println("initiator");
-            String filename = args[9];
-            int replicationFactor = Integer.parseInt(args[10]);
 
             // Calling LocalFile for testing
-            LocalFile localFile = new LocalFile("0001", filename, replicationFactor, peerConfig);
+            LocalFile localFile = new LocalFile(args[9], Integer.parseInt(args[10]), peerConfig);
             localFile.splitFile();
 
             //setup multicast socket and join group

@@ -3,12 +3,11 @@ package src.localStorage;
 import src.worker.BackupChunk;
 import src.main.PeerConfig;
 
-import java.io.InputStream;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 
 public class LocalFile {
@@ -19,11 +18,12 @@ public class LocalFile {
     String filename; // relative filename in the current file system
     Integer replicationDegree; //desired replication degree
 
-    public LocalFile(String fileId, String filename, Integer replicationDegree, PeerConfig peerConfig) {
-        this.fileId = fileId;
+    public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
+        this.peerConfig = peerConfig;
+
         this.filename = filename;
         this.replicationDegree = replicationDegree;
-        this.peerConfig = peerConfig;
+        loadFileId();
     }
 
     public void splitFile() {
@@ -55,6 +55,17 @@ public class LocalFile {
             i++;
 
             totalBytesRead += LocalFile.CHUNK_SIZE;
+        }
+    }
+
+    private void loadFileId() {
+        String hashSource = filename;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(hashSource.getBytes(StandardCharsets.UTF_8));
+            fileId = String.format("%064x", new BigInteger(1, hash));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
     }
 }

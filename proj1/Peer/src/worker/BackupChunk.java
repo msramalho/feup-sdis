@@ -25,13 +25,14 @@ public class BackupChunk implements Runnable {
     public void run() {
         //create message to send and convert to byte array
         String message = String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, localChunk.file.fileId, localChunk.chunkNo, replicationDeg, new String(localChunk.chunk));
-        byte[] data = message.getBytes();
-        //create and send package
-        this.sendChunkPacket(data);
 
         //wait for STORED replies
         int replies = 0;
         for (int i = 1; i <= BackupChunk.PUTCHUNK_ATTEMPTS || replies > this.replicationDeg; i++) {
+            //create and send message through multicast
+            peerConfig.mcBackup.send(message);
+            // System.out.println("[BackupChunk] - sent chunk: " + localChunk.chunkNo + "(" + message.length() + " bytes): " + message.substring(0, 25));
+
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
             System.out.println("[BackupChunk] - waiting for  " + wait + "ms");
             try {
@@ -54,17 +55,5 @@ public class BackupChunk implements Runnable {
             replies++;
         }
         return replies;
-    }
-
-    //simply send the PUTCHUNK packet
-    private synchronized void sendChunkPacket(byte[] data) {
-        try {
-            DatagramPacket outPacket = new DatagramPacket(data, data.length, peerConfig.mcBackup.getGroup(), peerConfig.mcBackup.getLocalPort()); // create the packet to send through the socket
-            peerConfig.mcBackup.send(outPacket);
-            System.out.println("[BackupChunk] - sent chunk: " + localChunk.chunkNo + "(" + data.length + " bytes): " + new String(data).substring(0, 25) + "...");
-        } catch (IOException e) {
-            System.err.println("[BackupChunk] - cannot send PUTCHUNK to mcBackup");
-            e.printStackTrace();
-        }
     }
 }
