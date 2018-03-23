@@ -8,7 +8,7 @@ public class LocalChunk {
 
     public LocalChunk(String fileId, Integer chunkNo, byte[] chunk) {
         this.chunkNo = chunkNo;
-        this.countAcks = 0
+        this.countAcks = 0;
         this.fileId = fileId;
         this.chunk = chunk;
     }
