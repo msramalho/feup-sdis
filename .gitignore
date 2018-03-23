@@ -63,3 +63,4 @@ fabric.properties
 *.iml
 
 proj1/Peer/out*
+proj1/Peer/internal_state_*
