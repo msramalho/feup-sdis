@@ -1,6 +1,11 @@
 package src.util;
 
+import src.localStorage.LocalFile;
+
 import java.util.Objects;
+
+import static java.lang.Integer.min;
+import static java.lang.Math.max;
 
 /**
  * parses a packet string into a queryable object
@@ -25,6 +30,7 @@ public class Message {
         try {
             this.parseMessage(packetMessage);
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println(String.format("[Message] - not a valid message (%d bytes): %s...ignoring", packetMessage.length(), packetMessage));
         }
     }
@@ -41,7 +47,7 @@ public class Message {
         this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
         this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
 
-        if (parts.length == 2) this.body = parts[1].substring(1); //save body if it exists
+        if (parts.length == 2) this.body = parts[1].substring(1, min(parts[1].length(), LocalFile.CHUNK_SIZE + 1)); //save body if it exists (64kB chunks)
     }
 
     public String getAction() {
@@ -52,13 +58,11 @@ public class Message {
         return this.senderId == selfId;
     }
 
-    public boolean isBackup() { return this.getAction().equals("BACKUP"); }
-
     public boolean isPutchunk() { return this.getAction().equals("PUTCHUNK"); }
 
     public boolean isStored() { return this.getAction().equals("STORED"); }
 
-    public boolean skipQueue() {return isPutchunk() || isBackup();}
+    public boolean skipQueue() {return isPutchunk();}
 
 
     @Override
@@ -85,8 +89,8 @@ public class Message {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Message message = (Message) o;
-        return Objects.equals(action, message.action) &&
-                fileId == message.fileId &&
+        return action.equals(message.action) &&
+                fileId.equals(message.fileId) &&
                 (chunkNo == message.chunkNo || chunkNo == -1);
     }
 

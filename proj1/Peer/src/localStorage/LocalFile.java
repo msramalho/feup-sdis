@@ -12,11 +12,11 @@ import java.security.NoSuchAlgorithmException;
 
 public class LocalFile {
     transient PeerConfig peerConfig;
-    static transient Integer CHUNK_SIZE = 64000;
+    public static transient Integer CHUNK_SIZE = 64000;
 
     public String fileId;
     String filename; // relative filename in the current file system
-    Integer replicationDegree; //desired replication degree
+    public Integer replicationDegree; //desired replication degree
 
     public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
         this.peerConfig = peerConfig;
@@ -50,7 +50,7 @@ public class LocalFile {
                 e.printStackTrace();
             }
 
-            BackupChunk bcWorker = new BackupChunk(peerConfig, new LocalChunk(this, i, temporaryChunk), this.replicationDegree);
+            BackupChunk bcWorker = new BackupChunk(peerConfig, new LocalChunk(this, i, temporaryChunk));
             this.peerConfig.threadPool.submit(bcWorker);
             i++;
 

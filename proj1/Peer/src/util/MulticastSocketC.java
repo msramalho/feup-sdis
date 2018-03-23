@@ -1,5 +1,6 @@
 package src.util;
 
+import src.main.PeerConfig;
 import src.worker.Dispatcher;
 
 import java.io.IOException;
@@ -7,7 +8,6 @@ import java.net.DatagramPacket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -18,14 +18,14 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
     private int selfId; //saves the id of the owner peer to reject own messages
     private String name;
     public LinkedBlockingDeque<Message> mcQueue; //blocking queue to store unprocessed mcControl packets
-    ExecutorService threadPool;
+    PeerConfig peerConfig;
 
-    public MulticastSocketC(String hostname, int port, int selfId, String name, ExecutorService threadPool) throws IOException {
+    public MulticastSocketC(String hostname, int port, int selfId, String name, PeerConfig peerConfig) throws IOException {
         super(port);
         this.group = Inet4Address.getByName(hostname);
         this.name = name;
         this.selfId = selfId;
-        this.threadPool = threadPool;
+        this.peerConfig = peerConfig;
         this.setTimeToLive(1);//setTimeToLeave
         this.joinGroup(this.group);
         this.mcQueue = new LinkedBlockingDeque<>(1024);
@@ -66,7 +66,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
             debug("received message with " + inPacket.getData().length + " bytes");
             if (!m.isOwnMessage(this.selfId)) {
                 if (m.skipQueue())
-                    threadPool.submit(new Dispatcher(m)); // send a new task to the threadpool
+                    peerConfig.threadPool.submit(new Dispatcher(m, peerConfig)); // send a new task to the threadpool
                 else
                     this.mcQueue.add(m);//add this message to the blocking queue if it may be needed in the future
             }

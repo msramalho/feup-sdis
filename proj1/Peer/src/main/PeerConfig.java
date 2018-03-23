@@ -29,9 +29,9 @@ public class PeerConfig {
         this.loadServiceAccessPoint(args[2]);
 
         //setup sockets and join group for <mccIP> <mccPort>, <mdbIp> <mdbPort> and <mdrIp> <mdrPort>, respectively
-        this.mcControl = new MulticastSocketC(args[3], Integer.parseInt(args[4]), this.id, "MCControl", this.threadPool);
-        this.mcBackup = new MulticastSocketC(args[5], Integer.parseInt(args[6]), this.id, "MCBackup", this.threadPool);
-        this.mcRestore = new MulticastSocketC(args[7], Integer.parseInt(args[8]), this.id, "MCRestore", this.threadPool);
+        this.mcControl = new MulticastSocketC(args[3], Integer.parseInt(args[4]), this.id, "MCControl", this);
+        this.mcBackup = new MulticastSocketC(args[5], Integer.parseInt(args[6]), this.id, "MCBackup", this);
+        this.mcRestore = new MulticastSocketC(args[7], Integer.parseInt(args[8]), this.id, "MCRestore", this);
     }
 
     /**
@@ -54,11 +54,8 @@ public class PeerConfig {
 
     public void initialize() {
         //threads for building the requests queues
-        Thread mccThread = new Thread(this.mcControl);
-        Thread mcbThread = new Thread(this.mcBackup);
-        Thread mcrThread = new Thread(this.mcRestore);
-        mccThread.start();
-        mcbThread.start();
-        mcrThread.start();
+        (new Thread(this.mcControl)).start();
+        (new Thread(this.mcBackup)).start();
+        (new Thread(this.mcRestore)).start();
     }
 }
