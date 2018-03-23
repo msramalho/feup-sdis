@@ -1,7 +1,7 @@
 package src.localStorage;
 
 public class StoredChunk {
-    String fileId; //file id sent in the backup request
+    String fileId; //file fileId sent in the backup request
     String chunkNumber;
     String path;
 

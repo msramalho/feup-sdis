@@ -3,7 +3,6 @@ package src.localStorage;
 import src.main.BackupChunkWorker;
 import src.main.PeerConfig;
 
-import java.util.ArrayList;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -13,61 +12,48 @@ import java.io.IOException;
 
 
 public class LocalFile {
-    static Integer CHUNK_SIZE = 64000;
-    String id;
+    static transient Integer CHUNK_SIZE = 64000;
+    String fileId;
     String filename; // relative filename in the current file system
-    ArrayList<LocalChunk> chunks;
     Integer replicationDegree; //desired replication degree
-    PeerConfig peerConfig;
+    transient PeerConfig peerConfig;
 
-    public LocalFile(String id, String filename, Integer replicationDegree, PeerConfig peerConfig) {
-        this.id = id;
+    public LocalFile(String fileId, String filename, Integer replicationDegree, PeerConfig peerConfig) {
+        this.fileId = fileId;
         this.filename = filename;
-        this.chunks = new ArrayList<LocalChunk>();
         this.replicationDegree = replicationDegree;
         this.peerConfig = peerConfig;
     }
 
     public void splitFile() {
-        int totalBytesRead = 0;
+        System.out.println("[LocalFile] - splitting file: " + filename);
 
-        System.out.println("[LocalFile]file: " + filename);
-
+        // read from the filesystem into an input stream
         File file = new File(this.filename);
         int file_size = (int) file.length();
-        System.out.println("[LocalFile][File Received length: " + file_size + "]");
-
         InputStream inStream = null;
         try {
             inStream = new BufferedInputStream(new FileInputStream(file));
         } catch (FileNotFoundException e) {
-            System.out.println("[LocalFile]unable to read file: " + this.filename);
+            System.out.println("[LocalFile] - unable to read file: " + this.filename);
             e.printStackTrace();
         }
-        int i = 0;
-        byte[] temporaryChunk;
+
+        // split file and add to worker thread
+        int i = 0, totalBytesRead = 0;
         while (totalBytesRead < file_size) {
-            temporaryChunk = new byte[LocalFile.CHUNK_SIZE]; //Temporary Byte Array
-            int bytesRead = 0;
+            byte[] temporaryChunk = new byte[LocalFile.CHUNK_SIZE]; //Temporary Byte Array
             try {
-                bytesRead = inStream.read(temporaryChunk, 0, LocalFile.CHUNK_SIZE);
+                inStream.read(temporaryChunk, 0, LocalFile.CHUNK_SIZE);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("[LocalFile]Chunk[" + i + "]" + " size: " + bytesRead);
 
-            LocalChunk chunck1 = new LocalChunk(1, i, 0);
-            chunks.add(chunck1);
-
-            BackupChunkWorker bcWorker = new BackupChunkWorker(peerConfig, temporaryChunk, "00001", i, this.replicationDegree);
+            BackupChunkWorker bcWorker = new BackupChunkWorker(peerConfig, new LocalChunk(this.fileId, i, temporaryChunk), this.replicationDegree);
             this.peerConfig.threadPool.submit(bcWorker);
             i++;
 
             totalBytesRead += LocalFile.CHUNK_SIZE;
         }
-
-
-        System.out.println("Size array: " + chunks.size());
-
     }
 }

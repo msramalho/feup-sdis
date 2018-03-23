@@ -49,7 +49,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
             }
 
             Message m = new Message(inPacket.getData());
-            System.out.println(String.format("[MulticastSocketC:%s] answer: %d bytes", this.name, inPacket.getData().length) + " id: " + String.join(",", m.head));
+            System.out.println(String.format("[MulticastSocketC:%s] answer: %d bytes", this.name, inPacket.getData().length) + " id: " + m.fileId);
             if (!m.isOwnMessage(this.selfId))
                 this.mcQueue.add(m);//add this message to the blocking queue if it is not ours
         }
