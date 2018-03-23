@@ -39,7 +39,9 @@ public class BackupChunk implements Runnable {
             }
             replies += this.getRepliesWithTimeout();
         }
-        System.out.println("[BackupChunk] - backup completed after " + i + " attempts, with " + replies + "/" + localChunk.file.replicationDegree + " replies");
+        System.out.println("[BackupChunk] - backup completed after " + (i - 1) + " attempts, with " + replies + "/" + localChunk.file.replicationDegree + " replies");
+
+        peerConfig.internalState.addLocalFile(localChunk.file).save();
         //TODO: commit the number of replies to the database
     }
 

@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 
 public class LocalFile {
@@ -17,12 +18,13 @@ public class LocalFile {
     public String fileId;
     String filename; // relative filename in the current file system
     public Integer replicationDegree; //desired replication degree
+    public ArrayList<LocalChunk> chunks; //the chunks in this file
 
     public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
         this.peerConfig = peerConfig;
-
         this.filename = filename;
         this.replicationDegree = replicationDegree;
+        this.chunks = new ArrayList<>();
         loadFileId();
     }
 
@@ -49,8 +51,9 @@ public class LocalFile {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            BackupChunk bcWorker = new BackupChunk(peerConfig, new LocalChunk(this, i, temporaryChunk));
+            LocalChunk localChunk = new LocalChunk(this, i, temporaryChunk);
+            chunks.add(localChunk);
+            BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk);
             this.peerConfig.threadPool.submit(bcWorker);
             i++;
 
@@ -59,6 +62,7 @@ public class LocalFile {
     }
 
     private void loadFileId() {
+        //TODO: use file metadata and/or maybe content instead of just filename to generate the unique fileId/hash
         String hashSource = filename;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

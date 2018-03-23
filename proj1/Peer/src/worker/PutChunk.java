@@ -10,6 +10,7 @@ public class PutChunk extends Protocol {
 
     @Override
     public void run() {
+        // d.peerConfig.int
         try {
             int sleepFor = ThreadLocalRandom.current().nextInt(0, 401);
             Thread.sleep(sleepFor);

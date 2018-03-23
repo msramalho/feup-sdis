@@ -1,5 +1,6 @@
 package src.localStorage;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class LocalChunk {
@@ -14,6 +15,7 @@ public class LocalChunk {
         this.chunkNo = chunkNo;
         this.file = file;
         this.chunk = chunk;
+        this.peersAcks = new HashSet<>();
     }
 
     public void addPeerAck(Integer peerId) {
