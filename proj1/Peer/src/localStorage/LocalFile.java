@@ -1,7 +1,7 @@
-package localStorage;
+package src.localStorage;
 
-import main.BackupChunkWorker;
-import main.PeerConfig;
+import src.main.BackupChunkWorker;
+import src.main.PeerConfig;
 
 import java.util.ArrayList;
 import java.io.InputStream;

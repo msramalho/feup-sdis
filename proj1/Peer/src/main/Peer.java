@@ -1,6 +1,7 @@
-package main;
+package src.main;
 
-import localStorage.LocalFile;
+
+import src.localStorage.LocalFile;
 
 public class Peer {
     public static void main(String[] args) {

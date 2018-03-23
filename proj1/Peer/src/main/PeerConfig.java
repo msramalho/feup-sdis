@@ -1,6 +1,7 @@
-package main;
+package src.main;
 
-import util.MulticastSocketC;
+
+import src.util.MulticastSocketC;
 
 import java.io.IOException;
 import java.net.*;
@@ -8,13 +9,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PeerConfig {
-    String protocolVersion;
+    public String protocolVersion;
     Integer id; // the peer id
     InetAddress sapIp; // service access point IP
     Integer sapPort; // service access point port
-    MulticastSocketC mcControl; // Multicast Control Socket
-    MulticastSocketC mcBackup; // Multicast Back Up Socket
-    MulticastSocketC mcRestore; // Multicast Restore Socket
+    public MulticastSocketC mcControl; // Multicast Control Socket
+    public MulticastSocketC mcBackup; // Multicast Back Up Socket
+    public MulticastSocketC mcRestore; // Multicast Restore Socket
     public ExecutorService threadPool; //global threadpool for services
 
     public PeerConfig(String[] args) throws Exception {
@@ -27,9 +28,12 @@ public class PeerConfig {
         this.id = Integer.parseInt(args[1]);
         this.loadServiceAccessPoint(args[2]);
 
-        this.mcControl = this.getMCGroup(args[3], args[4], "MCControl");//setup socket and join group for <mccIP> <mccPort>
-        this.mcBackup = this.getMCGroup(args[5], args[6], "MCBackup");//setup socket and join group for <mdbIp> <mdbPort>
-        this.mcRestore = this.getMCGroup(args[7], args[8], "MCRestore");//setup socket and join group for <mdrIp> <mdrPort>
+        this.mcControl = this.getMCGroup(args[3], args[4], () -> {
+        }, "MCControl");//setup socket and join group for <mccIP> <mccPort>
+        this.mcBackup = this.getMCGroup(args[5], args[6], () -> {
+        }, "MCBackup");//setup socket and join group for <mdbIp> <mdbPort>
+        this.mcRestore = this.getMCGroup(args[7], args[8], () -> {
+        }, "MCRestore");//setup socket and join group for <mdrIp> <mdrPort>
     }
 
     /**
@@ -39,11 +43,9 @@ public class PeerConfig {
      * @param port     the port for the MulticastSocket
      * @throws IOException
      */
-    protected MulticastSocketC getMCGroup(String hostname, String port, String name) throws IOException {
+    protected MulticastSocketC getMCGroup(String hostname, String port, Runnable serviceToInvoke, String name) throws IOException {
         InetAddress mcGroupIP = Inet4Address.getByName(hostname);
-        //TODO: replace () -> {} with the right runnable
-        MulticastSocketC mcsocket = new MulticastSocketC(Integer.parseInt(port), mcGroupIP, this.id, name, () -> {
-        }, this.threadPool);
+        MulticastSocketC mcsocket = new MulticastSocketC(Integer.parseInt(port), mcGroupIP, this.id, name, serviceToInvoke, this.threadPool);
         //mcsocket.setTimeToLive(1);
         return mcsocket;
     }
@@ -87,7 +89,3 @@ public class PeerConfig {
         return new Message(inPacket.getData());
     }*/
 }
-
-
-
-

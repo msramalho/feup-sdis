@@ -1,4 +1,4 @@
-package localStorage;
+package src.localStorage;
 
 public class LocalChunk {
 	Integer fileId;

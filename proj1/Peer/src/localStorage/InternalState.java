@@ -1,6 +1,7 @@
-package localStorage;
+package src.localStorage;
 
-import main.PeerConfig;
+import src.main.PeerConfig;
+
 import java.util.ArrayList;
 
 public class InternalState {

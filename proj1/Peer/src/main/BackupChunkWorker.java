@@ -1,6 +1,6 @@
-package main;
+package src.main;
 
-import util.Message;
+import src.util.Message;
 
 import java.io.IOException;
 import java.net.*;
@@ -28,14 +28,18 @@ public class BackupChunkWorker implements Runnable {
         //create message to send and convert to byte array
         String message = String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, this.fileId, this.chunkNo, this.replicationDeg, new String(this.chunk));
         byte[] data = message.getBytes();
-        System.out.println("size is: " + data.length);
         //create and send package
         this.sendChunkPacket(data);
 
         //wait for responses
         for (int i = 1; i <= BackupChunkWorker.PUTCHUNK_ATTEMPTS; i++) {
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
+            System.out.println("[BackupChunkWorker] - waiting for  " + wait + "ms");
+            try {
+                Thread.sleep(wait);
+            } catch (InterruptedException e) {}
             int replies = this.getRepliesWithTimeout(wait);
+            System.out.println("[BackupChunkWorker] - got " + replies + " replies");
         }
     }
 
@@ -61,7 +65,7 @@ public class BackupChunkWorker implements Runnable {
         try {
             DatagramPacket outPacket = new DatagramPacket(data, data.length, this.peerConfig.mcBackup.getGroup(), this.peerConfig.mcBackup.getLocalPort()); // create the packet to send through the socket
             this.peerConfig.mcBackup.send(outPacket);
-            System.out.println("[BackupChunkWorker] - sent chunk: " + chunkNo + "(" + data.length + " bytes): " + new String(data).substring(0, 25));
+            System.out.println("[BackupChunkWorker] - sent chunk: " + chunkNo + "(" + data.length + " bytes): " + new String(data).substring(0, 25) + "...");
         } catch (IOException e) {
             System.err.println("[BackupChunkWorker] - cannot send PUTCHUNK to mcBackup");
             e.printStackTrace();

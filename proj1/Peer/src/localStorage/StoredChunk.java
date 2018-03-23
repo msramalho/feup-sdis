@@ -1,4 +1,4 @@
-package localStorage;
+package src.localStorage;
 
 public class StoredChunk {
     String fileId; //file id sent in the backup request
