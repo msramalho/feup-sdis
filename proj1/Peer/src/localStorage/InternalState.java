@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.HashMap;
 
 public class InternalState {
-    private static transient String internaltStateFolder = "internal_state_peer_%d";
+    private static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.json";
 
     HashMap<String, LocalFile> localFiles; // local files being backed up
@@ -24,8 +24,8 @@ public class InternalState {
      * @return InternalState
      */
     public static InternalState load(int peerId) {
-        internaltStateFolder = String.format(internaltStateFolder, peerId);
-        File directory = new File(internaltStateFolder);
+        internalStateFolder = String.format(internalStateFolder, peerId);
+        File directory = new File(internalStateFolder);
         if (!directory.exists()) directory.mkdir();
         try {
             new File(getDatabaseName()).createNewFile(); // create if not exists
@@ -74,7 +74,7 @@ public class InternalState {
     }
 
     private static String getDatabaseName() {
-        return internaltStateFolder + "/" + internalStateFilename;
+        return internalStateFolder + "/" + internalStateFilename;
     }
 
     public void display() {

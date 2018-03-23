@@ -37,6 +37,7 @@ public class BackupChunk implements Runnable {
                 Thread.sleep(wait);
             } catch (InterruptedException e) {
             }
+            //TODO: verificar se as replies não são repetidas
             replies += this.getRepliesWithTimeout();
         }
         System.out.println("[BackupChunk] - backup completed after " + (i - 1) + " attempts, with " + replies + "/" + localChunk.file.replicationDegree + " replies");
