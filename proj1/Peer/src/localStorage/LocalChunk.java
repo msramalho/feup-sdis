@@ -1,15 +1,15 @@
 package src.localStorage;
 
 public class LocalChunk {
-    public transient String fileId;
+    public transient LocalFile file;
     public Integer chunkNo; // chunk ID
     public Integer countAcks; // count the number of ACKs received for this chunk
     public transient byte[] chunk;
 
-    public LocalChunk(String fileId, Integer chunkNo, byte[] chunk) {
+    public LocalChunk(LocalFile file, Integer chunkNo, byte[] chunk) {
         this.chunkNo = chunkNo;
         this.countAcks = 0;
-        this.fileId = fileId;
+        this.file = file;
         this.chunk = chunk;
     }
 }

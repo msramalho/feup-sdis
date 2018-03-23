@@ -3,7 +3,7 @@ package src.util;
 import java.util.Objects;
 
 /**
- * parses a packet string into a queriable object
+ * parses a packet string into a queryable object
  */
 public class Message {
     public String action;
@@ -25,7 +25,7 @@ public class Message {
         try {
             this.parseMessage(packetMessage);
         } catch (Exception e) {
-            System.err.println(String.format("[Message] - not a valid message (%d bytes): %s from PeerConfig, ignoring", packetMessage.length(), packetMessage));
+            System.err.println(String.format("[Message] - not a valid message (%d bytes): %s...ignoring", packetMessage.length(), packetMessage));
         }
     }
 
@@ -37,9 +37,9 @@ public class Message {
         this.protocolVersion = args[1];
         this.senderId = Integer.parseInt(args[2]);
         this.fileId = args[3];
+
         this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
         this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
-        // this.head = Arrays.copyOfRange(args, 4, args.length); // head keeps the optional args
 
         if (parts.length == 2) this.body = parts[1].substring(1); //save body if it exists
     }

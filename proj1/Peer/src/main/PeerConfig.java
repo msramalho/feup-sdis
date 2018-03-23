@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 
 public class PeerConfig {
     public String protocolVersion;
-    Integer id; // the peer id
+    public Integer id; // the peer id
     InetAddress sapIp; // service access point IP
     Integer sapPort; // service access point port
     public MulticastSocketC mcControl; // Multicast Control Socket

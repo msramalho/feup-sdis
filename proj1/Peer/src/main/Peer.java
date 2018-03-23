@@ -18,10 +18,9 @@ public class Peer {
         //InternalState internalState = new InternalState(peerConfig);
         //internalState.saveStorage();
 
-        //initiator peer, receives <filename> <replicationFactor>x
-
         peerConfig.initialize();
 
+        //initiator peer, receives <filename> <replicationFactor>x
         if (args.length == 11) {
             System.out.println("initiator");
             String filename = args[9];
@@ -33,7 +32,7 @@ public class Peer {
 
             //setup multicast socket and join group
             //byte[] data = "This is the contents of the file".getBytes(); //create message with service port
-            //BackupChunkWorker bcWorker = new BackupChunkWorker(peerConfig, data, 1, 3);
+            //BackupChunk bcWorker = new BackupChunk(peerConfig, data, 1, 3);
             //bcWorker.run();
             //peerConfig.threadPool.submit(bcWorker);
         }

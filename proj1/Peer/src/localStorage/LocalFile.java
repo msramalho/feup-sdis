@@ -1,6 +1,6 @@
 package src.localStorage;
 
-import src.main.BackupChunkWorker;
+import src.worker.BackupChunk;
 import src.main.PeerConfig;
 
 import java.io.InputStream;
@@ -12,11 +12,12 @@ import java.io.IOException;
 
 
 public class LocalFile {
+    transient PeerConfig peerConfig;
     static transient Integer CHUNK_SIZE = 64000;
-    String fileId;
+
+    public String fileId;
     String filename; // relative filename in the current file system
     Integer replicationDegree; //desired replication degree
-    transient PeerConfig peerConfig;
 
     public LocalFile(String fileId, String filename, Integer replicationDegree, PeerConfig peerConfig) {
         this.fileId = fileId;
@@ -49,7 +50,7 @@ public class LocalFile {
                 e.printStackTrace();
             }
 
-            BackupChunkWorker bcWorker = new BackupChunkWorker(peerConfig, new LocalChunk(this.fileId, i, temporaryChunk), this.replicationDegree);
+            BackupChunk bcWorker = new BackupChunk(peerConfig, new LocalChunk(this, i, temporaryChunk), this.replicationDegree);
             this.peerConfig.threadPool.submit(bcWorker);
             i++;
 
