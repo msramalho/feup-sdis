@@ -1,18 +1,19 @@
 package src.localStorage;
 
 import java.io.*;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class InternalState implements Serializable {
     private static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.ser";
 
-    HashMap<String, LocalFile> localFiles; // local files being backed up
-    // ArrayList<StoredChunk> storedChunks;
+    ConcurrentHashMap<String, LocalFile> localFiles; // local files being backed up - file_id => LocalFile
+    ConcurrentHashMap<String, StoredChunk> storedChunks; // others' chunks - <file_id>_<chunkNo> => StoredChunk
 
 
     public InternalState() {
-        this.localFiles = new HashMap<>();
+        this.localFiles = new ConcurrentHashMap<>();
+        this.storedChunks = new ConcurrentHashMap<>();
     }
 
     /**
@@ -67,6 +68,20 @@ public class InternalState implements Serializable {
         return this;
     }
 
+    public boolean isLocalFile(String fileId) {
+        return localFiles.containsKey(fileId);
+    }
+
+
+    public StoredChunk getStoredChunk(String fileId, int chunkNo) {
+        return storedChunks.get(InternalState.getStoredChunkKey(fileId, chunkNo));
+    }
+
+    private static String getStoredChunkKey(String fileId, int chunkNo) {
+        //returns a string in the format of the keys:
+        return String.format("%s_%d", fileId, chunkNo);
+    }
+
     @Override
     public String toString() {
         return "InternalState{" +
@@ -81,4 +96,5 @@ public class InternalState implements Serializable {
     public void display() {
         System.out.println("[InternalState] - " + this.toString());
     }
+
 }

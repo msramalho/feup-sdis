@@ -27,16 +27,12 @@ public class BackupChunk implements Runnable {
         //wait for STORED replies
         int replies = 0, i;
         for (i = 1; i <= BackupChunk.PUTCHUNK_ATTEMPTS && replies < localChunk.file.replicationDegree; i++) {
-            //create and send message through multicast
-            peerConfig.mcBackup.send(message);
+            peerConfig.mcBackup.send(message); //create and send message through multicast
             // System.out.println("[BackupChunk] - sent chunk: " + localChunk.chunkNo + "(" + message.length() + " bytes): " + message.substring(0, 25));
 
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
             System.out.println("[BackupChunk] - waiting for  " + wait + "ms (got " + replies + "/" + localChunk.file.replicationDegree + " replies)");
-            try {
-                Thread.sleep(wait);
-            } catch (InterruptedException e) {
-            }
+            try { Thread.sleep(wait); } catch (InterruptedException e) {}
             //TODO: verificar se as replies não são repetidas
             replies += this.getRepliesWithTimeout();
         }

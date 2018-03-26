@@ -1,8 +1,7 @@
 package src.util;
 
+import src.localStorage.InternalState;
 import src.localStorage.LocalFile;
-
-import java.util.Objects;
 
 import static java.lang.Integer.min;
 import static java.lang.Math.max;
@@ -62,7 +61,12 @@ public class Message {
 
     public boolean isStored() { return this.getAction().equals("STORED"); }
 
-    public boolean skipQueue() {return isPutchunk();}
+    public boolean needsDispacher(InternalState is) {
+        // is Putchunk -> needsDispacher
+        // is Stored and is not about one of my files -> needsDispacher
+        // is Stored and is about one of my files -> goes to queue for BackUpChunk
+        return isPutchunk() || (isStored() && is.isLocalFile(fileId));
+    }
 
 
     @Override

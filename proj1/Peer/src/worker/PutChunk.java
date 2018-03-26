@@ -11,10 +11,15 @@ public class PutChunk extends Protocol {
     @Override
     public void run() {
         // d.peerConfig.int
+        // d.message.replicationDegree
         try {
             int sleepFor = ThreadLocalRandom.current().nextInt(0, 401);
-            Thread.sleep(sleepFor);
             System.out.println("[Dispatcher] - sleep for: " + sleepFor + "ms");
+            Thread.sleep(sleepFor);
+            //only save chunk locally if not enough peers in the network have answered saying they saved the chunk
+            if (d.peerConfig.internalState.getStoredChunk(d.message.fileId, d.message.chunkNo).repliesToChunk < d.message.replicationDegree){
+
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

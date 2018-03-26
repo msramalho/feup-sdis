@@ -65,7 +65,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
             Message m = new Message(inPacket.getData());
             debug("received " + inPacket.getData().length + " bytes");
             if (!m.isOwnMessage(this.selfId)) {
-                if (m.skipQueue())
+                if (m.needsDispacher(peerConfig.internalState))
                     peerConfig.threadPool.submit(new Dispatcher(m, peerConfig)); // send a new task to the threadpool
                 else
                     this.mcQueue.add(m);//add this message to the blocking queue if it may be needed in the future

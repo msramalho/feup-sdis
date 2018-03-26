@@ -14,13 +14,14 @@ public class Dispatcher implements Runnable {
 
     @Override
     public void run() {
-        // System.out.println("\n[Dispatcher] - HELLO, this is d with message:\n" + message.toString());
-
         Protocol p = null;
 
-        if (message.isPutchunk()) {
+        // dispatch the message to the proper protocol handler
+        if (message.isPutchunk())
             p = new PutChunk(this);
-        }
+        else if (message.isStored())
+            p = new Stored(this);
+
 
         if (p != null) p.run();
     }
