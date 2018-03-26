@@ -1,9 +1,9 @@
 package src.localStorage;
 
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.HashSet;
 
-public class LocalChunk {
+public class LocalChunk implements Serializable {
     public transient LocalFile file;
     public transient byte[] chunk;
 

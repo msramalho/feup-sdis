@@ -1,14 +1,11 @@
 package src.localStorage;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-
 import java.io.*;
 import java.util.HashMap;
 
-public class InternalState {
+public class InternalState implements Serializable {
     private static transient String internalStateFolder = "internal_state_peer_%d";
-    private static transient String internalStateFilename = "database.json";
+    private static transient String internalStateFilename = "database.ser";
 
     HashMap<String, LocalFile> localFiles; // local files being backed up
     // ArrayList<StoredChunk> storedChunks;
@@ -20,6 +17,7 @@ public class InternalState {
 
     /**
      * receives the current peerId and loads the json values from the correspondent folder. If there is no database (file or folder) a new and empty one is created
+     *
      * @param peerId the peerid of the internal state
      * @return InternalState
      */
@@ -36,27 +34,30 @@ public class InternalState {
 
         InternalState is = null;
         try {
-            Gson gson = new Gson();
-            JsonReader reader = new JsonReader(new FileReader(getDatabaseName()));
-            is = gson.fromJson(reader, InternalState.class);
-        } catch (IOException e) {
-            System.out.println("[InternalState] - unable to read (or create) the 'database' file");
-            e.printStackTrace();
+            FileInputStream fileIn = new FileInputStream(getDatabaseName());
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            is = (InternalState) in.readObject();
+            in.close();
+            fileIn.close();
+        } catch (Exception i) {
+            System.out.println("[InternalState] - unable to load the 'database' file, may not exist yet");
         }
         if (is == null) is = new InternalState();
+
 
         return is;
     }
 
     public void save() {
-        Gson gson = new Gson();
         System.out.println("saving " + getDatabaseName());
         try {
-            FileWriter fw = new FileWriter(getDatabaseName());
-            gson.toJson(this, fw);
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            FileOutputStream fileOut = new FileOutputStream(getDatabaseName());
+            ObjectOutputStream out = new ObjectOutputStream(fileOut);
+            out.writeObject(this);
+            out.close();
+            fileOut.close();
+        } catch (IOException i) {
+            i.printStackTrace();
         }
     }
 

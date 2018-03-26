@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 
-public class LocalFile {
+public class LocalFile implements Serializable {
     transient PeerConfig peerConfig;
     public static transient Integer CHUNK_SIZE = 64000;
 
