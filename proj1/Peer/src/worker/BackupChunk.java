@@ -31,7 +31,7 @@ public class BackupChunk implements Runnable {
             // System.out.println("[BackupChunk] - sent chunk: " + localChunk.chunkNo + "(" + message.length() + " bytes): " + message.substring(0, 25));
 
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
-            System.out.println("[BackupChunk] - waiting for  " + wait + "ms (got " + replies + "/" + localChunk.file.replicationDegree + " replies)");
+            System.out.println("[BackupChunk] - waiting for chunk " + localChunk.chunkNo + " " + wait + "ms (got " + replies + "/" + localChunk.file.replicationDegree + " replies)");
             try { Thread.sleep(wait); } catch (InterruptedException e) {}
             //TODO: verificar se as replies não são repetidas
             replies += this.getRepliesWithTimeout();
@@ -46,6 +46,10 @@ public class BackupChunk implements Runnable {
     private int getRepliesWithTimeout() {
         int replies = 0;
         Message expectedMessage = new Message("STORED", localChunk.file.fileId, localChunk.chunkNo);
+
+        for (Message m: peerConfig.mcControl.mcQueue) {
+            System.out.println(m);
+        }
 
         while (peerConfig.mcControl.mcQueue.remove(expectedMessage))
             replies++;

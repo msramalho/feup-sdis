@@ -27,9 +27,14 @@ public class Peer {
         if (args.length == 11) {
             System.out.println("[Peer] - initiator");
 
+
             // Calling LocalFile for testing
             LocalFile localFile = new LocalFile(args[9], Integer.parseInt(args[10]), peerConfig);
             localFile.splitFile();
+
+            // peerConfig.mcControl.send("GETCHUNK");
+            //esperar pelo CHUNK respetivo
+            // quando chegar, devolve a chunk pedida
         }
 
     }

@@ -4,7 +4,7 @@ public class StoredChunk {
     String fileId; //file fileId sent in the backup request
     String chunkNumber;
     String path;
-    int repliesToPutchunk;
+    public int repliesToPutchunk;
 
     public StoredChunk(String fileId, String chunkNumber) {
         this.fileId = fileId;
@@ -19,4 +19,8 @@ public class StoredChunk {
     	//...
     	//this.path = "/.../chunk"
     }
+
+    // public String readChunkFromMemory(){
+        //ler ficheiro do path e devolver o conteúdo
+    // }
 }

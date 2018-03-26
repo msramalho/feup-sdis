@@ -12,7 +12,7 @@ import static java.lang.Math.max;
 public class Message {
     public String action;
     private String protocolVersion;
-    private int senderId;
+    public int senderId;
     public String fileId;
     public int chunkNo;
     public int replicationDegree;
@@ -49,23 +49,21 @@ public class Message {
         if (parts.length == 2) this.body = parts[1].substring(1, min(parts[1].length(), LocalFile.CHUNK_SIZE + 1)); //save body if it exists (64kB chunks)
     }
 
-    public String getAction() {
-        return action;
-    }
-
     public boolean isOwnMessage(int selfId) {
         return this.senderId == selfId;
     }
 
-    public boolean isPutchunk() { return this.getAction().equals("PUTCHUNK"); }
+    public boolean isPutchunk() { return this.action.equals("PUTCHUNK"); }
 
-    public boolean isStored() { return this.getAction().equals("STORED"); }
+    public boolean isStored() { return this.equals("STORED"); }
 
     public boolean needsDispacher(InternalState is) {
         // is Putchunk -> needsDispacher
         // is Stored and is not about one of my files -> needsDispacher
         // is Stored and is about one of my files -> goes to queue for BackUpChunk
-        return isPutchunk() || (isStored() && is.isLocalFile(fileId));
+        //TODO: make chunk for my requests add the CHUNK message to the queue and not to the dispatcher (return false here)
+        //TODO: make GETCHUNK call the dispacher (return true here)
+        return isPutchunk() || (isStored() && !is.isLocalFile(fileId)) || isGetChunk() || !(isChunk() && is.isLocalFile(fileId));
     }
 
 

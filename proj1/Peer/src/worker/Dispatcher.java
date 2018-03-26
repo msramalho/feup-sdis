@@ -21,6 +21,8 @@ public class Dispatcher implements Runnable {
             p = new PutChunk(this);
         else if (message.isStored())
             p = new Stored(this);
+        // else if (message.isGetChunk())
+        //     p = new GetChunk()
 
 
         if (p != null) p.run();

@@ -10,6 +10,6 @@ public class Stored extends Protocol {
 
     @Override
     public void run() {
-        d.peerConfig.internalState.updateExternalPutchunkReplies(d.message.fileId, d.message.chunkNo);
+        // d.peerConfig.internalState.updateExternalPutchunkReplies(d.message.fileId, d.message.chunkNo);
     }
 }
