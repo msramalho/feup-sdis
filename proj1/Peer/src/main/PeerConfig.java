@@ -4,7 +4,6 @@ package src.main;
 import src.localStorage.InternalState;
 import src.util.MulticastSocketC;
 
-import java.io.IOException;
 import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +28,6 @@ public class PeerConfig {
         protocolVersion = args[0];
         id = Integer.parseInt(args[1]);
         loadServiceAccessPoint(args[2]);
-        System.out.println("PEER: " + id);
         internalState = InternalState.load(id);
         internalState.display();
 

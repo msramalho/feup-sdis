@@ -16,7 +16,7 @@ public class PutChunk extends Protocol {
     @Override
     public void run() {
 
-        //Added to hashmap everytime a chunk passes throw the MCgroup
+        //Added to hashmap everytime a chunk passes through the MCgroup
         StoredChunk n = new StoredChunk(d.message.fileId, d.message.chunkNo);
         d.peerConfig.internalState.saveChunkLocally(n, d.message.body);
 

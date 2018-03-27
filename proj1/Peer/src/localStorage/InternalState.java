@@ -10,10 +10,10 @@ public class InternalState implements Serializable {
     private static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.ser";
     private static transient String internalStorage = "storage";
-    public static int peerId;
+    public int peerId;
+
     ConcurrentHashMap<String, LocalFile> localFiles; // local files being backed up - file_id => LocalFile
     ConcurrentHashMap<String, StoredChunk> storedChunks; // others' chunks - <file_id>_<chunkNo> => StoredChunk
-
 
     public InternalState() {
         this.localFiles = new ConcurrentHashMap<>();
@@ -26,8 +26,8 @@ public class InternalState implements Serializable {
      * @param peerId the peerid of the internal state
      * @return InternalState
      */
-    public static InternalState load(int pID) {
-        peerId = pID;
+    public static InternalState load(int peerId) {
+        this.peerId = peerId;
         internalStateFolder = String.format(internalStateFolder, peerId);
         File directory = new File(internalStateFolder);
         if (!directory.exists()) directory.mkdir();
@@ -65,19 +65,16 @@ public class InternalState implements Serializable {
         } catch (IOException i) {
             i.printStackTrace();
         }
-
-
-
     }
 
-    public void saveChunkLocally(StoredChunk chunk , String body){
-        System.out.println("Added in: " + getChunkPath(chunk.fileId,chunk.chunkNumber));
+    public void saveChunkLocally(StoredChunk chunk, String body) {
+        System.out.println("[InternalState] Added in: " + getChunkPath(chunk.fileId, chunk.chunkNumber));
         try {
-            Path path = Paths.get(getChunkPath(chunk.fileId,chunk.chunkNumber));
+            Path path = Paths.get(getChunkPath(chunk.fileId, chunk.chunkNumber));
             Files.createDirectories(path.getParent());
             Files.write(path, body.getBytes());
-            storedChunks.put(chunk.fileId+chunk.chunkNumber,chunk);
-            System.out.println("[Internal Peer] - chunk saved locally & hashmap");
+            storedChunks.put(chunk.fileId + chunk.chunkNumber, chunk);
+            System.out.println("[InternalState] - chunk saved locally & hashmap");
 
         } catch (IOException i) {
             i.printStackTrace();
@@ -95,7 +92,7 @@ public class InternalState implements Serializable {
     }
 
     public StoredChunk getStoredChunk(String fileId, int chunkNo) {
-        return storedChunks.get(fileId+chunkNo);
+        return storedChunks.get(fileId + chunkNo);
     }
 
     @Override
@@ -105,8 +102,8 @@ public class InternalState implements Serializable {
                 '}';
     }
 
-    private  String getChunkPath(String fileId, int chunkId) {
-        return  internalStorage + "/"+ peerId +"/" + fileId + "/" + chunkId;
+    private String getChunkPath(String fileId, int chunkId) {
+        return internalStorage + "/" + peerId + "/" + fileId + "/" + chunkId;
     }
 
     private static String getDatabaseName() {

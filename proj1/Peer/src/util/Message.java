@@ -17,7 +17,6 @@ public class Message {
     public int chunkNo;
     public int replicationDegree;
     public String body;
-    public byte[] bodyByte;
 
     public Message(String action, String fileId, int chunkNo) {
         this.action = action;
