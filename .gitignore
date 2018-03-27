@@ -64,3 +64,4 @@ fabric.properties
 
 proj1/Peer/out*
 proj1/Peer/internal_state_*
+proj1/Peer/storage/*
