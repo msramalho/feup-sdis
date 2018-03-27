@@ -1,4 +1,9 @@
 package src.worker;
+import src.localStorage.LocalChunk;
+import src.localStorage.StoredChunk;
+
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -10,20 +15,24 @@ public class PutChunk extends Protocol {
 
     @Override
     public void run() {
-        // d.peerConfig.int
-        // d.message.replicationDegree
+
+        //Added to hashmap everytime a chunk passes throw the MCgroup
+        StoredChunk n = new StoredChunk(d.message.fileId, d.message.chunkNo);
+        d.peerConfig.internalState.saveChunkLocally(n, d.message.body);
+
         try {
-            int sleepFor = ThreadLocalRandom.current().nextInt(0, 401);
+            int sleepFor = ThreadLocalRandom.current().nextInt(10, 401);
             System.out.println("[PutChunk] - sleep for: " + sleepFor + "ms");
             Thread.sleep(sleepFor);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException e){
             e.printStackTrace();
         }
-        d.peerConfig.mcControl.send(String.format("STORED %s %d %s %d \r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.fileId, d.message.chunkNo));
-        //only save chunk locally if not enough peers in the network have answered saying they saved the chunk
-        // if (d.peerConfig.internalState.getStoredChunk(d.message.fileId, d.message.chunkNo).repliesToPutchunk < d.message.replicationDegree) {
-            //TODO: save chunk locally and save that information in database.ser
-        // }
+
+        if (d.peerConfig.internalState.getStoredChunk(d.message.fileId, d.message.chunkNo).repliesToPutchunk < d.message.replicationDegree) {
+            System.out.println("[Peer] - Saved chunk.");
+            d.peerConfig.internalState.save();
+            d.peerConfig.mcControl.send(String.format("STORED %s %d %s %d \r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.fileId, d.message.chunkNo));
+        }
 
         //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
     }

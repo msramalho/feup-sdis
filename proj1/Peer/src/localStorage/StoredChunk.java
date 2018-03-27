@@ -1,12 +1,14 @@
 package src.localStorage;
 
-public class StoredChunk {
+import java.io.Serializable;
+
+public class StoredChunk implements Serializable {
     String fileId; //file fileId sent in the backup request
-    String chunkNumber;
+    int chunkNumber;
     String path;
     public int repliesToPutchunk;
 
-    public StoredChunk(String fileId, String chunkNumber) {
+    public StoredChunk(String fileId, int chunkNumber) {
         this.fileId = fileId;
         this.chunkNumber = chunkNumber;
         repliesToPutchunk = 0;

@@ -63,7 +63,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
 
             // processed the received message: either send to queue or add task to threadpool
             Message m = new Message(inPacket.getData());
-            if (!m.isOwnMessage(this.selfId)) {
+            if (!m.isOwnMessage(this.selfId)){
                 debug("received " + inPacket.getData().length + " bytes");
                 if (m.needsDispacher(peerConfig.internalState))
                     peerConfig.threadPool.submit(new Dispatcher(m, peerConfig)); // send a new task to the threadpool
@@ -76,5 +76,6 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
     //send a message with information about which multicastsocket is displaying the message
     private void debug(String debugMessage) {
         System.out.println(String.format("[MulticastSocketC:%s] - " + debugMessage, this.name));
+
     }
 }

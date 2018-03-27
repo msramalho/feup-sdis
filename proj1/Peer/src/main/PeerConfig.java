@@ -29,7 +29,7 @@ public class PeerConfig {
         protocolVersion = args[0];
         id = Integer.parseInt(args[1]);
         loadServiceAccessPoint(args[2]);
-
+        System.out.println("PEER: " + id);
         internalState = InternalState.load(id);
         internalState.display();
 
