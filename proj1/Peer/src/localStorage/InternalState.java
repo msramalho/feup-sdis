@@ -10,7 +10,7 @@ public class InternalState implements Serializable {
     private static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.ser";
     private static transient String internalStorage = "storage";
-    public int peerId;
+    public static int peerId;
 
     ConcurrentHashMap<String, LocalFile> localFiles; // local files being backed up - file_id => LocalFile
     ConcurrentHashMap<String, StoredChunk> storedChunks; // others' chunks - <file_id>_<chunkNo> => StoredChunk
@@ -23,11 +23,11 @@ public class InternalState implements Serializable {
     /**
      * receives the current peerId and loads the json values from the correspondent folder. If there is no database (file or folder) a new and empty one is created
      *
-     * @param peerId the peerid of the internal state
+     * @param pId the peerid of the internal state
      * @return InternalState
      */
-    public static InternalState load(int peerId) {
-        this.peerId = peerId;
+    public static InternalState load(int pId) {
+        peerId = pId;
         internalStateFolder = String.format(internalStateFolder, peerId);
         File directory = new File(internalStateFolder);
         if (!directory.exists()) directory.mkdir();
