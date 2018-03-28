@@ -17,7 +17,6 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
     private InetAddress group;
     private int selfId; //saves the id of the owner peer to reject own messages
     private String name;
-    public LinkedBlockingDeque<Message> mcQueue; //blocking queue to store unprocessed mcControl packets
     PeerConfig peerConfig;
 
     public MulticastSocketC(String hostname, int port, int selfId, String name, PeerConfig peerConfig) throws IOException {
@@ -28,7 +27,6 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
         this.peerConfig = peerConfig;
         this.setTimeToLive(1);//setTimeToLeave
         this.joinGroup(this.group);
-        this.mcQueue = new LinkedBlockingDeque<>(1024);
     }
 
     public InetAddress getGroup() {
@@ -40,7 +38,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
         try {
             DatagramPacket outPacket = new DatagramPacket(data, data.length, group, getLocalPort()); // create the packet to send through the socket
             send(outPacket);
-            debug("sent " + data.length + " bytes");
+            debug(String.format("sent %5d bytes: %9s", data.length, message.split(" ", 2)[0]));
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -64,18 +62,15 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
             // processed the received message: either send to queue or add task to threadpool
             Message m = new Message(inPacket.getData());
             if (!m.isOwnMessage(this.selfId)) {
-                debug("received " + inPacket.getData().length + " bytes");
-                if (m.needsDispacher(peerConfig.internalState))
-                    peerConfig.threadPool.submit(new Dispatcher(m, peerConfig)); // send a new task to the threadpool
-                else
-                    this.mcQueue.add(m);//add this message to the blocking queue if it may be needed in the future
+                peerConfig.threadPool.submit(new Dispatcher(m, peerConfig)); // send a new task to the threadpool
+                debug(String.format("received %9s from Peer %3d", m.action, m.senderId));
             }
         }
     }
 
     //send a message with information about which multicastsocket is displaying the message
     private void debug(String debugMessage) {
-        System.out.println(String.format("[MulticastSocketC:%s] - " + debugMessage, this.name));
+        System.out.println(String.format("[MulticastSocketC:%9s] - " + debugMessage, this.name));
 
     }
 }

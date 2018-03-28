@@ -78,7 +78,9 @@ public class InternalState implements Serializable {
     //------------------------------ local and stored chunks
 
     // return the local chunk or null if it does not exist
-    public Chunk getLocalChunk(Message m) { return localChunks.get(Chunk.getUniqueId(m.fileId, m.chunkNo)); }
+    public LocalChunk getLocalChunk(Message m) { return getLocalChunk(Chunk.getUniqueId(m.fileId, m.chunkNo)); }
+
+    public LocalChunk getLocalChunk(String uniqueId) { return localChunks.get(uniqueId); }
 
     // return the stored chunk or null if it does not exist
     public StoredChunk getStoredChunk(Message m) { return storedChunks.get(Chunk.getUniqueId(m.fileId, m.chunkNo)); }
@@ -108,25 +110,6 @@ public class InternalState implements Serializable {
         }
     }
 
-    // returns the storedChunk pointer if the chunk can be used and locks it if so, null otherwise (the requester cannot use it)
-    public synchronized LocalChunk tryToLockLocalChunk(LocalChunk lChunk) {
-        // LocalChunk lChunk = new LocalChunk(m);
-        if (!localChunks.containsKey(lChunk.getUniqueId()))
-            localChunks.put(lChunk.getUniqueId(), lChunk);
-        else lChunk = localChunks.get(lChunk.getUniqueId());
-        if (lChunk.isLocked()) return null;
-        return (LocalChunk) lChunk.lock(); // can now be used safely
-    }
-
-    // returns the storedChunk pointer if the chunk can be used and locks it if so, null otherwise (the requester cannot use it)
-    public synchronized StoredChunk tryToLockStoredChunk(Message m) {
-        StoredChunk sChunk = new StoredChunk(m);
-        if (!storedChunks.containsKey(sChunk.getUniqueId()))
-            storedChunks.put(sChunk.getUniqueId(), sChunk);
-        else sChunk = storedChunks.get(sChunk.getUniqueId());
-        if (sChunk.isLocked()) return null;
-        return (StoredChunk) sChunk.lock(); // can now be used safely
-    }
 
     //------------------------------ util functions
 
