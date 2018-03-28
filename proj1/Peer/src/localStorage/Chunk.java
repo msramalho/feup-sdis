@@ -11,16 +11,13 @@ public abstract class Chunk implements Serializable {
     public int replicationDegree;
     public HashSet<Integer> peersAcks; // a set of the IDs of Peers that have saved this chunk
     public transient byte[] chunk; // the chunk bytes for this chunk
+    public transient boolean locked; // true if there is a Worker handling a PUTCHUNK for this chunk
 
-    public Chunk() { }
+    public Chunk() { locked = false;}
 
     public Chunk(Message m) {
         this(m.fileId, m.chunkNo, m.replicationDegree, m.getBodyBytes());
     }
-
-    // public Chunk(String fileId, int chunkNo) {
-    //     this(fileId, chunkNo, null);
-    // }
 
     public Chunk(String fileId, int chunkNo, int replicationDegree, byte[] chunk) {
         this.fileId = fileId;
@@ -28,7 +25,14 @@ public abstract class Chunk implements Serializable {
         this.chunk = chunk;
         this.replicationDegree = replicationDegree;
         peersAcks = new HashSet<>();
+        locked = false;
     }
+
+    public boolean isLocked() { return locked; }
+
+    public Chunk lock() { this.locked = true; return this;}
+
+    public void unlock() { this.locked = false; }
 
     public void addAck(Integer peerId) {
         peersAcks.add(peerId);
@@ -42,5 +46,13 @@ public abstract class Chunk implements Serializable {
 
     public static String getUniqueId(String fileId, int chunkNo) {
         return fileId + "_" + chunkNo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Chunk that = (Chunk) o;
+        return chunkNo == that.chunkNo && fileId.equals(that.fileId);
     }
 }

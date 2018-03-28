@@ -6,7 +6,6 @@ import java.util.Objects;
 
 public class StoredChunk extends Chunk {
     boolean savedLocally; //true if this peer has a copy of the chunk, false otherwise
-    public transient boolean locked; // true if there is a Worker handling a PUTCHUNK for this chunk
 
     public StoredChunk() { }
 
@@ -18,31 +17,9 @@ public class StoredChunk extends Chunk {
     public StoredChunk(String fileId, int chunkNo, int replicationDegree, byte[] chunk) {
         super(fileId, chunkNo, replicationDegree, chunk);
         savedLocally = false;
-        locked = false;
     }
 
     public boolean isSavedLocally() { return savedLocally; }
 
     public void setSavedLocally(boolean savedLocally) { this.savedLocally = savedLocally; }
-
-    public boolean isLocked() { return locked; }
-
-    public StoredChunk lock() { this.locked = true; return this;}
-
-    public void unlock() { this.locked = false; }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        StoredChunk that = (StoredChunk) o;
-        return chunkNo == that.chunkNo && fileId.equals(that.fileId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(fileId, chunkNo);
-    }
-
 }
