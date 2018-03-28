@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InternalState implements Serializable {
     private static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.ser";
-    private static transient String internalStorage = "storage";
     public static int peerId;
 
     ConcurrentHashMap<String, LocalFile> localFiles; // local files being backed up - file_id => LocalFile
@@ -68,7 +67,7 @@ public class InternalState implements Serializable {
     }
 
     public void saveChunkLocally(StoredChunk chunk, String body) {
-        System.out.println("[InternalState] Added in: " + getChunkPath(chunk.fileId, chunk.chunkNumber));
+        System.out.println("[InternalState]  - Added in: " + getChunkPath(chunk.fileId, chunk.chunkNumber));
         try {
             Path path = Paths.get(getChunkPath(chunk.fileId, chunk.chunkNumber));
             Files.createDirectories(path.getParent());
@@ -102,8 +101,9 @@ public class InternalState implements Serializable {
                 '}';
     }
 
+    // return the path to the chunk in this peer's filesystem
     private String getChunkPath(String fileId, int chunkId) {
-        return internalStorage + "/" + peerId + "/" + fileId + "/" + chunkId;
+        return internalStateFolder  + "/" + fileId + "/" + chunkId;
     }
 
     private static String getDatabaseName() {
