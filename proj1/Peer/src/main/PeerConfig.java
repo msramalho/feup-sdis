@@ -29,7 +29,7 @@ public class PeerConfig {
         id = Integer.parseInt(args[1]);
         loadServiceAccessPoint(args[2]);
         internalState = InternalState.load(id);
-        internalState.display();
+        System.out.println(internalState);
 
         //setup sockets and join group for <mccIP> <mccPort>, <mdbIp> <mdbPort> and <mdrIp> <mdrPort>, respectively
         mcControl = new MulticastSocketC(args[3], Integer.parseInt(args[4]), id, "MCControl", this);

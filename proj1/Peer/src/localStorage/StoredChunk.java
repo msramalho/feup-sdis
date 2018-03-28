@@ -2,12 +2,13 @@ package src.localStorage;
 
 import src.util.Message;
 
-import java.io.Serializable;
 import java.util.Objects;
 
-public class StoredChunk extends Chunk implements Serializable {
+public class StoredChunk extends Chunk {
     boolean savedLocally; //true if this peer has a copy of the chunk, false otherwise
     public transient boolean locked; // true if there is a Worker handling a PUTCHUNK for this chunk
+
+    public StoredChunk() { }
 
     public StoredChunk(Message m) {
         this(m.fileId, m.chunkNo, m.replicationDegree, m.getBodyBytes());
@@ -20,17 +21,15 @@ public class StoredChunk extends Chunk implements Serializable {
         locked = false;
     }
 
-    public void setSavedLocally(boolean savedLocally) {
-        this.savedLocally = savedLocally;
-    }
+    public boolean isSavedLocally() { return savedLocally; }
 
-    public boolean isLocked() {
-        return locked;
-    }
+    public void setSavedLocally(boolean savedLocally) { this.savedLocally = savedLocally; }
 
-    public void setLocked(boolean locked) {
-        this.locked = locked;
-    }
+    public boolean isLocked() { return locked; }
+
+    public StoredChunk lock() { this.locked = true; return this;}
+
+    public void unlock() { this.locked = false; }
 
 
     @Override

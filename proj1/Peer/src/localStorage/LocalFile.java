@@ -8,10 +8,8 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 
-
-public class LocalFile implements Serializable {
+public class LocalFile {
     transient PeerConfig peerConfig;
     public static transient Integer CHUNK_SIZE = 64000;
 

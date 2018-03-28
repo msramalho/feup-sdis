@@ -30,15 +30,6 @@ public class InternalState implements Serializable {
     public static InternalState load(int pId) {
         peerId = pId;
         internalStateFolder = String.format(internalStateFolder, peerId);
-        File directory = new File(internalStateFolder);
-        if (!directory.exists()) directory.mkdir();
-        try {
-            new File(getDatabaseName()).createNewFile(); // create if not exists
-        } catch (IOException e) {
-            System.out.println("[InternalState] - unable to create or load file");
-            e.printStackTrace();
-        }
-
         InternalState is = null;
         try {
             FileInputStream fileIn = new FileInputStream(getDatabaseName());
@@ -46,8 +37,9 @@ public class InternalState implements Serializable {
             is = (InternalState) in.readObject();
             in.close();
             fileIn.close();
-        } catch (Exception i) {
+        } catch (Exception e) {
             System.out.println("[InternalState] - unable to load the 'database' file, may not exist yet");
+            // e.printStackTrace();
         }
         if (is == null) is = new InternalState();
 
@@ -56,6 +48,7 @@ public class InternalState implements Serializable {
 
     public void save() {
         System.out.println("saving " + getDatabaseName());
+        createIfNotExists();
         try {
             FileOutputStream fileOut = new FileOutputStream(getDatabaseName());
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
@@ -68,6 +61,18 @@ public class InternalState implements Serializable {
         }
     }
 
+    private void createIfNotExists() {
+        File directory = new File(internalStateFolder);
+        if (!directory.exists()) directory.mkdir();
+        try {
+            new File(getDatabaseName()).createNewFile(); // create if not exists
+        } catch (IOException e) {
+            System.out.println("[InternalState] - unable to create or load file");
+            e.printStackTrace();
+        }
+
+    }
+
     public void saveChunkLocally(StoredChunk sChunk) {
         System.out.println("[InternalState]  - Adding chunk to: " + getChunkPath(sChunk));
         try {
@@ -75,12 +80,13 @@ public class InternalState implements Serializable {
             Files.createDirectories(path.getParent());
             Files.write(path, sChunk.chunk);
             sChunk.setSavedLocally(true);
-            System.out.println("[InternalState] - chunk " + sChunk.getUniqueId() + " saved successfully" );
+            System.out.println("[InternalState] - chunk " + sChunk.getUniqueId() + " saved successfully");
         } catch (IOException i) {
-            System.out.println("[InternalState] - failed to save chunk " + sChunk.getUniqueId() + " locally" );
+            System.out.println("[InternalState] - failed to save chunk " + sChunk.getUniqueId() + " locally");
             i.printStackTrace();
         }
     }
+
 
     //add or update a given local file information
     public InternalState addLocalChunk(LocalChunk localChunk) {
@@ -96,10 +102,14 @@ public class InternalState implements Serializable {
         return storedChunks.get(StoredChunk.getUniqueId(m.fileId, m.chunkNo));
     }
 
-    public synchronized boolean lockChunk(StoredChunk storedChunk) {
-        if (storedChunks.containsKey(storedChunk.getUniqueId())) return storedChunk.isLocked();
-        storedChunks.put(storedChunk.getUniqueId(), storedChunk);
-        return true;
+    // returns the storedChunk pointer if the chunk can be used and locks it if so, null otherwise (the requester cannot use it)
+    public synchronized StoredChunk lockChunk(Message m) {
+        StoredChunk sChunk = new StoredChunk(m);
+        if (!storedChunks.containsKey(sChunk.getUniqueId()))
+            storedChunks.put(sChunk.getUniqueId(), sChunk);
+        else sChunk = storedChunks.get(sChunk.getUniqueId());
+        if (sChunk.isLocked()) return null;
+        return sChunk.lock(); // can now be used safely
     }
 
 
@@ -107,9 +117,10 @@ public class InternalState implements Serializable {
 
     @Override
     public String toString() {
-        return "InternalState{" +
-                "localChunks=" + localChunks.size() +
-                '}';
+        return "InternalState{\n" +
+                "   localChunks=" + localChunks.size() +
+                "\n   storedChunks=" + storedChunks.size() +
+                "\n}";
     }
 
     // return the path to the chunk in this peer's filesystem
@@ -119,10 +130,6 @@ public class InternalState implements Serializable {
 
     private static String getDatabaseName() {
         return internalStateFolder + "/" + internalStateFilename;
-    }
-
-    public void display() {
-        System.out.println("[InternalState] - " + this.toString());
     }
 
 }

@@ -2,14 +2,17 @@ package src.localStorage;
 
 import src.util.Message;
 
+import java.io.Serializable;
 import java.util.HashSet;
 
-public abstract class Chunk {
+public abstract class Chunk implements Serializable {
     public String fileId; //file fileId sent in the backup request
     public int chunkNo;
     public int replicationDegree;
     public HashSet<Integer> peersAcks; // a set of the IDs of Peers that have saved this chunk
     public transient byte[] chunk; // the chunk bytes for this chunk
+
+    public Chunk() { }
 
     public Chunk(Message m) {
         this(m.fileId, m.chunkNo, m.replicationDegree, m.getBodyBytes());
@@ -33,10 +36,11 @@ public abstract class Chunk {
 
     public int countAcks() {return peersAcks.size();}
 
-    public String getUniqueId(){
+    public String getUniqueId() {
         return StoredChunk.getUniqueId(fileId, chunkNo);
     }
-    public static String getUniqueId(String fileId, int chunkNo){
+
+    public static String getUniqueId(String fileId, int chunkNo) {
         return fileId + "_" + chunkNo;
     }
 }
