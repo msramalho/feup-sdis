@@ -37,6 +37,7 @@ public class Message {
     //<MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
     private void parseMessage(String packetMessage) {
         String[] parts = packetMessage.split("\r\n\r\n", 2); // split only once
+        parts[0] = parts[0].replaceAll("^ +| +$|( )+", "$1"); //the message may have more than one space between field, this cleans it
         String[] args = parts[0].split(" ");
         this.action = args[0];
         this.protocolVersion = args[1];
@@ -68,6 +69,9 @@ public class Message {
         return isPutchunk() || (isStored() && !is.isLocalFile(fileId)) ; //|| isGetChunk() || !(isChunk() && is.isLocalFile(fileId));
     }
 
+    public byte[] getBodyBytes() {
+        return body.getBytes();
+    }
 
     @Override
     public String toString() {
