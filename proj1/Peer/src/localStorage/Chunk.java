@@ -11,9 +11,8 @@ public abstract class Chunk implements Serializable {
     public int replicationDegree;
     public HashSet<Integer> peersAcks; // a set of the IDs of Peers that have saved this chunk
     public transient byte[] chunk; // the chunk bytes for this chunk
-    public transient boolean locked; // true if there is a Worker handling a PUTCHUNK for this chunk
 
-    public Chunk() { locked = false;}
+    public Chunk() { chunk = null;}
 
     public Chunk(Message m) {
         this(m.fileId, m.chunkNo, m.replicationDegree, m.getBodyBytes());
@@ -25,14 +24,7 @@ public abstract class Chunk implements Serializable {
         this.chunk = chunk;
         this.replicationDegree = replicationDegree;
         peersAcks = new HashSet<>();
-        locked = false;
     }
-
-    public boolean isLocked() { return locked; }
-
-    public Chunk lock() { this.locked = true; return this;}
-
-    public void unlock() { this.locked = false; }
 
     public void addAck(Integer peerId) {
         peersAcks.add(peerId);
