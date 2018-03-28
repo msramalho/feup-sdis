@@ -1,28 +1,49 @@
 package src.localStorage;
 
+import src.util.Message;
+
 import java.io.Serializable;
+import java.util.Objects;
 
-public class StoredChunk implements Serializable {
-    String fileId; //file fileId sent in the backup request
-    int chunkNumber;
-    String path;
-    public int repliesToPutchunk;
+public class StoredChunk extends Chunk implements Serializable {
+    boolean savedLocally; //true if this peer has a copy of the chunk, false otherwise
+    public transient boolean locked; // true if there is a Worker handling a PUTCHUNK for this chunk
 
-    public StoredChunk(String fileId, int chunkNumber) {
-        this.fileId = fileId;
-        this.chunkNumber = chunkNumber;
-        repliesToPutchunk = 0;
-        path = null;
+    public StoredChunk(Message m) {
+        this(m.fileId, m.chunkNo, m.replicationDegree, m.getBodyBytes());
     }
 
-    // saves the chunk into the local file system
-    public void saveChunk(){
-        repliesToPutchunk++;
-    	//...
-    	//this.path = "/.../chunk"
+
+    public StoredChunk(String fileId, int chunkNo, int replicationDegree, byte[] chunk) {
+        super(fileId, chunkNo, replicationDegree, chunk);
+        savedLocally = false;
+        locked = false;
     }
 
-    // public String readChunkFromMemory(){
-        //ler ficheiro do path e devolver o conteúdo
-    // }
+    public void setSavedLocally(boolean savedLocally) {
+        this.savedLocally = savedLocally;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StoredChunk that = (StoredChunk) o;
+        return chunkNo == that.chunkNo && fileId.equals(that.fileId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fileId, chunkNo);
+    }
+
 }

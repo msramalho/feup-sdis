@@ -18,13 +18,11 @@ public class LocalFile implements Serializable {
     public String fileId;
     String filename; // relative filename in the current file system
     public Integer replicationDegree; //desired replication degree
-    public ArrayList<LocalChunk> chunks; //the chunks in this file
 
     public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
         this.peerConfig = peerConfig;
         this.filename = filename;
         this.replicationDegree = replicationDegree;
-        this.chunks = new ArrayList<>();
         loadFileId();
     }
 
@@ -51,8 +49,7 @@ public class LocalFile implements Serializable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            LocalChunk localChunk = new LocalChunk(this, i, temporaryChunk);
-            chunks.add(localChunk);
+            LocalChunk localChunk = new LocalChunk(fileId, i, replicationDegree, temporaryChunk);
             BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk);
             this.peerConfig.threadPool.submit(bcWorker);
             i++;
