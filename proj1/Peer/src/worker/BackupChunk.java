@@ -2,7 +2,7 @@ package src.worker;
 
 import src.localStorage.LocalChunk;
 import src.main.PeerConfig;
-
+import src.util.Message;
 
 //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
 public class BackupChunk implements Runnable {
@@ -25,8 +25,9 @@ public class BackupChunk implements Runnable {
             peerConfig.internalState.addLocalChunk(lChunk);
         } else return; // this local chunk is already being sent by the current peer, abort
 
+
         //create message to send and convert to byte array
-        String message = String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo, lChunk.replicationDegree, new String(localChunk.chunk));
+        byte[] message = Message.createMessage(String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n", peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo, lChunk.replicationDegree), lChunk.chunk);
 
         //wait for STORED replies
         int i;

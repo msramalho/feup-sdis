@@ -6,39 +6,35 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 public abstract class Chunk implements Serializable {
-    public String fileId; //file fileId sent in the backup request
-    public int chunkNo;
-    public int replicationDegree;
-    public HashSet<Integer> peersAcks; // a set of the IDs of Peers that have saved this chunk
-    public transient byte[] chunk; // the chunk bytes for this chunk
+    public String fileId = null; //file fileId sent in the backup request
+    public int chunkNo = -1;
+    public int replicationDegree = 0;
+    public HashSet<Integer> peersAcks = new HashSet<>(); // a set of the IDs of Peers that have saved this chunk
+    public transient byte[] chunk = null; // the chunk bytes for this chunk
 
-    public Chunk() { chunk = null;}
+    public Chunk() {}
 
     public Chunk(Message m) {
-        this(m.fileId, m.chunkNo, m.replicationDegree, m.getBodyBytes());
+        this(m.fileId, m.chunkNo, m.replicationDegree, m.body);
+        System.out.println(String.format("before: %d bytes, after: %d bytes", m.body.length, m.body.length));
     }
+
+    public Chunk(String fileId, int chunkNo) {this(fileId, chunkNo, 0, null);}
 
     public Chunk(String fileId, int chunkNo, int replicationDegree, byte[] chunk) {
         this.fileId = fileId;
         this.chunkNo = chunkNo;
         this.chunk = chunk;
         this.replicationDegree = replicationDegree;
-        peersAcks = new HashSet<>();
     }
 
-    public void addAck(Integer peerId) {
-        peersAcks.add(peerId);
-    }
+    public void addAck(Integer peerId) { peersAcks.add(peerId); }
 
     public int countAcks() {return peersAcks.size();}
 
-    public String getUniqueId() {
-        return StoredChunk.getUniqueId(fileId, chunkNo);
-    }
+    public String getUniqueId() { return StoredChunk.getUniqueId(fileId, chunkNo); }
 
-    public static String getUniqueId(String fileId, int chunkNo) {
-        return fileId + "_" + chunkNo;
-    }
+    public static String getUniqueId(String fileId, int chunkNo) { return fileId + "_" + chunkNo; }
 
     @Override
     public boolean equals(Object o) {

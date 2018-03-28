@@ -1,10 +1,8 @@
 package src.util;
 
-import src.localStorage.InternalState;
-import src.localStorage.LocalFile;
-
-import static java.lang.Integer.min;
-import static java.lang.Math.max;
+import java.net.DatagramPacket;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /**
  * parses a packet string into a queryable object
@@ -16,28 +14,23 @@ public class Message {
     public String fileId;
     public int chunkNo;
     public int replicationDegree;
-    public String body;
+    public byte[] body = new byte[0];
 
-    public Message(String action, String fileId, int chunkNo) {
-        this.action = action;
-        this.fileId = fileId;
-        this.chunkNo = chunkNo;
-    }
-
-    public Message(byte[] packetMessageBytes) {
-        String packetMessage = new String(packetMessageBytes).trim();
+    public Message(DatagramPacket packet) {
         try {
-            this.parseMessage(packetMessage);
+            this.parseMessage(packet);
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println(String.format("[Message] - not a valid message (%d bytes): %s...ignoring", packetMessage.length(), packetMessage));
+            System.err.println(String.format("[Message] - not a valid message (%d bytes)...ignoring", packet.getData()));
         }
     }
 
     //<MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
-    private void parseMessage(String packetMessage) {
+    private void parseMessage(DatagramPacket packet) {
+        String packetMessage = new String(packet.getData(), StandardCharsets.UTF_8).substring(0, packet.getLength());
         String[] parts = packetMessage.split("\r\n\r\n", 2); // split only once
-        parts[0] = parts[0].replaceAll("^ +| +$|( )+", "$1"); //the message may have more than one space between field, this cleans it
+        int headerBytes = parts[0].length();
+        parts[0] = parts[0].replaceAll("^ +| +$|( )+", "$1").trim(); //the message may have more than one space between field, this cleans it
         String[] args = parts[0].split(" ");
         this.action = args[0];
         this.protocolVersion = args[1];
@@ -47,7 +40,8 @@ public class Message {
         this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
         this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
 
-        if (parts.length == 2) this.body = parts[1].substring(1, min(parts[1].length(), LocalFile.CHUNK_SIZE + 1)); //save body if it exists (64kB chunks)
+        // retrieve the bytes received that belong to the body
+        if (parts.length == 2) this.body =Arrays.copyOfRange(packet.getData(), headerBytes + 4, packet.getLength());//save body if it exists (64kB chunks)
     }
 
     public boolean isOwnMessage(int selfId) {
@@ -56,12 +50,21 @@ public class Message {
 
     public boolean isPutchunk() { return this.action.equals("PUTCHUNK"); }
 
-    public boolean isGetchunk() { return this.action.equals("GETCHUNK"); }
+    public boolean isGetChunk() { return this.action.equals("GETCHUNK"); }
 
     public boolean isStored() { return this.action.equals("STORED"); }
 
-    public byte[] getBodyBytes() {
-        return body.getBytes();
+    public boolean isChunk() { return this.action.equals("CHUNK"); }
+
+    public static byte[] createMessage(String header) { return Message.createMessage(header, new byte[0]); }
+
+    public static byte[] createMessage(String header, byte[] body) {
+        byte[] head = header.getBytes();
+        byte[] combined = new byte[head.length + body.length];
+
+        System.arraycopy(head, 0, combined, 0, head.length);
+        System.arraycopy(body, 0, combined, head.length, body.length);
+        return combined;
     }
 
     @Override
@@ -92,5 +95,4 @@ public class Message {
                 fileId.equals(message.fileId) &&
                 (chunkNo == message.chunkNo || chunkNo == -1);
     }
-
 }

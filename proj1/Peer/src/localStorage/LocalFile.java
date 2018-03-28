@@ -2,20 +2,27 @@ package src.localStorage;
 
 import src.worker.BackupChunk;
 import src.main.PeerConfig;
+import src.worker.RestoreChunk;
 
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import static java.lang.Integer.min;
 
 public class LocalFile {
-    transient PeerConfig peerConfig;
-    public static transient Integer CHUNK_SIZE = 64000;
+    PeerConfig peerConfig;
+    public static Integer CHUNK_SIZE = 64000;
 
     public String fileId;
     String filename; // relative filename in the current file system
     public Integer replicationDegree; //desired replication degree
+    ArrayList<LocalChunk> chunks;
 
     public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
         this.peerConfig = peerConfig;
@@ -30,20 +37,24 @@ public class LocalFile {
         // read from the filesystem into an input stream
         File file = new File(this.filename);
         int file_size = (int) file.length();
-        InputStream inStream = null;
+        FileInputStream inStream = null;
         try {
-            inStream = new BufferedInputStream(new FileInputStream(file));
+            inStream = new FileInputStream(file);
         } catch (FileNotFoundException e) {
             System.out.println("[LocalFile] - unable to read file: " + this.filename);
             e.printStackTrace();
         }
 
+
         // split file and add to worker thread
         int i = 0, totalBytesRead = 0;
         while (totalBytesRead < file_size) {
-            byte[] temporaryChunk = new byte[LocalFile.CHUNK_SIZE]; //Temporary Byte Array
+            int chunkSize = min(LocalFile.CHUNK_SIZE, (file_size - totalBytesRead));
+            System.out.println(String.format("Chunk %d has %d bytes", i, chunkSize));
+            byte[] temporaryChunk = new byte[chunkSize]; //Temporary Byte Array
             try {
-                inStream.read(temporaryChunk, 0, LocalFile.CHUNK_SIZE);
+                totalBytesRead += inStream.read(temporaryChunk, 0, chunkSize);
+                System.out.println(String.format("Chunk %d has %d totalBytesRead", i, totalBytesRead));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -51,9 +62,46 @@ public class LocalFile {
             BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk);
             this.peerConfig.threadPool.submit(bcWorker);
             i++;
-
-            totalBytesRead += LocalFile.CHUNK_SIZE;
         }
+        try {
+            inStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void reconstructFile() throws IOException, ExecutionException, InterruptedException {
+        System.out.println("[LocalFile] - reconstructing file: " + filename);
+        File file = new File(this.filename);
+        int file_size = (int) file.length();
+        int numChunks = (int) Math.ceil(file_size / CHUNK_SIZE) + 1;
+
+        ArrayList<Future<LocalChunk>> futureChunks = new ArrayList<>();
+        chunks = new ArrayList<>();
+
+        for (int i = 0; i < numChunks; i++) {
+            futureChunks.add((Future<LocalChunk>) peerConfig.threadPool.submit(new RestoreChunk(peerConfig, new LocalChunk(fileId, i))));
+            chunks.add(null);
+        }
+
+        for (Future<LocalChunk> fChunk : futureChunks) {
+            LocalChunk lChunk;
+            lChunk = fChunk.get();
+            if (lChunk.chunk == null)
+                System.out.println("[LocalFile] - Chunk " + lChunk.chunkNo + " could not be retrieved from peers");
+            chunks.set(lChunk.chunkNo, lChunk);
+        }
+
+        String path = InternalState.internalStateFolder + "/restored_" + filename;
+        File f = new File(path);
+        f.getParentFile().mkdirs();
+        f.createNewFile();
+        FileOutputStream fos = new FileOutputStream(f, true); // true means append
+        for (int i = 0; i < chunks.size(); i++)
+            if (chunks.get(i) != null && chunks.get(i).chunk != null)
+                fos.write(chunks.get(i).chunk);
+        fos.close();
+        System.out.println("[LocalFile] - File reconstruction completed: " + path);
     }
 
     private void loadFileId() {

@@ -2,22 +2,14 @@ package src.localStorage;
 
 import src.util.Message;
 
-import java.util.Objects;
-
 public class StoredChunk extends Chunk {
-    boolean savedLocally; //true if this peer has a copy of the chunk, false otherwise
+    boolean savedLocally = false; //true if this peer has a copy of the chunk, false otherwise
+    public boolean inProcess = false; //true if this Chunk is being handled in a GETCHUNK received message
+    public boolean gotAnswer = false; // true if the current peer saw a CHUNK message while sleeping
 
     public StoredChunk() { }
 
-    public StoredChunk(Message m) {
-        this(m.fileId, m.chunkNo, m.replicationDegree, m.getBodyBytes());
-    }
-
-
-    public StoredChunk(String fileId, int chunkNo, int replicationDegree, byte[] chunk) {
-        super(fileId, chunkNo, replicationDegree, chunk);
-        savedLocally = false;
-    }
+    public StoredChunk(Message message) {super(message);}
 
     public boolean isSavedLocally() { return savedLocally; }
 

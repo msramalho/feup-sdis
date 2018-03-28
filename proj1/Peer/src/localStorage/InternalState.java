@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InternalState implements Serializable {
-    private static transient String internalStateFolder = "internal_state_peer_%d";
+    public static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.ser";
     public static int peerId;
 
@@ -101,9 +101,14 @@ public class InternalState implements Serializable {
         try {
             Path path = Paths.get(getChunkPath(sChunk));
             Files.createDirectories(path.getParent());
-            Files.write(path, sChunk.chunk);
+
+            FileOutputStream fos = new FileOutputStream(getChunkPath(sChunk));
+            fos.write(sChunk.chunk);
+            fos.close();
+
             sChunk.setSavedLocally(true);
-            System.out.println("[InternalState] - chunk " + sChunk.chunkNo + " saved successfully");
+            sChunk.addAck(peerId);
+            // System.out.println("[InternalState] - chunk " + sChunk.chunkNo + " saved successfully");
         } catch (IOException i) {
             System.out.println("[InternalState] - failed to save chunk " + sChunk.getUniqueId() + " locally");
             i.printStackTrace();

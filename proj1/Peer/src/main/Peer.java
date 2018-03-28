@@ -1,10 +1,12 @@
 package src.main;
 
-
 import src.localStorage.LocalFile;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+
 public class Peer {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException, IOException, ExecutionException {
         PeerConfig peerConfig;
 
         try {
@@ -24,9 +26,9 @@ public class Peer {
             LocalFile localFile = new LocalFile(args[9], Integer.parseInt(args[10]), peerConfig);
             localFile.splitFile();
 
-            //peerConfig.mcControl.send("GETCHUNK");
-            //esperar pelo CHUNK respetivo
-            // quando chegar, devolve a chunk pedida
+            //sleeping and reconstructing the file
+            Thread.sleep(5000); //wait for 2 seconds before sending the getchunk
+            localFile.reconstructFile();
         }
 
     }

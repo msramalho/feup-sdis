@@ -18,11 +18,13 @@ public class Dispatcher implements Runnable {
 
         // dispatch the message to the proper protocol handler
         if (message.isPutchunk())
-            p = new PutChunk(this);
+            p = new P_PutChunk(this);
         else if (message.isStored())
-            p = new Stored(this);
-        // else if (message.isGetChunk())
-        //     p = new GetChunk()
+            p = new P_Stored(this);
+        else if (message.isGetChunk())
+            p = new P_GetChunk(this);
+        else if (message.isChunk())
+            p = new P_Chunk(this);
 
 
         if (p != null) p.run();
