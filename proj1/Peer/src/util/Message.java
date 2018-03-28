@@ -58,16 +58,7 @@ public class Message {
 
     public boolean isGetchunk() { return this.action.equals("GETCHUNK"); }
 
-    public boolean isStored() { return this.equals("STORED"); }
-
-    public boolean needsDispacher(InternalState is) {
-        // is Putchunk -> needsDispacher
-        // is Stored and is not about one of my files -> needsDispacher
-        // is Stored and is about one of my files -> goes to queue for BackUpChunk
-        //TODO: make chunk for my requests add the CHUNK message to the queue and not to the dispatcher (return false here)
-        //TODO: make GETCHUNK call the dispacher (return true here)
-        return isPutchunk() || (isStored() && !is.isLocalFile(fileId)) ; //|| isGetChunk() || !(isChunk() && is.isLocalFile(fileId));
-    }
+    public boolean isStored() { return this.action.equals("STORED"); }
 
     public byte[] getBodyBytes() {
         return body.getBytes();
