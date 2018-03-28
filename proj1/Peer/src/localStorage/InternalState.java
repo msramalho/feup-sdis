@@ -21,6 +21,8 @@ public class InternalState implements Serializable {
         this.storedChunks = new ConcurrentHashMap<>();
     }
 
+    //------------------------------ file system funcions above
+
     /**
      * receives the current peerId and loads the serialized values from the correspondent folder. If there is no database (file or folder) a new and empty one is created
      *
@@ -47,7 +49,7 @@ public class InternalState implements Serializable {
     }
 
     public void save() {
-        System.out.println("saving " + getDatabaseName());
+        System.out.println("[InternalState] - saving " + getDatabaseName());
         createIfNotExists();
         try {
             FileOutputStream fileOut = new FileOutputStream(getDatabaseName());
@@ -73,47 +75,60 @@ public class InternalState implements Serializable {
 
     }
 
+    //------------------------------ local and stored chunks
+
+    // return the local chunk or null if it does not exist
+    public Chunk getLocalChunk(Message m) { return localChunks.get(Chunk.getUniqueId(m.fileId, m.chunkNo)); }
+
+    // return the stored chunk or null if it does not exist
+    public StoredChunk getStoredChunk(Message m) { return storedChunks.get(Chunk.getUniqueId(m.fileId, m.chunkNo)); }
+
+    //add or update a given local chunk information
+    public InternalState addLocalChunk(LocalChunk localChunk) {
+        localChunks.put(localChunk.getUniqueId(), localChunk);
+        return this;
+    }
+
+    //add or update a given stored chunk  information
+    public InternalState addStoredChunk(StoredChunk storedChunk) {
+        storedChunks.put(storedChunk.getUniqueId(), storedChunk);
+        return this;
+    }
+
     public void saveChunkLocally(StoredChunk sChunk) {
-        System.out.println("[InternalState]  - Adding chunk to: " + getChunkPath(sChunk));
         try {
             Path path = Paths.get(getChunkPath(sChunk));
             Files.createDirectories(path.getParent());
             Files.write(path, sChunk.chunk);
             sChunk.setSavedLocally(true);
-            System.out.println("[InternalState] - chunk " + sChunk.getUniqueId() + " saved successfully");
+            System.out.println("[InternalState] - chunk " + sChunk.chunkNo + " saved successfully");
         } catch (IOException i) {
             System.out.println("[InternalState] - failed to save chunk " + sChunk.getUniqueId() + " locally");
             i.printStackTrace();
         }
     }
 
-
-    //add or update a given local file information
-    public InternalState addLocalChunk(LocalChunk localChunk) {
-        localChunks.put(localChunk.getUniqueId(), localChunk);
-        return this;
-    }
-
-    public boolean isLocalFile(String fileId) {
-        return localChunks.containsKey(fileId);
-    }
-
-    public StoredChunk getStoredChunk(Message m) {
-        return storedChunks.get(StoredChunk.getUniqueId(m.fileId, m.chunkNo));
+    // returns the storedChunk pointer if the chunk can be used and locks it if so, null otherwise (the requester cannot use it)
+    public synchronized LocalChunk tryToLockLocalChunk(LocalChunk lChunk) {
+        // LocalChunk lChunk = new LocalChunk(m);
+        if (!localChunks.containsKey(lChunk.getUniqueId()))
+            localChunks.put(lChunk.getUniqueId(), lChunk);
+        else lChunk = localChunks.get(lChunk.getUniqueId());
+        if (lChunk.isLocked()) return null;
+        return (LocalChunk) lChunk.lock(); // can now be used safely
     }
 
     // returns the storedChunk pointer if the chunk can be used and locks it if so, null otherwise (the requester cannot use it)
-    public synchronized StoredChunk lockChunk(Message m) {
+    public synchronized StoredChunk tryToLockStoredChunk(Message m) {
         StoredChunk sChunk = new StoredChunk(m);
         if (!storedChunks.containsKey(sChunk.getUniqueId()))
             storedChunks.put(sChunk.getUniqueId(), sChunk);
         else sChunk = storedChunks.get(sChunk.getUniqueId());
         if (sChunk.isLocked()) return null;
-        return sChunk.lock(); // can now be used safely
+        return (StoredChunk) sChunk.lock(); // can now be used safely
     }
 
-
-    //------------------------------
+    //------------------------------ util functions
 
     @Override
     public String toString() {

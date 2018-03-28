@@ -7,26 +7,19 @@ public class Peer {
     public static void main(String[] args) {
         PeerConfig peerConfig;
 
-        //TODO: local database next
-        System.out.println("TODO: local database is next");
-
         try {
             peerConfig = new PeerConfig(args);//create peer
-            System.out.println("[Peer] - Hello, this is peer with id: " + peerConfig.id);
         } catch (Exception e) {
             System.err.println("[Peer] - cannot parse cmd line args");
             System.out.println(e.getMessage());
             return;
         }
 
-        //InternalState internalState = new InternalState(peerConfig);
-        //internalState.saveStorage();
-
+        System.out.println("[Peer] - Hello, this is peer with id: " + peerConfig.id);
         peerConfig.initialize();
 
         //initiator peer, receives <filename> <replicationFactor>x
         if (args.length == 11) {
-
             // Calling LocalFile for testing
             LocalFile localFile = new LocalFile(args[9], Integer.parseInt(args[10]), peerConfig);
             localFile.splitFile();

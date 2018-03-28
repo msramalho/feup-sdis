@@ -23,7 +23,7 @@ public class PeerConfig {
         if (args.length < 7)
             throw new Exception("Usage: <protocolVersion> <peerId> <serviceAccessPoint> <mccIP> <mccPort> <mdbIp> <mdbPort> <mdrIp> <mdrPort>");
 
-        threadPool = Executors.newFixedThreadPool(16);//creating a pool of 5 threads
+        threadPool = Executors.newFixedThreadPool(32);//creating a pool of 32 threads
 
         protocolVersion = args[0];
         id = Integer.parseInt(args[1]);
