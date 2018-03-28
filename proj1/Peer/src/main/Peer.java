@@ -12,6 +12,7 @@ public class Peer {
 
         try {
             peerConfig = new PeerConfig(args);//create peer
+            System.out.println("[Peer] - Hello, this is peer with id: " + peerConfig.id);
         } catch (Exception e) {
             System.err.println("[Peer] - cannot parse cmd line args");
             System.out.println(e.getMessage());

@@ -26,7 +26,7 @@ public class BackupChunk implements Runnable {
 
         //wait for STORED replies
         int replies = 0, i;
-        for (i = 1; i <= BackupChunk.PUTCHUNK_ATTEMPTS && replies < localChunk.file.replicationDegree; i++) {
+        for (i = 0; i < BackupChunk.PUTCHUNK_ATTEMPTS && replies < localChunk.file.replicationDegree; i++) {
             peerConfig.mcBackup.send(message); //create and send message through multicast
             // System.out.println("[BackupChunk] - sent chunk: " + localChunk.chunkNo + "(" + message.length() + " bytes): " + message.substring(0, 25));
 
