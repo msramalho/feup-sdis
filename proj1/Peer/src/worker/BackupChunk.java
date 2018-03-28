@@ -2,10 +2,6 @@ package src.worker;
 
 import src.localStorage.LocalChunk;
 import src.main.PeerConfig;
-import src.util.Message;
-
-import java.io.IOException;
-import java.net.*;
 
 
 //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
@@ -21,39 +17,30 @@ public class BackupChunk implements Runnable {
 
     @Override
     public void run() {
+        LocalChunk lChunk = peerConfig.internalState.getLocalChunk(localChunk.getUniqueId());
+
+        // try to read the chunk from the internal state, and add it if it is not there.
+        if (lChunk == null) {
+            lChunk = localChunk;
+            peerConfig.internalState.addLocalChunk(lChunk);
+        } else return; // this local chunk is already being sent by the current peer, abort
+
         //create message to send and convert to byte array
-        String message = String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, localChunk.file.fileId, localChunk.chunkNo, localChunk.file.replicationDegree, new String(localChunk.chunk));
+        String message = String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n %s", peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo, lChunk.replicationDegree, new String(localChunk.chunk));
 
         //wait for STORED replies
-        int replies = 0, i;
-        for (i = 0; i < BackupChunk.PUTCHUNK_ATTEMPTS && replies < localChunk.file.replicationDegree; i++) {
+        int i;
+        for (i = 0; i < BackupChunk.PUTCHUNK_ATTEMPTS && lChunk.countAcks() < lChunk.replicationDegree; i++) {
             peerConfig.mcBackup.send(message); //create and send message through multicast
-            // System.out.println("[BackupChunk] - sent chunk: " + localChunk.chunkNo + "(" + message.length() + " bytes): " + message.substring(0, 25));
-
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
-            System.out.println("[BackupChunk] - waiting for chunk " + localChunk.chunkNo + " " + wait + "ms (got " + replies + "/" + localChunk.file.replicationDegree + " replies)");
+
+            System.out.println("[BackupChunk] - waiting for chunk " + lChunk.chunkNo + " " + wait + "ms (got " + lChunk.countAcks() + "/" + lChunk.replicationDegree + " replies)");
+
             try { Thread.sleep(wait); } catch (InterruptedException e) {}
-            //TODO: verificar se as replies não são repetidas
-            replies += this.getRepliesWithTimeout();
-        }
-        System.out.println("[BackupChunk] - backup completed after " + (i - 1) + " attempts, with " + replies + "/" + localChunk.file.replicationDegree + " replies");
-
-        peerConfig.internalState.addLocalFile(localChunk.file).save();
-        //TODO: commit the number of replies to the database
-    }
-
-    // count the number of STORED messages in the queue for the current chunk
-    private int getRepliesWithTimeout() {
-        int replies = 0;
-        Message expectedMessage = new Message("STORED", localChunk.file.fileId, localChunk.chunkNo);
-
-        for (Message m: peerConfig.mcControl.mcQueue) {
-            System.out.println(m);
         }
 
-        while (peerConfig.mcControl.mcQueue.remove(expectedMessage))
-            replies++;
+        System.out.println("[BackupChunk] - backup completed after " + (i) + " attempt(s), with " + lChunk.countAcks() + "/" + localChunk.replicationDegree + " replies");
 
-        return replies;
+        peerConfig.internalState.save();
     }
 }
