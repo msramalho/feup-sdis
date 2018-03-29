@@ -13,7 +13,7 @@ public class P_GetChunk extends Protocol {
         StoredChunk sChunk = d.peerConfig.internalState.getStoredChunk(d.message);
 
         if (sChunk == null || !sChunk.isSavedLocally()) {
-            System.out.println("[Protocol:GetChunk]: I don't have the request chunk:" + new StoredChunk(d.message).getShortId());
+            System.out.println("[Protocol:GetChunk]: I don't have the requested chunk:" + new StoredChunk(d.message).getShortId());
             return;
         }
 

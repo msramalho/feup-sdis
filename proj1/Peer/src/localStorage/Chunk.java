@@ -17,7 +17,6 @@ public abstract class Chunk implements Serializable {
 
     public Chunk(Message m) {
         this(m.fileId, m.chunkNo, m.replicationDegree, m.body);
-        System.out.println(String.format("before: %d bytes, after: %d bytes", m.body.length, m.body.length));
     }
 
     public Chunk(String fileId, int chunkNo) {this(fileId, chunkNo, 0, null);}

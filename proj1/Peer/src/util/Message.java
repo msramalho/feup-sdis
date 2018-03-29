@@ -1,7 +1,6 @@
 package src.util;
 
 import java.net.DatagramPacket;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -27,7 +26,8 @@ public class Message {
 
     //<MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
     private void parseMessage(DatagramPacket packet) {
-        String packetMessage = new String(packet.getData(), StandardCharsets.UTF_8).substring(0, packet.getLength());
+        String packetMessage = new String(packet.getData());
+        packetMessage = packetMessage.substring(0, Math.min(packet.getLength(), packetMessage.length()));
         String[] parts = packetMessage.split("\r\n\r\n", 2); // split only once
         int headerBytes = parts[0].length();
         parts[0] = parts[0].replaceAll("^ +| +$|( )+", "$1").trim(); //the message may have more than one space between field, this cleans it
@@ -57,6 +57,8 @@ public class Message {
     public boolean isChunk() { return this.action.equals("CHUNK"); }
 
     public boolean isDelete() { return this.action.equals("DELETE"); }
+
+    public boolean isRemoved() { return this.action.equals("REMOVED"); }
 
     public static byte[] createMessage(String header) { return Message.createMessage(header, new byte[0]); }
 

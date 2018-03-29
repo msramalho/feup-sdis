@@ -63,7 +63,7 @@ public class LocalFile {
                 e.printStackTrace();
             }
             LocalChunk localChunk = new LocalChunk(fileId, i, replicationDegree, temporaryChunk);
-            BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk);
+            BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk, true);
             this.peerConfig.threadPool.submit(bcWorker);
             i++;
         }

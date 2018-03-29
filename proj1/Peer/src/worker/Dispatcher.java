@@ -27,6 +27,8 @@ public class Dispatcher implements Runnable {
             p = new P_Chunk(this);
         else if (message.isDelete())
             p = new P_Delete(this);
+        else if (message.isRemoved())
+            p = new P_Removed(this);
 
 
         if (p != null) p.run();

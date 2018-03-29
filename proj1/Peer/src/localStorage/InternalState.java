@@ -1,17 +1,24 @@
 package src.localStorage;
 
+import src.main.PeerConfig;
 import src.util.Message;
+import src.worker.RemoveChunk;
 
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InternalState implements Serializable {
     public static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.ser";
+    public transient long occupiedSpace; // bytes that this peer can occupy in the file system
+    public long allowedSpace = (long) (16 * Math.pow(2, 20)); // bytes that this peer can occupy in the file system
+    // public long allowedSpace = (long) (1 * Math.pow(2, 17)); // bytes that this peer can occupy in the file system
+
     public static int peerId;
 
     public ConcurrentHashMap<String, LocalChunk> localChunks; // local files being backed up - file_id => LocalFile
@@ -46,6 +53,9 @@ public class InternalState implements Serializable {
         }
         if (is == null) is = new InternalState();
 
+        is.createIfNotExists();//create internal state folder if it does not exist
+        is.updateOccupiedSpace();//read the current occupied space
+
         return is;
     }
 
@@ -68,14 +78,14 @@ public class InternalState implements Serializable {
         // try to delete all the chunks that failed to delete contents on disc when DELETE came
         for (StoredChunk sChunk : storedChunks.values())
             if (sChunk.deleted == true && sChunk.savedLocally)
-                deleteStoredChunk(sChunk);
-        //TODO: remove empty folder
+                deleteStoredChunk(sChunk, true);
         removeEmptyFolders(internalStateFolder);
     }
 
     //recursively remove empty folders inside a folder
     private long removeEmptyFolders(String dir) {
         File f = new File(dir);
+        if (!f.exists()) return 0;
         String listFiles[] = f.list();
         long totalSize = 0;
         for (String file : listFiles) {
@@ -103,6 +113,41 @@ public class InternalState implements Serializable {
 
     }
 
+    private void updateOccupiedSpace() { occupiedSpace = InternalState.folderSize(new File(internalStateFolder)); }
+
+    private long getFileSpace(String filename) { return new File(filename).length(); }
+
+    public static long folderSize(File directory) {
+        long length = 0;
+        for (File file : directory.listFiles()) {
+            if (file.isFile())
+                length += file.length();
+            else
+                length += folderSize(file);
+        }
+        return length;
+    }
+
+    public long availableSpace() { updateOccupiedSpace(); return allowedSpace - occupiedSpace; }
+
+    public boolean freeMemory(PeerConfig peerConfig, long requiredMemory) {
+        ArrayList<RemoveChunk> tasks = new ArrayList<>();
+        long canFree = 0;
+        for (StoredChunk sChunk : storedChunks.values()) {
+            //This chunk is replicated more times than it should
+            if (sChunk.savedLocally && sChunk.peersAcks.size() > sChunk.replicationDegree) {
+                tasks.add(new RemoveChunk(peerConfig, sChunk));
+                canFree += getFileSpace(getChunkPath(sChunk));
+                if (canFree >= requiredMemory) break;
+            }
+        }
+        if (canFree < requiredMemory) return false;//unable to free the desired space
+
+        //if the desired space can be freed, do it asynchronously and return false
+        for (RemoveChunk rChunk : tasks)
+            peerConfig.threadPool.submit(rChunk);
+        return true;
+    }
     //------------------------------ local and stored chunks
 
     // return the local chunk or null if it does not exist
@@ -159,7 +204,7 @@ public class InternalState implements Serializable {
         }
     }
 
-    public void deleteStoredChunk(StoredChunk sChunk) {
+    public void deleteStoredChunk(StoredChunk sChunk, boolean dueToDELETE) {
         File file = new File(getChunkPath(sChunk));
         if (file.delete()) {
             System.out.println("[InternalState] - chunk: " + sChunk.getShortId() + " deleted");
@@ -168,7 +213,7 @@ public class InternalState implements Serializable {
         } else {
             System.out.println("[InternalState] - unable to delete chunk: " + sChunk.getUniqueId());
         }
-        sChunk.deleted = true;
+        sChunk.deleted = dueToDELETE;
         save();
     }
 
@@ -179,6 +224,7 @@ public class InternalState implements Serializable {
         return "InternalState{\n" +
                 "   localChunks(" + localChunks.size() + ")=" + localChunks.values() +
                 "\n   storedChunks(" + storedChunks.size() + ")=" + storedChunks.values() +
+                "\n   occupied: " + occupiedSpace + "/" + allowedSpace + " = " + Math.round(100 * occupiedSpace / allowedSpace) + "%" +
                 "}";
     }
 

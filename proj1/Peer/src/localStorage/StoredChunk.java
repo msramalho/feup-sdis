@@ -5,6 +5,7 @@ import src.util.Message;
 import java.io.Serializable;
 
 public class StoredChunk extends Chunk implements Serializable {
+    public transient boolean receivedPutChunk = false;
     boolean savedLocally = false; //true if this peer has a copy of the chunk, false otherwise
     public boolean inProcess = false; //true if this Chunk is being handled in a GETCHUNK received message
     public boolean gotAnswer = false; // true if the current peer saw a CHUNK message while sleeping
