@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InternalState implements Serializable {
     public static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.ser";
-    public transient long occupiedSpace; // bytes that this peer can occupy in the file system
+    public long occupiedSpace; // bytes that this peer can occupy in the file system
     public long allowedSpace = (long) (16 * Math.pow(2, 20)); // bytes that this peer can occupy in the file system
     // public long allowedSpace = (long) (1 * Math.pow(2, 17)); // bytes that this peer can occupy in the file system
 
@@ -71,6 +71,7 @@ public class InternalState implements Serializable {
         } catch (IOException i) {
             i.printStackTrace();
         }
+        updateOccupiedSpace();
         // System.out.println("[InternalState] - saved: " + this);
     }
 
@@ -227,7 +228,6 @@ public class InternalState implements Serializable {
                 if (deleteStoredChunk(storedChunk, false))
                     storedChunk.savedLocally = false;
 
-        updateOccupiedSpace();
         save();
         System.out.println("[InternalState] - allowedSpace after: " + allowedSpace);
     }
