@@ -26,9 +26,8 @@ public class P_PutChunk extends Protocol {
             else return;
         }
 
-
-        // random sleep - this peer will update the number of STORED replies to storedChunk while sleeping
-        this.sleepRandom();
+        // random (considering available space) sleep - this peer will update the number of STORED replies to storedChunk while sleeping
+        sleepRandomConsiderDiskSpace();
 
         //conclude the store process
         System.out.println(String.format("[Protocol:PutChunk] - perceived replication degree for chunk %s: %d/%d", sChunk.getShortId(), sChunk.countAcks(), sChunk.replicationDegree));
