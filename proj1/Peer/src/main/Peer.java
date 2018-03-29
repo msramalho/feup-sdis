@@ -1,18 +1,18 @@
 package src.main;
 
-import src.localStorage.LocalFile;
-
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-public class Peer implements InitiatorPeer {
-    public static void main(String[] args) {
-        PeerConfig peerConfig;
+import src.localStorage.InternalState;
+import src.localStorage.LocalFile;
 
+public class Peer implements InitiatorPeer {
+    static LocalFile localFile;
+    static PeerConfig peerConfig;
+
+    public static void main(String[] args) {
         try {
             peerConfig = new PeerConfig(args);//create peer
         } catch (Exception e) {
@@ -26,7 +26,7 @@ public class Peer implements InitiatorPeer {
 
             InitiatorPeer stub = (InitiatorPeer) UnicastRemoteObject.exportObject(initPeer, 0);
             // Bind the remote object's stub in the registry
-            Registry registry = LocateRegistry.getRegistry();
+            Registry registry = LocateRegistry.getRegistry("localhost");
             registry.rebind(Integer.toString(peerConfig.id), stub);
             System.err.println("Server ready");
         } catch (Exception e) {
@@ -34,23 +34,8 @@ public class Peer implements InitiatorPeer {
             e.printStackTrace();
         }
 
-
         System.out.println("[Peer] - Hello, this is peer with id: " + peerConfig.id);
         peerConfig.initialize();
-
-        /*//initiator peer, receives <filename> <replicationFactor>
-        if (args.length == 11) {
-            // Calling LocalFile for testing
-            LocalFile localFile = new LocalFile(args[9], Integer.parseInt(args[10]), peerConfig);
-            localFile.splitFile();
-
-            //sleeping and reconstructing the file
-            // Thread.sleep(5000); //wait for 5 seconds before sending the getchunk
-            // localFile.reconstructFile();
-
-            // Thread.sleep(3000); //wait for 5 seconds before sending the getchunk
-            // localFile.deleteFile();
-        }*/
 
         // maintain proper state of internal database every 10s
         while (true) {
@@ -59,34 +44,47 @@ public class Peer implements InitiatorPeer {
         }
     }
 
+
     @Override
-    public void backup(String file, int ack) throws RemoteException {
-        //TODO: SEND MESSAGE TO MULTICAST GROUP HERE
-        System.out.println("[BACKUP]");
+    public void backup(String pathname, int replicationDegree) throws RemoteException {
+        System.out.println("[Peer_RMI] - BACKUP started");
+        localFile = new LocalFile(pathname, replicationDegree, peerConfig);
+        localFile.backup();
     }
 
     @Override
-    public void restore(String file) throws RemoteException {
-        //TODO: SEND MESSAGE TO MULTICAST GROUP HERE
-        System.out.println("[RESTORE]");
+    public void restore(String pathname) throws RemoteException {
+        System.out.println("[Peer_RMI] - RESTORE started");
+        localFile = new LocalFile(pathname, 0, peerConfig);
+        try {
+            localFile.reconstructFile();
+        } catch (Exception e) {
+            System.out.println("[Peer_RMI] - Unable to reconstruct file:");
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void delete(String file) throws RemoteException {
-        //TODO: SEND MESSAGE TO MULTICAST GROUP HERE
-        System.out.println("[DELETE]");
+    public void delete(String pathname) throws RemoteException {
+        System.out.println("[Peer_RMI] - DELETE started");
+        localFile = new LocalFile(pathname, 0, peerConfig);
+        localFile.deleteFile();
     }
 
     @Override
-    public void reclaim(int rec) throws RemoteException {
-        //TODO: SEND MESSAGE TO MULTICAST GROUP HERE
-        System.out.println("[RECLAIM]");
+    public void reclaim(int maxDiskSpace) throws RemoteException {
+        System.out.println("[Peer_RMI] - RECLAIM started");
+        peerConfig.internalState.reclaimKBytes(maxDiskSpace);
     }
 
     @Override
-    public void state() throws RemoteException {
-        //TODO: SEND MESSAGE TO MULTICAST GROUP HERE
-        System.out.println("[STATE]");
+    public InternalState state() throws RemoteException {
+        System.out.println("[Peer_RMI] - STATE started");
+        //TODO: complete with section 4. Client interface: Retrieve local service state information
+        //TODO: do so by completing: addMissingInfoForClient
+        InternalState is = peerConfig.internalState;
+        is.addMissingInfoForClient();
+        return is;
     }
 
 }

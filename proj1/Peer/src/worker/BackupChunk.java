@@ -20,8 +20,7 @@ public class BackupChunk implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("BACKING UP..................");
-        Chunk c = null;
+        Chunk c;
         if (!isLocalChunk) { // this corresponds to sending PUTCHUNK after receiving REMOVED
             c = initialChunk;
         } else { // this corresponds to a request to Backup a chunk from the TestApp or InitiatorPeer

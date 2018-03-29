@@ -44,8 +44,7 @@ public class PeerConfig {
      * @throws UnknownHostException when Inet4Address.getByName fails for the given IP/hostname
      */
     protected void loadServiceAccessPoint(String sap) throws UnknownHostException {
-        //TODO: check if localhost is the way to go
-        String hostname = "localhost";
+        String hostname = "localhost"; // if no other is given
         if (sap.contains(":")) {//ip and port
             String sapParts[] = sap.split(":");
             hostname = sapParts[0];

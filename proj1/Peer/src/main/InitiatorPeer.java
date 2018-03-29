@@ -1,17 +1,19 @@
 package src.main;
 
+import src.localStorage.InternalState;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface InitiatorPeer extends Remote {
 
-    void backup(String file, int ack) throws RemoteException;
+    void backup(String pathname, int replicationDegree) throws RemoteException;
 
-    void restore(String file) throws RemoteException;
+    void restore(String pathname) throws RemoteException;
 
-    void delete(String file) throws RemoteException;
+    void delete(String pathname) throws RemoteException;
 
-    void reclaim(int rec) throws RemoteException;
+    void reclaim(int maxDiskSpace) throws RemoteException;
 
-    void state() throws RemoteException;
+    InternalState state() throws RemoteException;
 }

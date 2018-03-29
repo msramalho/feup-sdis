@@ -1,6 +1,5 @@
 package src.localStorage;
 
-import src.util.Message;
 import src.worker.BackupChunk;
 import src.main.PeerConfig;
 import src.worker.DeleteChunk;
@@ -37,7 +36,7 @@ public class LocalFile {
         numChunks = (int) Math.ceil(file_size / CHUNK_SIZE) + 1;
     }
 
-    public void splitFile() {
+    public void backup() {
         System.out.println("[LocalFile] - splitting file: " + filename);
 
         // read from the filesystem into an input stream

@@ -1,5 +1,6 @@
 package src.client;
 
+import src.localStorage.InternalState;
 import src.main.*;
 
 import java.rmi.RemoteException;
@@ -25,8 +26,8 @@ public class TestApp {
             case "BACKUP":
                 try {
                     String file = args[2];
-                    int ack = Integer.parseInt(args[3]);
-                    stub.backup(file, ack);
+                    int replicationDegree = Integer.parseInt(args[3]);
+                    stub.backup(file, replicationDegree);
                 } catch (RemoteException e) {
                     System.out.println(e.getMessage());
                 }
@@ -50,8 +51,8 @@ public class TestApp {
 
             case "RECLAIM":
                 try {
-                    int rec = Integer.parseInt(args[2]);
-                    stub.reclaim(rec);
+                    int maxDiskSpace = Integer.parseInt(args[2]);
+                    stub.reclaim(maxDiskSpace);
                 } catch (RemoteException e) {
                     System.out.println(e.getMessage());
                 }
@@ -59,7 +60,8 @@ public class TestApp {
 
             case "STATE":
                 try {
-                    stub.state();
+                    InternalState state = stub.state();
+                    System.out.println(state);
                 } catch (RemoteException e) {
                     System.out.println(e.getMessage());
                 }

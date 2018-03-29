@@ -204,27 +204,46 @@ public class InternalState implements Serializable {
         }
     }
 
-    public void deleteStoredChunk(StoredChunk sChunk, boolean dueToDELETE) {
+    public boolean deleteStoredChunk(StoredChunk sChunk, boolean dueToDELETE) {
+        boolean res = false;
         File file = new File(getChunkPath(sChunk));
         if (file.delete()) {
             System.out.println("[InternalState] - chunk: " + sChunk.getShortId() + " deleted");
             sChunk.savedLocally = false;
             sChunk.peersAcks.remove(peerId);
+            res = true;
         } else {
             System.out.println("[InternalState] - unable to delete chunk: " + sChunk.getUniqueId());
         }
         sChunk.deleted = dueToDELETE;
         save();
+        return res;
     }
 
+    public void reclaimKBytes(int maxDiskSpace) {
+        allowedSpace = maxDiskSpace * 1000;
+        if (maxDiskSpace == 0) // remove all files
+            for (StoredChunk storedChunk : storedChunks.values())
+                if (deleteStoredChunk(storedChunk, false))
+                    storedChunk.savedLocally = false;
+
+        updateOccupiedSpace();
+        save();
+        System.out.println("[InternalState] - allowedSpace after: " + allowedSpace);
+    }
+
+    public void addMissingInfoForClient() {
+
+    }
     //------------------------------ util functions
 
     @Override
     public String toString() {
+        String spacePercent = allowedSpace == 0 ? "inf" : String.valueOf(Math.round(100 * occupiedSpace / allowedSpace));
         return "InternalState{\n" +
                 "   localChunks(" + localChunks.size() + ")=" + localChunks.values() +
                 "\n   storedChunks(" + storedChunks.size() + ")=" + storedChunks.values() +
-                "\n   occupied: " + occupiedSpace + "/" + allowedSpace + " = " + Math.round(100 * occupiedSpace / allowedSpace) + "%" +
+                "\n   occupied: " + occupiedSpace + "/" + allowedSpace + " = " + spacePercent + "%" +
                 "}";
     }
 
