@@ -7,6 +7,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import src.localStorage.InternalState;
 import src.localStorage.LocalFile;
+import src.util.Message;
 
 public class Peer implements InitiatorPeer {
     static LocalFile localFile;
@@ -21,6 +22,7 @@ public class Peer implements InitiatorPeer {
             return;
         }
 
+        peerConfig.mcControl.send(Message.createMessage("HELLO %d...."))
         try {
             Peer initPeer = new Peer();
 

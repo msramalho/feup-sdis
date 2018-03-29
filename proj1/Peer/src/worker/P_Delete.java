@@ -1,5 +1,7 @@
 package src.worker;
 
+import src.util.Message;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 public class P_Delete extends Protocol {
@@ -10,9 +12,10 @@ public class P_Delete extends Protocol {
         AtomicReference<Integer> count = new AtomicReference<>(0);
         d.peerConfig.internalState.storedChunks.forEach(1, (k, v) -> {
             // System.out.println(String.format("[P_Delete] - checking %s against %s", v.fileId.substring(0, 10), d.message.fileId.substring(0, 10)));
-            if (v.fileId.equals(d.message.fileId) && v.isSavedLocally()) {
+            if (v.fileId.equals(d.message.fileId) && v.isSavedLocally()) { // found a chunk to delete
                 d.peerConfig.internalState.deleteStoredChunk(v, true);
                 count.getAndSet(count.get() + 1);
+                d.peerConfig.mcControl.send(Message.createMessage("DELETED..."))
             }
         });
         System.out.println(String.format("[Protocol:Delete] - deleted %d chunk(s)", count.get()));
