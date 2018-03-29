@@ -19,26 +19,33 @@ public class BackupChunk implements Runnable {
     public void run() {
         LocalChunk lChunk = peerConfig.internalState.getLocalChunk(localChunk.getUniqueId());
 
+
         // try to read the chunk from the internal state, and add it if it is not there.
         if (lChunk == null) {
             lChunk = localChunk;
             peerConfig.internalState.addLocalChunk(lChunk);
-        } else return; // this local chunk is already being sent by the current peer, abort
-
+        } else {
+            System.out.println("[BackupChunk] - chunk: " + lChunk + " is already backed up");
+            lChunk.chunk = localChunk.chunk;
+            // return;
+            // this local chunk is already being sent by the current peer, abort} and has enough copies - could have if (lChunk.replicationDegree <= lChunk.peersAcks.size()), but nothing is said
+        }
 
         //create message to send and convert to byte array
-        byte[] message = Message.createMessage(String.format("PUTCHUNK %s %d %s %d %d \r\n\r\n", peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo, lChunk.replicationDegree), lChunk.chunk);
+        byte[] message = Message.createMessage(String.format("PUTCHUNK %s %d %s %d %d\r\n\r\n", peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo, lChunk.replicationDegree), lChunk.chunk);
 
         //wait for STORED replies
-        int i;
-        for (i = 0; i < BackupChunk.PUTCHUNK_ATTEMPTS && lChunk.countAcks() < lChunk.replicationDegree; i++) {
-            peerConfig.mcBackup.send(message); //create and send message through multicast
+        int i = 0;
+        do {
+            peerConfig.mcBackup.send(message); // send message through multicast
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
 
             System.out.println("[BackupChunk] - waiting for chunk " + lChunk.chunkNo + " " + wait + "ms (got " + lChunk.countAcks() + "/" + lChunk.replicationDegree + " replies)");
 
             try { Thread.sleep(wait); } catch (InterruptedException e) {}
-        }
+            i++;
+        } while (i < BackupChunk.PUTCHUNK_ATTEMPTS && lChunk.countAcks() < lChunk.replicationDegree);
+
 
         System.out.println("[BackupChunk] - backup completed after " + (i) + " attempt(s), with " + lChunk.countAcks() + "/" + localChunk.replicationDegree + " replies");
 

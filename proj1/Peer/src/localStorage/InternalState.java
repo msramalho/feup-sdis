@@ -3,6 +3,7 @@ package src.localStorage;
 import src.util.Message;
 
 import java.io.*;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,8 +14,8 @@ public class InternalState implements Serializable {
     private static transient String internalStateFilename = "database.ser";
     public static int peerId;
 
-    ConcurrentHashMap<String, LocalChunk> localChunks; // local files being backed up - file_id => LocalFile
-    ConcurrentHashMap<String, StoredChunk> storedChunks; // others' chunks - <file_id>_<chunkNo> => StoredChunk
+    public ConcurrentHashMap<String, LocalChunk> localChunks; // local files being backed up - file_id => LocalFile
+    public ConcurrentHashMap<String, StoredChunk> storedChunks; // others' chunks - <file_id>_<chunkNo> => StoredChunk
 
     public InternalState() {
         this.localChunks = new ConcurrentHashMap<>();
@@ -48,8 +49,7 @@ public class InternalState implements Serializable {
         return is;
     }
 
-    public void save() {
-        System.out.println("[InternalState] - saving " + getDatabaseName());
+    public synchronized void save() {
         createIfNotExists();
         try {
             FileOutputStream fileOut = new FileOutputStream(getDatabaseName());
@@ -61,6 +61,15 @@ public class InternalState implements Serializable {
         } catch (IOException i) {
             i.printStackTrace();
         }
+        System.out.println("[InternalState] - saved: " + this);
+    }
+
+    public void asyncChecks() { // works like a one-time garbage collector
+        // try to delete all the chunks that failed to delete contents on disc when DELETE came
+        for (StoredChunk sChunk : storedChunks.values())
+            if (sChunk.deleted == true && sChunk.savedLocally)
+                deleteStoredChunk(sChunk);
+        //TODO: remove empty folder
     }
 
     private void createIfNotExists() {
@@ -83,7 +92,22 @@ public class InternalState implements Serializable {
     public LocalChunk getLocalChunk(String uniqueId) { return localChunks.get(uniqueId); }
 
     // return the stored chunk or null if it does not exist
-    public StoredChunk getStoredChunk(Message m) { return storedChunks.get(Chunk.getUniqueId(m.fileId, m.chunkNo)); }
+    public synchronized StoredChunk getStoredChunk(Message m) {
+        StoredChunk sChunk = storedChunks.get(Chunk.getUniqueId(m.fileId, m.chunkNo));
+        if (sChunk != null && sChunk.savedLocally && sChunk.chunk == null) {
+            System.out.println(String.format("[InternalState] - reading (%s) from memory", sChunk.getUniqueId()));
+            Path p = FileSystems.getDefault().getPath("", getChunkPath(sChunk));
+            try {
+                sChunk.chunk = Files.readAllBytes(p);
+            } catch (IOException e) {
+                System.out.println(String.format("[InternalState] - unable to read chunk from memory (%s) this chunk will be marked as unsaved locally", sChunk.getUniqueId()));
+                sChunk.savedLocally = false;
+                save();
+                e.printStackTrace();
+            }
+        }
+        return sChunk;
+    }
 
     //add or update a given local chunk information
     public InternalState addLocalChunk(LocalChunk localChunk) {
@@ -115,15 +139,27 @@ public class InternalState implements Serializable {
         }
     }
 
+    public void deleteStoredChunk(StoredChunk sChunk) {
+        File file = new File(getChunkPath(sChunk));
+        if (file.delete()) {
+            System.out.println("[InternalState] - chunk: " + sChunk.getUniqueId() + " deleted");
+            sChunk.savedLocally = false;
+            sChunk.peersAcks.remove(peerId);
+        } else {
+            System.out.println("[InternalState] - unable to delete chunk: " + sChunk.getUniqueId());
+        }
+        sChunk.deleted = true;
+        save();
+    }
 
     //------------------------------ util functions
 
     @Override
     public String toString() {
         return "InternalState{\n" +
-                "   localChunks=" + localChunks.size() +
-                "\n   storedChunks=" + storedChunks.size() +
-                "\n}";
+                "   localChunks(" + localChunks.size() + ")=" + localChunks.values() +
+                "\n   storedChunks(" + storedChunks.size() + ")=" + storedChunks.values() +
+                "}";
     }
 
     // return the path to the chunk in this peer's filesystem

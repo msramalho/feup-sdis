@@ -24,7 +24,7 @@ public class P_GetChunk extends Protocol {
 
         if (!sChunk.gotAnswer) {
             //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
-            d.peerConfig.mcRestore.send(Message.createMessage(String.format("CHUNK %s %d %s %d \r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo), sChunk.chunk));
+            d.peerConfig.mcRestore.send(Message.createMessage(String.format("CHUNK %s %d %s %d\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo), sChunk.chunk));
         }
 
 

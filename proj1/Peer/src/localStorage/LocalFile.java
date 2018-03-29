@@ -1,7 +1,9 @@
 package src.localStorage;
 
+import src.util.Message;
 import src.worker.BackupChunk;
 import src.main.PeerConfig;
+import src.worker.DeleteChunk;
 import src.worker.RestoreChunk;
 
 import java.io.*;
@@ -23,12 +25,16 @@ public class LocalFile {
     String filename; // relative filename in the current file system
     public Integer replicationDegree; //desired replication degree
     ArrayList<LocalChunk> chunks;
+    public int numChunks;
 
     public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
         this.peerConfig = peerConfig;
         this.filename = filename;
         this.replicationDegree = replicationDegree;
         loadFileId();
+        File file = new File(this.filename);
+        int file_size = (int) file.length();
+        numChunks = (int) Math.ceil(file_size / CHUNK_SIZE) + 1;
     }
 
     public void splitFile() {
@@ -50,11 +56,9 @@ public class LocalFile {
         int i = 0, totalBytesRead = 0;
         while (totalBytesRead < file_size) {
             int chunkSize = min(LocalFile.CHUNK_SIZE, (file_size - totalBytesRead));
-            System.out.println(String.format("Chunk %d has %d bytes", i, chunkSize));
             byte[] temporaryChunk = new byte[chunkSize]; //Temporary Byte Array
             try {
                 totalBytesRead += inStream.read(temporaryChunk, 0, chunkSize);
-                System.out.println(String.format("Chunk %d has %d totalBytesRead", i, totalBytesRead));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -72,9 +76,6 @@ public class LocalFile {
 
     public void reconstructFile() throws IOException, ExecutionException, InterruptedException {
         System.out.println("[LocalFile] - reconstructing file: " + filename);
-        File file = new File(this.filename);
-        int file_size = (int) file.length();
-        int numChunks = (int) Math.ceil(file_size / CHUNK_SIZE) + 1;
 
         ArrayList<Future<LocalChunk>> futureChunks = new ArrayList<>();
         chunks = new ArrayList<>();
@@ -103,6 +104,13 @@ public class LocalFile {
         fos.close();
         System.out.println("[LocalFile] - File reconstruction completed: " + path);
     }
+
+    public void deleteFile(){
+        for (int i = 0; i < numChunks; i++) {
+            peerConfig.threadPool.submit(new DeleteChunk(peerConfig, new LocalChunk(fileId, i)));
+        }
+    }
+
 
     private void loadFileId() {
         //TODO: use file metadata and/or maybe content instead of just filename to generate the unique fileId/hash

@@ -13,7 +13,7 @@ public class Peer {
             peerConfig = new PeerConfig(args);//create peer
         } catch (Exception e) {
             System.err.println("[Peer] - cannot parse cmd line args");
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             return;
         }
 
@@ -27,9 +27,14 @@ public class Peer {
             localFile.splitFile();
 
             //sleeping and reconstructing the file
-            Thread.sleep(5000); //wait for 2 seconds before sending the getchunk
+            Thread.sleep(5000); //wait for 5 seconds before sending the getchunk
             localFile.reconstructFile();
+
+            Thread.sleep(3000); //wait for 5 seconds before sending the getchunk
+            localFile.deleteFile();
         }
 
+        // maintain proper state of internal database
+        peerConfig.internalState.asyncChecks();
     }
 }

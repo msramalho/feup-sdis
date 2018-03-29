@@ -9,6 +9,7 @@ public abstract class Chunk implements Serializable {
     public String fileId = null; //file fileId sent in the backup request
     public int chunkNo = -1;
     public int replicationDegree = 0;
+    public boolean deleted = false;
     public HashSet<Integer> peersAcks = new HashSet<>(); // a set of the IDs of Peers that have saved this chunk
     public transient byte[] chunk = null; // the chunk bytes for this chunk
 
@@ -42,5 +43,17 @@ public abstract class Chunk implements Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         Chunk that = (Chunk) o;
         return chunkNo == that.chunkNo && fileId.equals(that.fileId);
+    }
+
+
+    @Override
+    public String toString() {
+        return "StoredChunk{" +
+                "fileId='" + fileId.substring(0, 10) + '\'' +
+                ", chunkNo=" + chunkNo +
+                ", deleted=" + deleted +
+                ", replicationDegree=" + replicationDegree +
+                ", peersAcks= (" + peersAcks.size() + ")" + peersAcks +
+                '}';
     }
 }

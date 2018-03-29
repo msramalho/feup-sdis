@@ -1,6 +1,8 @@
 package src.localStorage;
 
-public class LocalChunk extends Chunk {
+import java.io.Serializable;
+
+public class LocalChunk extends Chunk implements Serializable {
     public LocalChunk(String fileId, int chunkNo) {
         super(fileId, chunkNo);
     }

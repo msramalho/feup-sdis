@@ -20,9 +20,10 @@ public class P_Stored extends Protocol {
         // if not, it is about a never-heard-off chunk, so it is not local, add as new (not locally saved) P_Stored P_Chunk
         if (chunk == null) {
             chunk = new StoredChunk(d.message);
-            d.peerConfig.internalState.addStoredChunk((StoredChunk) chunk);
+            d.peerConfig.internalState.addStoredChunk((StoredChunk) chunk).save();
         }
 
         chunk.addAck(d.message.senderId);
+        d.peerConfig.internalState.save();
     }
 }

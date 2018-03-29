@@ -41,7 +41,7 @@ public class Message {
         this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
 
         // retrieve the bytes received that belong to the body
-        if (parts.length == 2) this.body =Arrays.copyOfRange(packet.getData(), headerBytes + 4, packet.getLength());//save body if it exists (64kB chunks)
+        if (parts.length == 2) this.body = Arrays.copyOfRange(packet.getData(), headerBytes + 4, packet.getLength());//save body if it exists (64kB chunks)
     }
 
     public boolean isOwnMessage(int selfId) {
@@ -55,6 +55,8 @@ public class Message {
     public boolean isStored() { return this.action.equals("STORED"); }
 
     public boolean isChunk() { return this.action.equals("CHUNK"); }
+
+    public boolean isDelete() { return this.action.equals("DELETE"); }
 
     public static byte[] createMessage(String header) { return Message.createMessage(header, new byte[0]); }
 
@@ -95,4 +97,5 @@ public class Message {
                 fileId.equals(message.fileId) &&
                 (chunkNo == message.chunkNo || chunkNo == -1);
     }
+
 }
