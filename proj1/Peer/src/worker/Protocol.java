@@ -19,7 +19,6 @@ public abstract class Protocol {
     public void sleepRandomConsiderDiskSpace() {
         int percentOccupied = (int) (100 * (d.peerConfig.internalState.occupiedSpace / d.peerConfig.internalState.allowedSpace));
         percentOccupied = Math.min(percentOccupied, 100); // if memory exceeds 100%
-        System.out.println(String.format("[Protocol:%9s] - percentOccupied %d = min %d ms", d.message.action, percentOccupied, 4 * percentOccupied));
         sleepRandom(4 * percentOccupied);
     }
 
