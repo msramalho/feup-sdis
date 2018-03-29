@@ -91,8 +91,10 @@ public class LocalFile {
         for (Future<LocalChunk> fChunk : futureChunks) {
             LocalChunk lChunk;
             lChunk = fChunk.get();
-            if (lChunk.chunk == null)
-                System.out.println("[LocalFile] - Chunk " + lChunk.chunkNo + " could not be retrieved from peers");
+            if (lChunk.chunk == null){
+                System.out.println("[LocalFile] - Chunk " + lChunk.chunkNo + " could not be retrieved from peers...aborting");
+                return;
+            }
             chunks.set(lChunk.chunkNo, lChunk);
         }
 
