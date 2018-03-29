@@ -25,14 +25,24 @@ JAVAARGS="-cp .:./bin/ src.client.TestApp"
 
 if [ $ACTION = "1" ]; then
     java $JAVAARGS $PEERID BACKUP $FILENAME $OPT
+elif [ $ACTION = "1e" ]; then
+    java $JAVAARGS $PEERID BACKUPENH $FILENAME $OPT
 elif [ $ACTION = "2" ]; then
     java $JAVAARGS $PEERID RESTORE $FILENAME
+elif [ $ACTION = "2e" ]; then
+    java $JAVAARGS $PEERID RESTOREENH $FILENAME
 elif [ $ACTION = "3" ]; then
     java $JAVAARGS $PEERID DELETE $FILENAME
+elif [ $ACTION = "3e" ]; then
+    java $JAVAARGS $PEERID DELETEENH $FILENAME
 elif [ $ACTION = "4" ]; then
     java $JAVAARGS $PEERID RECLAIM $OPT
+elif [ $ACTION = "4e" ]; then
+    java $JAVAARGS $PEERID RECLAIMENH $OPT
 elif [ $ACTION = "5" ]; then
     java $JAVAARGS $PEERID STATE
+elif [ $ACTION = "e5" ]; then
+    java $JAVAARGS $PEERID STATEENH
 else
     echo Invalid action $ACTION must be 1-5
 fi
