@@ -15,5 +15,7 @@ public interface InitiatorPeer extends Remote {
 
     void reclaim(int maxDiskSpace) throws RemoteException;
 
+    void updateProtocolVersion(String newVersion) throws RemoteException;
+
     InternalState state() throws RemoteException;
 }
