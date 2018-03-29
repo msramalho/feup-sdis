@@ -9,7 +9,10 @@ public class P_PutChunk extends Protocol {
 
     @Override
     public void run() {
-
+        if (d.message.body.length == 0) {
+            System.out.println("received chunk with length 0, the last");
+            return;
+        }
         // try to read the chunk from the internal state, and add it if it is not there
         StoredChunk sChunk = d.peerConfig.internalState.getStoredChunk(d.message);
         if (sChunk == null) {

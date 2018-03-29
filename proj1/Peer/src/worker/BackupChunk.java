@@ -36,6 +36,7 @@ public class BackupChunk implements Runnable {
                 // return;
                 // this local chunk is already being sent by the current peer, abort} and has enough copies - could have if (lChunk.replicationDegree <= lChunk.peersAcks.size()), but nothing is said
             }
+            peerConfig.internalState.save();
         }
 
         //create message to send and convert to byte array
@@ -54,7 +55,5 @@ public class BackupChunk implements Runnable {
         } while (i < BackupChunk.PUTCHUNK_ATTEMPTS && c.countAcks() < c.replicationDegree);
 
         System.out.println("[BackupChunk] - backup completed after " + (i) + " attempt(s), with " + c.countAcks() + "/" + initialChunk.replicationDegree + " replies");
-
-        peerConfig.internalState.save();
     }
 }
