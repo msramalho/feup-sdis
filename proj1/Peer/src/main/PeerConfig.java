@@ -1,6 +1,5 @@
 package src.main;
 
-
 import src.localStorage.InternalState;
 import src.util.MulticastSocketC;
 
@@ -61,4 +60,6 @@ public class PeerConfig {
         (new Thread(this.mcBackup)).start();
         (new Thread(this.mcRestore)).start();
     }
+
+    public boolean isEnhanced() { return protocolVersion != "1.0"; }
 }
