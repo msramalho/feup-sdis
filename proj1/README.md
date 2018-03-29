@@ -21,3 +21,6 @@ Project 1 -- Distributed Backup Service
     * `sh testApp.sh largePenguin.jpg 1 3` - on peer `1`, start action `3` (DELETE) of file `largePenguin.jpg`
     * `sh testApp.sh largePenguin.jpg 1 4 0` - on peer `1`, start action `4` (RECLAIM) with `0` KBytes
     * `sh testApp.sh largePenguin.jpg 1 5` - on peer `1`, start action `5` (STATE)
+
+#### NOTE
+If you append an `e` to the testApph.sh action, this will instead call the enhanced version of the subprotocol, if it exists, or the default if it doesn't: * `sh testApp.sh largePenguin.jpg 1 2e` - on peer `1`, start action `2e` (RESTOREENH) of file `largePenguin.jpg` (uses TCP btw)
