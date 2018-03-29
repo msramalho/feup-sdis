@@ -2,7 +2,7 @@ package src.localStorage;
 
 import src.worker.BackupChunk;
 import src.main.PeerConfig;
-import src.worker.DeleteChunk;
+import src.worker.DeleteFile;
 import src.worker.RestoreChunk;
 
 import java.io.*;
@@ -105,7 +105,7 @@ public class LocalFile {
     }
 
     public void deleteFile(){
-        peerConfig.threadPool.submit(new DeleteChunk(peerConfig, new LocalChunk(fileId, -2)));
+        peerConfig.threadPool.submit(new DeleteFile(peerConfig, new LocalChunk(fileId, -2)));
     }
 
 

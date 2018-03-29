@@ -4,12 +4,12 @@ import src.localStorage.LocalChunk;
 import src.main.PeerConfig;
 import src.util.Message;
 
-public class DeleteChunk implements Runnable {
+public class DeleteFile implements Runnable {
     // private static int DELETE_ATTEMPTS = 5;
     private PeerConfig peerConfig;
     private LocalChunk localChunk;
 
-    public DeleteChunk(PeerConfig peerConfig, LocalChunk localChunk) {
+    public DeleteFile(PeerConfig peerConfig, LocalChunk localChunk) {
         this.peerConfig = peerConfig;
         this.localChunk = localChunk;
     }
