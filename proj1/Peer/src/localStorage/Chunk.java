@@ -37,6 +37,10 @@ public abstract class Chunk implements Serializable {
 
     public static String getUniqueId(String fileId, int chunkNo) { return fileId + "_" + chunkNo; }
 
+    public String getShortId() {
+        return fileId.substring(0, 10) + "_" + chunkNo;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -56,4 +60,5 @@ public abstract class Chunk implements Serializable {
                 ", peersAcks= (" + peersAcks.size() + ")" + peersAcks +
                 '}';
     }
+
 }

@@ -106,9 +106,7 @@ public class LocalFile {
     }
 
     public void deleteFile(){
-        for (int i = 0; i < numChunks; i++) {
-            peerConfig.threadPool.submit(new DeleteChunk(peerConfig, new LocalChunk(fileId, i)));
-        }
+        peerConfig.threadPool.submit(new DeleteChunk(peerConfig, new LocalChunk(fileId, -2)));
     }
 
 

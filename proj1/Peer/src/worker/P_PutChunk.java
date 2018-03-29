@@ -1,14 +1,7 @@
 package src.worker;
 
-import src.localStorage.InternalState;
 import src.localStorage.StoredChunk;
 import src.util.Message;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 
 public class P_PutChunk extends Protocol {
 
@@ -24,15 +17,17 @@ public class P_PutChunk extends Protocol {
         } else {
             // this putchunk is already handled by the current peer, abort
             // if the current peer already has a copy of this chunk, send a STORED anyway (UDP is unreliable)
-            if (sChunk.isSavedLocally()) sendStored(sChunk);
-            return;
+            if (sChunk.isSavedLocally() && !sChunk.deleted) {
+                sendStored(sChunk); return;
+            } else if (sChunk.deleted && sChunk.countAcks() < sChunk.replicationDegree) // save previously deleted chunk
+                sChunk.chunk = d.message.body;
         }
 
         // random sleep - this peer will update the number of STORED replies to storedChunk while sleeping
         this.sleepRandom();
 
         //conclude the store process
-        System.out.println(String.format("[P_PutChunk] - perceived replication degree: %d/%d", sChunk.countAcks(), sChunk.replicationDegree));
+        System.out.println(String.format("[P_PutChunk] - perceived replication degree for chunk %s: %d/%d", sChunk.getShortId(), sChunk.countAcks(), sChunk.replicationDegree));
         if (sChunk.countAcks() < sChunk.replicationDegree) {
             d.peerConfig.internalState.saveChunkLocally(sChunk);
             sendStored(sChunk);

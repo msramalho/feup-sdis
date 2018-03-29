@@ -12,7 +12,10 @@ public class P_GetChunk extends Protocol {
         // if i have this chunk in storage and locally saved, send it if no one else does it before me
         StoredChunk sChunk = d.peerConfig.internalState.getStoredChunk(d.message);
 
-        if (sChunk == null || !sChunk.isSavedLocally()) return;
+        if (sChunk == null || !sChunk.isSavedLocally()) {
+            System.out.println("[Protocol:GetChunk]: I don't have the request chunk:" + new StoredChunk(d.message).getShortId());
+            return;
+        }
 
         if (sChunk.inProcess) return;
 

@@ -20,7 +20,7 @@ public class Peer {
         System.out.println("[Peer] - Hello, this is peer with id: " + peerConfig.id);
         peerConfig.initialize();
 
-        //initiator peer, receives <filename> <replicationFactor>x
+        //initiator peer, receives <filename> <replicationFactor>
         if (args.length == 11) {
             // Calling LocalFile for testing
             LocalFile localFile = new LocalFile(args[9], Integer.parseInt(args[10]), peerConfig);
@@ -34,7 +34,10 @@ public class Peer {
             localFile.deleteFile();
         }
 
-        // maintain proper state of internal database
-        peerConfig.internalState.asyncChecks();
+        // maintain proper state of internal database every 10s
+        while (true) {
+            try { Thread.sleep(10000); } catch (InterruptedException e) {}
+            peerConfig.internalState.asyncChecks();
+        }
     }
 }

@@ -61,7 +61,7 @@ public class InternalState implements Serializable {
         } catch (IOException i) {
             i.printStackTrace();
         }
-        System.out.println("[InternalState] - saved: " + this);
+        // System.out.println("[InternalState] - saved: " + this);
     }
 
     public void asyncChecks() { // works like a one-time garbage collector
@@ -70,6 +70,25 @@ public class InternalState implements Serializable {
             if (sChunk.deleted == true && sChunk.savedLocally)
                 deleteStoredChunk(sChunk);
         //TODO: remove empty folder
+        removeEmptyFolders(internalStateFolder);
+    }
+
+    //recursively remove empty folders inside a folder
+    private long removeEmptyFolders(String dir) {
+        File f = new File(dir);
+        String listFiles[] = f.list();
+        long totalSize = 0;
+        for (String file : listFiles) {
+            File folder = new File(dir + "/" + file);
+            if (folder.isDirectory())
+                totalSize += removeEmptyFolders(folder.getAbsolutePath());
+            else
+                totalSize += folder.length();
+        }
+
+        if (totalSize == 0) f.delete();
+
+        return totalSize;
     }
 
     private void createIfNotExists() {
@@ -95,7 +114,7 @@ public class InternalState implements Serializable {
     public synchronized StoredChunk getStoredChunk(Message m) {
         StoredChunk sChunk = storedChunks.get(Chunk.getUniqueId(m.fileId, m.chunkNo));
         if (sChunk != null && sChunk.savedLocally && sChunk.chunk == null) {
-            System.out.println(String.format("[InternalState] - reading (%s) from memory", sChunk.getUniqueId()));
+            System.out.println(String.format("[InternalState] - reading (%s) from memory", sChunk.getShortId()));
             Path p = FileSystems.getDefault().getPath("", getChunkPath(sChunk));
             try {
                 sChunk.chunk = Files.readAllBytes(p);
@@ -131,6 +150,7 @@ public class InternalState implements Serializable {
             fos.close();
 
             sChunk.setSavedLocally(true);
+            sChunk.deleted = false;
             sChunk.addAck(peerId);
             // System.out.println("[InternalState] - chunk " + sChunk.chunkNo + " saved successfully");
         } catch (IOException i) {
@@ -142,7 +162,7 @@ public class InternalState implements Serializable {
     public void deleteStoredChunk(StoredChunk sChunk) {
         File file = new File(getChunkPath(sChunk));
         if (file.delete()) {
-            System.out.println("[InternalState] - chunk: " + sChunk.getUniqueId() + " deleted");
+            System.out.println("[InternalState] - chunk: " + sChunk.getShortId() + " deleted");
             sChunk.savedLocally = false;
             sChunk.peersAcks.remove(peerId);
         } else {

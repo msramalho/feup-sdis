@@ -24,6 +24,7 @@ public class StoredChunk extends Chunk implements Serializable {
                 "fileId='" + fileId.substring(0, 10) + '\'' +
                 ", chunkNo=" + chunkNo +
                 ", savedLocally=" + savedLocally +
+                ", deleted=" + deleted+
                 ", replicationDegree=" + replicationDegree +
                 ", peersAcks= (" + peersAcks.size() + ")" + peersAcks +
                 '}';
