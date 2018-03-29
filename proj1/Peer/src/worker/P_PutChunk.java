@@ -19,8 +19,9 @@ public class P_PutChunk extends Protocol {
             // if the current peer already has a copy of this chunk, send a STORED anyway (UDP is unreliable)
             if (sChunk.isSavedLocally() && !sChunk.deleted) {
                 sendStored(sChunk); return;
-            } else if (sChunk.deleted && sChunk.countAcks() < sChunk.replicationDegree) // save previously deleted chunk
+            } else if (sChunk.countAcks() < sChunk.replicationDegree) // save previously deleted chunk (sChunk.deleted &&
                 sChunk.chunk = d.message.body;
+            else return;
         }
 
         // random sleep - this peer will update the number of STORED replies to storedChunk while sleeping
