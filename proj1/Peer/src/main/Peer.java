@@ -89,4 +89,10 @@ public class Peer implements InitiatorPeer {
         return is;
     }
 
+    @Override
+    public void updateProtocolVersion(String newVersion) throws RemoteException {
+        peerConfig.protocolVersion = newVersion;
+        System.out.println("[Peer_RMI] - Using version: " + newVersion);
+    }
+
 }
