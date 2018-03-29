@@ -7,7 +7,35 @@ echo "Source code compiled"
 
 # get filename or use default
 FILENAME="$1"
-FILENAME=${FILENAME:-"file.txt"}  # If variable not set, use default.
+FILENAME=${FILENAME:-"file.txt"} # If variable not set, use default.
 
-#Usage:
-java -cp .:./bin/ src.client.TestApp 4 BACKUP $FILENAME 3
+# get peerID or use default
+PEERID="$2"
+PEERID=${PEERID:-"1"}
+
+#get the action
+ACTION="$3"
+ACTION=${ACTION:-"1"}
+
+#get the optional replicationDegree or spaceReclaim
+OPT="$4"
+OPT=${OPT:-"2"}
+
+JAVAARGS="-cp .:./bin/ src.client.TestApp"
+
+if [ $ACTION = "1" ]; then
+    java $JAVAARGS $PEERID BACKUP $FILENAME $OPT
+elif [ $ACTION = "2" ]; then
+    java $JAVAARGS $PEERID RESTORE $FILENAME
+elif [ $ACTION = "3" ]; then
+    java $JAVAARGS $PEERID DELETE $FILENAME
+elif [ $ACTION = "4" ]; then
+    java $JAVAARGS $PEERID RECLAIM $OPT
+elif [ $ACTION = "5" ]; then
+    java $JAVAARGS $PEERID STATE
+else
+    echo Invalid action $ACTION must be 1-5
+fi
+
+
+#Usage: <fileName:default=file.txt> <peerId:default=1> <action:default=1=BACKUP> <replicationDegree|spaceReclaim:default=2>
