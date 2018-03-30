@@ -37,7 +37,7 @@ public class RestoreChunk implements Callable {
 
         for (int i = 0; i < RestoreChunk.RESTORE_ATTEMPTS && lChunk.chunk == null; i++) {
             //no ongoing TCP connection - this will be false again if TCP connection fails
-            if (!lChunk.gotAnswer || i == 0) peerConfig.mcControl.send(message); //create and send message through multicast
+            if (lChunk.socket == null || i == 0) peerConfig.mcControl.send(message); //create and send message through multicast
 
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
             System.out.println("[RestoreChunk] - waiting for CHUNK " + lChunk.chunkNo + " for " + wait + "ms");
