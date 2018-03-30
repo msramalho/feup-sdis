@@ -15,7 +15,7 @@ public class P_Delete extends Protocol {
             if (v.fileId.equals(d.message.fileId) && v.isSavedLocally()) { // found a chunk to delete
                 d.peerConfig.internalState.deleteStoredChunk(v, true);
                 count.getAndSet(count.get() + 1);
-                d.peerConfig.mcControl.send(Message.createMessage("DELETED..."))
+                // d.peerConfig.mcControl.send(Message.createMessage("DELETED..."))
             }
         });
         System.out.println(String.format("[Protocol:Delete] - deleted %d chunk(s)", count.get()));

@@ -16,14 +16,16 @@ public class DeleteFile implements Runnable {
 
     @Override
     public void run() {
-        byte[] message = Message.createMessage(String.format("DELETE %s %d %s\r\n\r\n", peerConfig.protocolVersion, peerConfig.id, localChunk.fileId));
-        peerConfig.mcControl.send(message); // send DELETE message
-        //update local information about this deleted chunk
+        // send DELETE message
+        peerConfig.mcControl.send(Message.createMessage(String.format("DELETE %s %d %s\r\n\r\n", peerConfig.protocolVersion, peerConfig.id, localChunk.fileId)));
+
+        // update localChunks to know they have been deleted
+        for (LocalChunk lChunk: peerConfig.internalState.localChunks.values()) {
+            if (lChunk.fileId.equals(localChunk.fileId)) {
+                lChunk.deleted = true;
+            }
+        }
+        
         peerConfig.internalState.save();
-        localChunk.deleted = true;
-
-        //TODO: enhancement receive acks for delete (DELETED) messages
-        //TODO: enhancement trigger this mechanism on ADELE Protocol (Hello)
-
     }
 }

@@ -52,7 +52,7 @@ public abstract class Chunk implements Serializable {
 
     @Override
     public String toString() {
-        return "StoredChunk{" +
+        return "Chunk{" +
                 "fileId='" + fileId.substring(0, 10) + '\'' +
                 ", chunkNo=" + chunkNo +
                 ", deleted=" + deleted +

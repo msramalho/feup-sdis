@@ -21,7 +21,7 @@ public class InternalState implements Serializable {
 
     public static int peerId;
 
-    public ConcurrentHashMap<String, LocalChunk> localChunks; // local files being backed up - file_id => LocalFile
+    public ConcurrentHashMap<String, LocalChunk> localChunks; // local files being backed up - file_id_chukNo => LocalChunk
     public ConcurrentHashMap<String, StoredChunk> storedChunks; // others' chunks - <file_id>_<chunkNo> => StoredChunk
 
     public InternalState() {
