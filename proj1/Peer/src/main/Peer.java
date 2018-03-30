@@ -37,7 +37,7 @@ public class Peer implements InitiatorPeer {
         System.out.println(String.format("[Peer] - Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
         peerConfig.initialize();
 
-        peerConfig.mcControl.send(Message.createMessage(String.format("HELLO %s %d 0\r\n\r\n", peerConfig.protocolVersion, peerConfig.id)));
+        peerConfig.mcControl.send(Message.createMessage(String.format("ADELE %s %d 0\r\n\r\n", peerConfig.protocolVersion, peerConfig.id)));
 
         // maintain proper state of internal database every 10s
         while (true) {

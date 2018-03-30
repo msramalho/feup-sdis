@@ -28,15 +28,11 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
         this.joinGroup(this.group);
     }
 
-    public InetAddress getGroup() {
-        return group;
-    }
-
     public boolean send(byte[] data) {
         try {
             DatagramPacket outPacket = new DatagramPacket(data, data.length, group, getLocalPort()); // create the packet to send through the socket
             send(outPacket);
-            debug(String.format("sent %5d bytes", data.length));
+            debug(String.format("sent %5d bytes in: %s", data.length, new String(data).split(" ", 2)[0]));
         } catch (IOException e) {
             e.printStackTrace();
             return false;

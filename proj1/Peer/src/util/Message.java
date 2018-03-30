@@ -60,7 +60,7 @@ public class Message {
 
     public boolean isRemoved() { return this.action.equals("REMOVED"); }
 
-    public boolean isHello() { return this.action.equals("HELLO"); }
+    public boolean isAdele() { return this.action.equals("ADELE"); }
 
     public boolean isDeleted() { return this.action.equals("DELETED");}
 

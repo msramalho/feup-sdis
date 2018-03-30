@@ -47,7 +47,6 @@ public class LocalFile {
             inStream = new FileInputStream(file);
         } catch (FileNotFoundException e) {
             System.out.println("[LocalFile] - unable to read file: " + this.filename);
-            e.printStackTrace();
             return;
         }
 
