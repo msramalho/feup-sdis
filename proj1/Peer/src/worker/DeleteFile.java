@@ -22,9 +22,6 @@ public class DeleteFile implements Runnable {
         peerConfig.internalState.save();
         localChunk.deleted = true;
 
-        try { Thread.sleep(2000); } catch (InterruptedException e) {}
-        peerConfig.mcControl.send(message);
-
         //TODO: enhancement receive acks for delete (DELETED) messages
         //TODO: enhancement trigger this mechanism on ADELE Protocol (Hello)
 

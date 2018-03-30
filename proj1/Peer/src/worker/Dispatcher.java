@@ -29,6 +29,7 @@ public class Dispatcher implements Runnable {
             p = new P_Delete(this);
         else if (message.isRemoved())
             p = new P_Removed(this);
+        // TODO: diogo:
         else if (message.isHello())
             p = new P_Hello(this);//vê se no internalState.localChunks há alguma chunk deleted E que tenha o senderId dentro dos peerAcks
         else if (message.isDeleted())

@@ -22,7 +22,8 @@ public class Peer implements InitiatorPeer {
             return;
         }
 
-        peerConfig.mcControl.send(Message.createMessage("HELLO %d...."))
+        // TODO: diogo: peerConfig.mcControl.send(Message.createMessage("HELLO %d...."));
+
         try {
             Peer initPeer = new Peer();
             InitiatorPeer stub = (InitiatorPeer) UnicastRemoteObject.exportObject(initPeer, 0);
