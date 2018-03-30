@@ -6,7 +6,7 @@ Project 1 -- Distributed Backup Service
 [Official script](https://web.fe.up.pt/~pfs/aulas/sd2018/projs/proj1/proj1.html)
 
 ### The script files
- * `peer.sh` starts a peer and can start the RMI(operation which must be done in the beginning): `<peerId:default=1> <resetDatabase:default=false> <startRMI:default=false>`
+ * `peer.sh` starts a peer and can start the RMI(operation which must be done in the beginning): `<peerId:default=1> <resetDatabase:default=false> <startRMI:default=false> <protocolVersion:default=1.0>`
  * `testApp.sh` communicates with a Peer through RMI and sends the action desired: `<fileName:default=file.txt> <peerId:default=1> <action:default=1=BACKUP> <replicationDegree:default=2>`
 
 ## Test Project:
