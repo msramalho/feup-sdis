@@ -1,5 +1,6 @@
 package src.worker;
 
+import src.localStorage.StoredChunk;
 import src.util.Message;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -9,15 +10,27 @@ public class P_Delete extends Protocol {
 
     @Override
     public void run() {
-        AtomicReference<Integer> count = new AtomicReference<>(0);
-        d.peerConfig.internalState.storedChunks.forEach(1, (k, v) -> {
-            // System.out.println(String.format("[P_Delete] - checking %s against %s", v.fileId.substring(0, 10), d.message.fileId.substring(0, 10)));
-            if (v.fileId.equals(d.message.fileId) && v.isSavedLocally()) { // found a chunk to delete
-                d.peerConfig.internalState.deleteStoredChunk(v, true);
-                count.getAndSet(count.get() + 1);
-                // d.peerConfig.mcControl.send(Message.createMessage("DELETED..."))
+
+        int count = 0;
+        boolean hasChunk = false;
+
+        for (StoredChunk storedChunk : d.peerConfig.internalState.storedChunks.values()) {
+            if (storedChunk.fileId.equals(d.message.fileId)) {
+                hasChunk = true;
+                if (storedChunk.isSavedLocally()) {
+                    d.peerConfig.internalState.deleteStoredChunk(storedChunk, true);
+                    count++;
+                }
             }
-        });
-        System.out.println(String.format("[Protocol:Delete] - deleted %d chunk(s)", count.get()));
+        }
+
+        if (hasChunk) {
+            d.peerConfig.mcControl.send(Message.createMessage(String.format("DELETED %s %d %s\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.fileId)));
+        }
+
+        // commit changes to non-volatile memory
+        d.peerConfig.internalState.save();
+
+        System.out.println(String.format("[Protocol:Delete] - deleted %d chunk(s)", count));
     }
 }

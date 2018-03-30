@@ -20,12 +20,10 @@ public class DeleteFile implements Runnable {
         peerConfig.mcControl.send(Message.createMessage(String.format("DELETE %s %d %s\r\n\r\n", peerConfig.protocolVersion, peerConfig.id, localChunk.fileId)));
 
         // update localChunks to know they have been deleted
-        for (LocalChunk lChunk: peerConfig.internalState.localChunks.values()) {
-            if (lChunk.fileId.equals(localChunk.fileId)) {
+        for (LocalChunk lChunk: peerConfig.internalState.localChunks.values())
+            if (lChunk.fileId.equals(localChunk.fileId))
                 lChunk.deleted = true;
-            }
-        }
-        
+
         peerConfig.internalState.save();
     }
 }

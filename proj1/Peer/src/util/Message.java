@@ -62,6 +62,8 @@ public class Message {
 
     public boolean isHello() { return this.action.equals("HELLO"); }
 
+    public boolean isDeleted() { return this.action.equals("DELETED");}
+
     public static byte[] createMessage(String header) { return Message.createMessage(header, new byte[0]); }
 
     public static byte[] createMessage(String header, byte[] body) {

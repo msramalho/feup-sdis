@@ -31,12 +31,8 @@ public class Dispatcher implements Runnable {
             p = new P_Removed(this);
         else if (message.isHello())
             p = new P_Hello(this);
-
-
-        // else if (message.isHello())
-        //     p = new P_Hello(this);//vê se no internalState.localChunks há alguma chunk deleted E que tenha o senderId dentro dos peerAcks
-        // else if (message.isDeleted())
-        //     p = new P_Deleted(this);//vai ao internalState.localChunks procurar o fileid_chunko e tira dos peerAcks
+        else if (message.isDeleted())
+            p = new P_Deleted(this);
 
 
         if (p != null) p.run();
