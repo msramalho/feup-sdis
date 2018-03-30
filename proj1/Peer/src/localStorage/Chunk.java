@@ -12,6 +12,7 @@ public abstract class Chunk implements Serializable {
     public boolean deleted = false;
     public HashSet<Integer> peersAcks = new HashSet<>(); // a set of the IDs of Peers that have saved this chunk
     public transient byte[] chunk = null; // the chunk bytes for this chunk
+    public boolean gotAnswer = false; // true if the current peer saw a CHUNK message while sleeping
 
     public Chunk() {}
 
@@ -59,5 +60,4 @@ public abstract class Chunk implements Serializable {
                 ", peersAcks= (" + peersAcks.size() + ")" + peersAcks +
                 '}';
     }
-
 }

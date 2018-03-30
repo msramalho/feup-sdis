@@ -6,7 +6,6 @@ import src.util.MulticastSocketC;
 import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 public class PeerConfig {
     public String protocolVersion;
@@ -65,7 +64,7 @@ public class PeerConfig {
         (new Thread(this.mcRestore)).start();
     }
 
-    public boolean isEnhanced() { return protocolVersion != "1.0"; }
+    public boolean isEnhanced() { return !protocolVersion.equals("1.0"); }
 
     private void readMachineIp() {
         try {
