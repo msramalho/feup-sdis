@@ -248,7 +248,7 @@ public class InternalState implements Serializable {
     }
 
     // return the path to the chunk in this peer's filesystem
-    private String getChunkPath(StoredChunk sChunk) {
+    public String getChunkPath(StoredChunk sChunk) {
         return internalStateFolder + "/" + sChunk.fileId + "/" + sChunk.chunkNo;
     }
 

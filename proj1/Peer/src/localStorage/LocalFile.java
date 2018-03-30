@@ -8,6 +8,10 @@ import src.worker.RestoreChunk;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -125,8 +129,14 @@ public class LocalFile {
 
 
     private void loadFileId() {
-        //TODO: use file metadata and/or maybe content instead of just filename to generate the unique fileId/hash
         String hashSource = filename;
+        try {
+            BasicFileAttributes metadata = Files.readAttributes(Paths.get(filename), BasicFileAttributes.class);
+            hashSource = filename + metadata.creationTime() + metadata.lastAccessTime() + metadata.lastModifiedTime() + metadata.size();
+        } catch (IOException e) {
+            System.out.println("[LocalFile] - Unable to read file's metadata, using filename only for the chunk");
+        }
+
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(hashSource.getBytes(StandardCharsets.UTF_8));
