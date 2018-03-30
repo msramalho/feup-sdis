@@ -23,18 +23,17 @@ public class Peer implements InitiatorPeer {
 
         try {
             Peer initPeer = new Peer();
-
             InitiatorPeer stub = (InitiatorPeer) UnicastRemoteObject.exportObject(initPeer, 0);
             // Bind the remote object's stub in the registry
             Registry registry = LocateRegistry.getRegistry("localhost");
             registry.rebind(Integer.toString(peerConfig.id), stub);
-            System.err.println("Server ready");
+            System.err.println("[Peer] - RMI registry complete");
         } catch (Exception e) {
-            System.err.println("Server exception: " + e.toString());
+            System.err.println("[Peer] - RMI registry exception: " + e.toString());
             e.printStackTrace();
         }
 
-        System.out.println("[Peer] - Hello, this is peer with id: " + peerConfig.id);
+        System.out.println(String.format("[Peer] - Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
         peerConfig.initialize();
 
         // maintain proper state of internal database every 10s

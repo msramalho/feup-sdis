@@ -92,10 +92,18 @@ public class LocalFile {
         for (Future<LocalChunk> fChunk : futureChunks) {
             LocalChunk lChunk;
             lChunk = fChunk.get();
-            if (lChunk == null || lChunk.chunk == null){
+            if (lChunk == null || lChunk.chunk == null) {
                 System.out.println("[LocalFile] - at least one chunk could not be retrieved from peers...aborting");
                 return;
+            } else if ((lChunk.chunkNo != (numChunks - 1) && lChunk.chunk.length == 0)) {
+                System.out.println("[LocalFile] - received a 0 byte chunk that is not the last...aborting");
+                return;
+            } else if ((lChunk.chunkNo != (numChunks - 1) && lChunk.chunk.length != LocalFile.CHUNK_SIZE)) {
+                System.out.println("[LocalFile] - received a " + lChunk.chunk.length + " byte chunk that is not the last, should always be: " + LocalFile.CHUNK_SIZE + "...aborting");
+                return;
             }
+
+
             chunks.set(lChunk.chunkNo, lChunk);
         }
 

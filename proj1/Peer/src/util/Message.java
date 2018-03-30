@@ -14,10 +14,8 @@ public class Message {
     public int chunkNo;
     public int replicationDegree;
     public byte[] body = new byte[0];
-    public int senderPort;
 
     public Message(DatagramPacket packet) {
-        senderPort = packet.getPort();
         try {
             this.parseMessage(packet);
         } catch (Exception e) {
