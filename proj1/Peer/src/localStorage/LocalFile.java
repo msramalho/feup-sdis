@@ -48,6 +48,7 @@ public class LocalFile {
         } catch (FileNotFoundException e) {
             System.out.println("[LocalFile] - unable to read file: " + this.filename);
             e.printStackTrace();
+            return;
         }
 
 
@@ -63,9 +64,13 @@ public class LocalFile {
             }
             LocalChunk localChunk = new LocalChunk(fileId, i, replicationDegree, temporaryChunk);
             BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk, true);
-            this.peerConfig.threadPool.submit(bcWorker);
+            peerConfig.threadPool.submit(bcWorker);
             i++;
+            System.out.println(String.format("Chunk %d has %d bytes (read: %d out of %d)", i, chunkSize, totalBytesRead, file_size));
         }
+        if ((file_size % CHUNK_SIZE) == 0) // if last chunk is 64K send chunk with size 0
+            peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, i, -1, new byte[0]), false));
+
         try {
             inStream.close();
         } catch (IOException e) {
@@ -87,8 +92,10 @@ public class LocalFile {
         for (Future<LocalChunk> fChunk : futureChunks) {
             LocalChunk lChunk;
             lChunk = fChunk.get();
-            if (lChunk.chunk == null)
-                System.out.println("[LocalFile] - Chunk " + lChunk.chunkNo + " could not be retrieved from peers");
+            if (lChunk == null || lChunk.chunk == null){
+                System.out.println("[LocalFile] - at least one chunk could not be retrieved from peers...aborting");
+                return;
+            }
             chunks.set(lChunk.chunkNo, lChunk);
         }
 
@@ -104,7 +111,7 @@ public class LocalFile {
         System.out.println("[LocalFile] - File reconstruction completed: " + path);
     }
 
-    public void deleteFile(){
+    public void deleteFile() {
         peerConfig.threadPool.submit(new DeleteFile(peerConfig, new LocalChunk(fileId, -2)));
     }
 

@@ -9,6 +9,8 @@ public class P_PutChunk extends Protocol {
 
     @Override
     public void run() {
+        //received chunk with length 0, the last
+        if (d.message.body.length == 0) return;
 
         // try to read the chunk from the internal state, and add it if it is not there
         StoredChunk sChunk = d.peerConfig.internalState.getStoredChunk(d.message);
@@ -26,8 +28,8 @@ public class P_PutChunk extends Protocol {
             else return;
         }
 
-        // random (considering available space) sleep - this peer will update the number of STORED replies to storedChunk while sleeping
-        sleepRandomConsiderDiskSpace();
+        // random takes ENHANCEMENT_1 into account sleep - this peer will update the number of STORED replies to storedChunk while sleeping
+        sleepRandom();
 
         //conclude the store process
         System.out.println(String.format("[Protocol:PutChunk] - perceived replication degree for chunk %s: %d/%d", sChunk.getShortId(), sChunk.countAcks(), sChunk.replicationDegree));

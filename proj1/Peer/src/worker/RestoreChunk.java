@@ -21,14 +21,21 @@ public class RestoreChunk implements Callable {
     @Override
     public Object call() {
         LocalChunk lChunk = peerConfig.internalState.getLocalChunk(localChunk.getUniqueId());
+        if (lChunk == null) return null; // this is not a local file
         lChunk.chunk = null; // equivalent to empty cache
 
-        byte[] message = Message.createMessage(String.format("GETCHUNK %s %d %s %d \r\n\r\n", peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo));
-        for (int i = 0; i < RestoreChunk.RESTORE_ATTEMPTS && lChunk.chunk == null; i++) {
+        // handle ENHANCEMENT_2
+        byte[] getChunkBody = new byte[0];
+        if (peerConfig.isEnhanced() && peerConfig.machineIp != null)
+            getChunkBody = peerConfig.machineIp.getHostAddress().getBytes();
+
+        byte[] message = Message.createMessage(String.format("GETCHUNK %s %d %s %d \r\n\r\n", peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo), getChunkBody);
+        //TODO: figure a way of knly sending one attempt at a TCP connection
+        for (int i = 0; i < RestoreChunk.RESTORE_ATTEMPTS && lChunk.chunk == null && lChunk.gotAnswer; i++) {
             peerConfig.mcControl.send(message); //create and send message through multicast
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
 
-            System.out.println("[RestoreChunk] - waiting for chunk " + lChunk.chunkNo + " for " + wait + "ms");
+            System.out.println("[RestoreChunk] - waiting for CHUNK " + lChunk.chunkNo + " for " + wait + "ms");
 
             try { Thread.sleep(wait); } catch (InterruptedException e) {}
         }

@@ -22,7 +22,18 @@ public class TestApp {
             e.printStackTrace();
         }
 
+        //change the version according to the usage of enhancements
+        String version = "1.0";
+        String enhancedVersion = "1.1";
+        if (action.substring(action.length() - 3).equals("ENH")) version = enhancedVersion;
+        try {
+            stub.updateProtocolVersion(version); // send the correct protocol version
+        } catch (RemoteException e) {
+            System.out.println(e.getMessage());
+        }
+
         switch (action) {
+            case "BACKUPENH":
             case "BACKUP":
                 try {
                     String file = args[2];
@@ -32,6 +43,7 @@ public class TestApp {
                     System.out.println(e.getMessage());
                 }
                 break;
+            case "RESTOREENH":
             case "RESTORE":
                 try {
                     String file = args[2];
@@ -40,6 +52,7 @@ public class TestApp {
                     System.out.println(e.getMessage());
                 }
                 break;
+            case "DELETEENH":
             case "DELETE":
                 try {
                     String file = args[2];
@@ -48,7 +61,7 @@ public class TestApp {
                     System.out.println(e.getMessage());
                 }
                 break;
-
+            case "RECLAIMENH":
             case "RECLAIM":
                 try {
                     int maxDiskSpace = Integer.parseInt(args[2]);
@@ -57,7 +70,7 @@ public class TestApp {
                     System.out.println(e.getMessage());
                 }
                 break;
-
+            case "STATEENH":
             case "STATE":
                 try {
                     InternalState state = stub.state();
@@ -66,7 +79,6 @@ public class TestApp {
                     System.out.println(e.getMessage());
                 }
                 break;
-
         }
     }
 }
