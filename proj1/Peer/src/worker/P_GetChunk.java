@@ -53,7 +53,7 @@ public class P_GetChunk extends Protocol {
                     clientSocket.close(); // sends EOF
                     System.out.println("[Protocol:GetChunk] - chunk " + sChunk.getShortId() + " sent through TCP (" + sChunk.chunk.length + " bytes)");
                 } catch (IOException e) {
-                    System.out.println("[Protocol:GetChunk] - enhancement unable to connect to TCP");
+                    System.out.println("[Protocol:GetChunk] - enhancement 2 unable to connect to TCP");
                     e.printStackTrace();
                 }
             }
