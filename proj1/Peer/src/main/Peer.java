@@ -81,8 +81,7 @@ public class Peer implements InitiatorPeer {
     @Override
     public InternalState state() throws RemoteException {
         System.out.println("[Peer_RMI] - STATE started");
-        //TODO: complete with section 4. Client interface: Retrieve local service state information
-        //TODO: do so by completing: addMissingInfoForClient
+        //TODO: complete with section 4. Client interface: Retrieve local service state information, do so by completing: addMissingInfoForClient
         InternalState is = peerConfig.internalState;
         is.addMissingInfoForClient();
         return is;
