@@ -48,6 +48,7 @@ public class LocalFile {
         } catch (FileNotFoundException e) {
             System.out.println("[LocalFile] - unable to read file: " + this.filename);
             e.printStackTrace();
+            return;
         }
 
 
@@ -91,8 +92,8 @@ public class LocalFile {
         for (Future<LocalChunk> fChunk : futureChunks) {
             LocalChunk lChunk;
             lChunk = fChunk.get();
-            if (lChunk.chunk == null){
-                System.out.println("[LocalFile] - Chunk " + lChunk.chunkNo + " could not be retrieved from peers...aborting");
+            if (lChunk == null || lChunk.chunk == null){
+                System.out.println("[LocalFile] - at least one chunk could not be retrieved from peers...aborting");
                 return;
             }
             chunks.set(lChunk.chunkNo, lChunk);

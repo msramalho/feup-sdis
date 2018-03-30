@@ -6,11 +6,13 @@ import src.util.MulticastSocketC;
 import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Stream;
 
 public class PeerConfig {
     public String protocolVersion;
     public Integer id; // the peer id
     InetAddress sapIp; // service access point IP
+    public InetAddress machineIp = null; // Ip address of current machine, for TCP connections
     Integer sapPort; // service access point port
     public MulticastSocketC mcControl; // Multicast Control Socket
     public MulticastSocketC mcBackup; // Multicast Back Up Socket
@@ -28,6 +30,7 @@ public class PeerConfig {
         id = Integer.parseInt(args[1]);
         loadServiceAccessPoint(args[2]);
         internalState = InternalState.load(id);
+        readMachineIp();
         System.out.println(internalState);
 
         //setup sockets and join group for <mccIP> <mccPort>, <mdbIp> <mdbPort> and <mdrIp> <mdrPort>, respectively
@@ -35,6 +38,7 @@ public class PeerConfig {
         mcBackup = new MulticastSocketC(args[5], Integer.parseInt(args[6]), id, "MCBackup", this);
         mcRestore = new MulticastSocketC(args[7], Integer.parseInt(args[8]), id, "MCRestore", this);
     }
+
 
     /**
      * Convert the cmd arg <serviceAccessPoint> into variables (this.sapIp, this.sapPort).
@@ -62,4 +66,13 @@ public class PeerConfig {
     }
 
     public boolean isEnhanced() { return protocolVersion != "1.0"; }
+
+    private void readMachineIp() {
+        try {
+            machineIp = InetAddress.getLocalHost(); // use .getHostAddress() for the Ip string
+        } catch (UnknownHostException e) {
+            System.out.println("[PeerConfig] - unable to get current machine Ip address, enhanced GETCHUNK will not happen");
+            e.printStackTrace();
+        }
+    }
 }
