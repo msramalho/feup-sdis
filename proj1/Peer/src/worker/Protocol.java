@@ -15,7 +15,7 @@ public abstract class Protocol {
      * for a peer with 100% space occupied, interval is random between [400, 400]
      * ENHANCEMENT_1
      */
-    public void sleepRandomConsiderDiskSpace() {
+    public void sleepRandom() {
         int percentOccupied = 0;
         if (d.peerConfig.isEnhanced()) {
             percentOccupied = (int) (100 * (d.peerConfig.internalState.occupiedSpace / d.peerConfig.internalState.allowedSpace));
@@ -23,8 +23,6 @@ public abstract class Protocol {
         }
         sleepRandom(4 * percentOccupied);
     }
-
-    public void sleepRandom() {sleepRandom(0);}
 
     public void sleepRandom(int from) {
         try {
