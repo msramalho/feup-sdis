@@ -33,7 +33,7 @@ public class LocalFile {
         loadFileId();
         File file = new File(this.filename);
         int file_size = (int) file.length();
-        numChunks = (int) Math.ceil(file_size / CHUNK_SIZE) + 1;
+        numChunks = (int) Math.ceil(file_size / CHUNK_SIZE);
     }
 
     public void backup() {
@@ -69,7 +69,7 @@ public class LocalFile {
             System.out.println(String.format("Chunk %d has %d bytes (read: %d out of %d)", i, chunkSize, totalBytesRead, file_size));
         }
         if ((file_size % CHUNK_SIZE) == 0) // if last chunk is 64K send chunk with size 0
-            peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, i, -1, new byte[0]), false));
+            peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, i, replicationDegree, new byte[0]), true));
 
         try {
             inStream.close();
@@ -84,7 +84,7 @@ public class LocalFile {
         ArrayList<Future<LocalChunk>> futureChunks = new ArrayList<>();
         chunks = new ArrayList<>();
 
-        for (int i = 0; i < numChunks; i++) {
+        for (int i = 0; i <= numChunks; i++) {
             futureChunks.add((Future<LocalChunk>) peerConfig.threadPool.submit(new RestoreChunk(peerConfig, new LocalChunk(fileId, i))));
             chunks.add(null);
         }
@@ -92,13 +92,14 @@ public class LocalFile {
         for (Future<LocalChunk> fChunk : futureChunks) {
             LocalChunk lChunk;
             lChunk = fChunk.get();
+            // System.out.println(String.format("chunk %d of %d has %d bytes", lChunk.chunkNo, numChunks, lChunk.chunk.length));
             if (lChunk == null || lChunk.chunk == null) {
                 System.out.println("[LocalFile] - at least one chunk could not be retrieved from peers...aborting");
                 return;
-            } else if ((lChunk.chunkNo != (numChunks - 1) && lChunk.chunk.length == 0)) {
+            } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length == 0)) {
                 System.out.println("[LocalFile] - received a 0 byte chunk that is not the last...aborting");
                 return;
-            } else if ((lChunk.chunkNo != (numChunks - 1) && lChunk.chunk.length != LocalFile.CHUNK_SIZE)) {
+            } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length != LocalFile.CHUNK_SIZE)) {
                 System.out.println("[LocalFile] - received a " + lChunk.chunk.length + " byte chunk that is not the last, should always be: " + LocalFile.CHUNK_SIZE + "...aborting");
                 return;
             }

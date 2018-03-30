@@ -24,7 +24,7 @@ public class LocalChunk extends Chunk implements Serializable {
     public void loadFromTCP() {
         try {
             socket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
-            socket.setSoTimeout(250);
+            socket.setSoTimeout(1000);
             Socket connectionSocket = socket.accept();
             socket.close();
             DataInputStream inFromClient = new DataInputStream(connectionSocket.getInputStream());
@@ -44,7 +44,7 @@ public class LocalChunk extends Chunk implements Serializable {
             chunk = null;
             socket = null;
             System.out.println("[Protocol:Chunk] - unable to receive chunk through TCP, defaulting back to old protocol");
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 
