@@ -26,17 +26,21 @@ public class RestoreChunk implements Callable {
 
         // handle ENHANCEMENT_2
         byte[] getChunkBody = new byte[0];
-        if (peerConfig.isEnhanced() && peerConfig.machineIp != null)
-            getChunkBody = peerConfig.machineIp.getHostAddress().getBytes();
+        if (peerConfig.isEnhanced() && peerConfig.machineIp != null) {
+            // if is enhanced, send the IP:Port of the TCP connection to the peeer
+            lChunk.initiateSocket();
+            String chunkBody = String.format("%s:%s", peerConfig.machineIp.getHostAddress(), lChunk.socket.getLocalPort());
+            getChunkBody = chunkBody.getBytes();
+        }
 
         byte[] message = Message.createMessage(String.format("GETCHUNK %s %d %s %d \r\n\r\n", peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo), getChunkBody);
-        //TODO: figure a way of knly sending one attempt at a TCP connection
-        for (int i = 0; i < RestoreChunk.RESTORE_ATTEMPTS && lChunk.chunk == null && lChunk.gotAnswer; i++) {
-            peerConfig.mcControl.send(message); //create and send message through multicast
+
+        for (int i = 0; i < RestoreChunk.RESTORE_ATTEMPTS && lChunk.chunk == null; i++) {
+            //no ongoing TCP connection - this will be false again if TCP connection fails
+            if (!lChunk.gotAnswer || i == 0) peerConfig.mcControl.send(message); //create and send message through multicast
+
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
-
             System.out.println("[RestoreChunk] - waiting for CHUNK " + lChunk.chunkNo + " for " + wait + "ms");
-
             try { Thread.sleep(wait); } catch (InterruptedException e) {}
         }
         return lChunk;
