@@ -10,7 +10,7 @@ Project 1 -- Distributed Backup Service
  * `testApp.sh` communicates with a Peer through RMI and sends the action desired: `<fileName:default=file.txt> <peerId:default=1> <action:default=1=BACKUP> <replicationDegree:default=2|spaceReclaim:default=2KBytes>`
 
 ## How to test
-* Clone the repository root folder (`Peer`) into your local file system
+* Clone the repository root folder into your local file system and enter it (it should contain the bas files)
 * (The compilation and execution has been placed on the bash files described above (`peer.sh` and `testApp.sh`))
 * Open 4 terminals [TERMINAL_1, TERMINAL_2, TERMINAL_3, TERMINAL_4] inside the `Peer` folder
 * In **TERMINAL_1**: `sh peer.sh 1 0 1`. Start peer 1, do not reset database, and start RMI. This will open a new terminal that will start the `rmiregistry`. And will also load Peer ID 1.
