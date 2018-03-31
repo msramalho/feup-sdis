@@ -8,7 +8,7 @@ import java.util.Arrays;
  */
 public class Message {
     public String action;
-    private String protocolVersion;
+    public String protocolVersion;
     public int senderId;
     public String fileId;
     public int chunkNo;

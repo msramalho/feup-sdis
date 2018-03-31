@@ -17,7 +17,8 @@ public abstract class Protocol {
      */
     public void sleepRandom() {
         int percentOccupied = 0;
-        if (d.peerConfig.isEnhanced()) {
+        // only use heuristic if this peer is enhanced and the message is a PUTCHUNK
+        if (d.peerConfig.isEnhanced() && d.message.isPutchunk()) {
             percentOccupied = (int) (100 * (d.peerConfig.internalState.occupiedSpace / d.peerConfig.internalState.allowedSpace));
             percentOccupied = Math.min(percentOccupied, 100); // if memory exceeds 100%
         }

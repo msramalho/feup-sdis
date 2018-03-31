@@ -1,6 +1,8 @@
 package src.worker;
 
 import src.localStorage.StoredChunk;
+import src.main.Peer;
+import src.main.PeerConfig;
 import src.util.Message;
 
 import java.io.DataOutputStream;
@@ -31,15 +33,18 @@ public class P_GetChunk extends Protocol {
 
         if (!sChunk.gotAnswer) {
             byte[] messageBody;
-
+            String usingVersion = PeerConfig.DEFAULT_VERSION;
+            boolean usingEnhancedVersion = d.peerConfig.isEnhanced() && PeerConfig.isMessageEnhanced(d.message);//both are enhanced
             //handle ENHANCEMENT_2
-            if (d.peerConfig.isEnhanced()) messageBody = new byte[0];
-            else messageBody = sChunk.chunk;
+            if (usingEnhancedVersion) {
+                messageBody = new byte[0];
+                usingVersion = d.peerConfig.protocolVersion;
+            } else messageBody = sChunk.chunk;
 
             //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
-            d.peerConfig.mcRestore.send(Message.createMessage(String.format("CHUNK %s %d %s %d\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo), messageBody));
+            d.peerConfig.mcRestore.send(Message.createMessage(String.format("CHUNK %s %d %s %d\r\n\r\n", usingVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo), messageBody));
 
-            if (d.peerConfig.isEnhanced()) { // ENHANCEMENT_2 continuation
+            if (usingEnhancedVersion) { // ENHANCEMENT_2 continuation
                 try {
                     //parse the body of the message, which should contain IP:Port of the TCP socket on the other Peer
                     String[] parts = new String(d.message.body).split(":"); ;

@@ -20,10 +20,12 @@ public class RestoreChunk implements Callable {
 
     @Override
     public Object call() {
+        System.out.println("here1 " + localChunk.getShortId());
         LocalChunk lChunk = peerConfig.internalState.getLocalChunk(localChunk.getUniqueId());
         if (lChunk == null) return null; // this is not a local file
         lChunk.chunk = null; // equivalent to empty cache
 
+        System.out.println("here2");
         // handle ENHANCEMENT_2
         byte[] getChunkBody = new byte[0];
         if (peerConfig.isEnhanced() && peerConfig.machineIp != null) {

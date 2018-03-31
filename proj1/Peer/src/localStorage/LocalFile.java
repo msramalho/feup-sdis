@@ -132,7 +132,7 @@ public class LocalFile {
         String hashSource = filename;
         try {
             BasicFileAttributes metadata = Files.readAttributes(Paths.get(filename), BasicFileAttributes.class);
-            hashSource = filename + metadata.creationTime() + metadata.lastAccessTime() + metadata.lastModifiedTime() + metadata.size();
+            hashSource = filename + metadata.creationTime() + metadata.lastModifiedTime() + metadata.size();
         } catch (IOException e) {
             System.out.println("[LocalFile] - Unable to read file's metadata, using filename only for the chunk");
         }

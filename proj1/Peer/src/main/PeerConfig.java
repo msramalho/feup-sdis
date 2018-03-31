@@ -1,6 +1,7 @@
 package src.main;
 
 import src.localStorage.InternalState;
+import src.util.Message;
 import src.util.MulticastSocketC;
 
 import java.net.*;
@@ -8,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PeerConfig {
+    public static final String DEFAULT_VERSION = "1.0";
     public String protocolVersion;
     public Integer id; // the peer id
     InetAddress sapIp; // service access point IP
@@ -64,7 +66,9 @@ public class PeerConfig {
         (new Thread(this.mcRestore)).start();
     }
 
-    public boolean isEnhanced() { return !protocolVersion.equals("1.0"); }
+    public boolean isEnhanced() { return !protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }
+
+    public static boolean isMessageEnhanced(Message m) { return !m.protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }
 
     private void readMachineIp() {
         try {
