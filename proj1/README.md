@@ -7,10 +7,12 @@ Project 1 -- Distributed Backup Service
 
 ### The script files
  * `peer.sh` starts a peer and can start the RMI(operation which must be done in the beginning): `<peerId:default=1> <resetDatabase:default=false> <startRMI:default=false> <protocolVersion:default=1.0>`
- * `testApp.sh` communicates with a Peer through RMI and sends the action desired: `<fileName:default=file.txt> <peerId:default=1> <action:default=1=BACKUP> <replicationDegree:default=2>`
+ * `testApp.sh` communicates with a Peer through RMI and sends the action desired: `<fileName:default=file.txt> <peerId:default=1> <action:default=1=BACKUP> <replicationDegree:default=2|spaceReclaim:default=2KBytes>`
 
-## Test Project:
-* Open 4 terminals [TERMINAL_1, TERMINAL_2, TERMINAL_3, TERMINAL_4] on the `proj1/Peer` folder
+## How to test
+* Clone the repository root folder (`Peer`) into your local file system
+* (The compilation and execution has been placed on the bash files described above (`peer.sh` and `testApp.sh`))
+* Open 4 terminals [TERMINAL_1, TERMINAL_2, TERMINAL_3, TERMINAL_4] inside the `Peer` folder
 * In **TERMINAL_1**: `sh peer.sh 1 0 1`. Start peer 1, do not reset database, and start RMI. This will open a new terminal that will start the `rmiregistry`. And will also load Peer ID 1.
 * In **TERMINAL_2**: `sh peer.sh 2`. Start peer 2
 * In **TERMINAL_3**: `sh peer.sh 3`. Start peer 3
