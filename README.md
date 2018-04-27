@@ -6,3 +6,4 @@
 
 # Projects
  * [P01 - P2P Backup](https://github.com/msramalho/feup-sdis/tree/master/proj1) - [official script](https://web.fe.up.pt/~pfs/aulas/sd2018/projs/proj1/proj1.html)
+ * [P02 - P2P Backup w/ security and Peer Clustering](https://github.com/msramalho/feup-sdis/tree/master/proj2)
