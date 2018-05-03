@@ -36,7 +36,7 @@ public class PeerConfig {
         loadServiceAccessPoint(args[2]);
         internalState = InternalState.load(id);
         readMachineIp();
-        System.out.println(internalState);
+        logger.print(internalState.toString());
 
         //setup sockets and join group for <mccIP> <mccPort>, <mdbIp> <mdbPort> and <mdrIp> <mdrPort>, respectively
         mcControl = new MulticastSocketC(args[3], Integer.parseInt(args[4]), id, "MCControl", this);
@@ -78,7 +78,7 @@ public class PeerConfig {
         try {
             machineIp = InetAddress.getLocalHost(); // use .getHostAddress() for the Ip string
         } catch (UnknownHostException e) {
-            System.out.println("[PeerConfig] - unable to get current machine Ip address, enhanced GETCHUNK will not happen");
+            logger.print("unable to get current machine Ip address, enhanced GETCHUNK will not happen");
             e.printStackTrace();
         }
     }

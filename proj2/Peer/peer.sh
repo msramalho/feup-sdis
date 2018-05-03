@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 clear
+rm bin -rf
 mkdir bin
 
-javac -cp .:./bin/:./ -d bin src/*/*.java
+javac -cp .:./bin/:./ -d bin src/*/*.java #-Xlint:unchecked
 echo "Source code compiled"
 
 # get peerID or use default

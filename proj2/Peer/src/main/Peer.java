@@ -1,20 +1,24 @@
 package src.main;
 
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 import src.localStorage.InternalState;
 import src.localStorage.LocalFile;
+import src.util.Logger;
 import src.util.Message;
 
 public class Peer implements InitiatorPeer {
     private static LocalFile localFile;
     private static PeerConfig peerConfig;
+    static Logger logger = new Logger("Peer");
 
     public static void main(String[] args) {
         try {
+            for (String a : args) {
+                logger.print(a);
+            }
             peerConfig = new PeerConfig(args);//create peer
         } catch (Exception e) {
             System.err.println("[Peer] - cannot parse cmd line args");
@@ -28,13 +32,13 @@ public class Peer implements InitiatorPeer {
             // Bind the remote object's stub in the registry
             Registry registry = LocateRegistry.getRegistry("localhost");
             registry.rebind(Integer.toString(peerConfig.id), stub);
-            System.err.println("[Peer] - RMI registry complete");
+            logger.print("RMI registry complete");
         } catch (Exception e) {
-            System.err.println("[Peer] - RMI registry exception: " + e.toString());
+            logger.err("RMI registry exception: " + e.toString());
             e.printStackTrace();
         }
 
-        System.out.println(String.format("[Peer] - Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
+        logger.print(String.format("Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
         peerConfig.initialize();
 
         if (peerConfig.isEnhanced())  // only send ADELE if is enhanced
@@ -50,39 +54,39 @@ public class Peer implements InitiatorPeer {
 
     @Override
     public void backup(String pathname, int replicationDegree) {
-        System.out.println("[Peer_RMI] - BACKUP started");
+        logger.print("BACKUP started");
         localFile = new LocalFile(pathname, replicationDegree, peerConfig);
         localFile.backup();
     }
 
     @Override
     public void restore(String pathname) {
-        System.out.println("[Peer_RMI] - RESTORE started");
+        logger.print("RESTORE started");
         localFile = new LocalFile(pathname, 0, peerConfig);
         try {
             localFile.reconstructFile();
         } catch (Exception e) {
-            System.out.println("[Peer_RMI] - Unable to reconstruct file:");
+            logger.print("Unable to reconstruct file:");
             e.printStackTrace();
         }
     }
 
     @Override
     public void delete(String pathname) {
-        System.out.println("[Peer_RMI] - DELETE started");
+        logger.print("DELETE started");
         localFile = new LocalFile(pathname, 0, peerConfig);
         localFile.deleteFile();
     }
 
     @Override
     public void reclaim(int maxDiskSpace) {
-        System.out.println("[Peer_RMI] - RECLAIM started");
+        logger.print("RECLAIM started");
         peerConfig.internalState.reclaimKBytes(maxDiskSpace);
     }
 
     @Override
     public InternalState state() {
-        System.out.println("[Peer_RMI] - STATE started");
+        logger.print("STATE started");
         //TODO: complete with section 4. Client interface: Retrieve local service state information, do so by completing: addMissingInfoForClient
         InternalState is = peerConfig.internalState;
         is.addMissingInfoForClient();
@@ -92,7 +96,7 @@ public class Peer implements InitiatorPeer {
     @Override
     public void updateProtocolVersion(String newVersion) {
         peerConfig.protocolVersion = newVersion;
-        System.out.println("[Peer_RMI] - Using version: " + newVersion);
+        logger.print("Using version: " + newVersion);
     }
 
 }

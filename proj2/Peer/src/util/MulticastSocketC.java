@@ -15,24 +15,24 @@ import java.net.MulticastSocket;
 public class MulticastSocketC extends MulticastSocket implements Runnable {
     private InetAddress group;
     private int selfId; //saves the id of the owner peer to reject own messages
-    private String name;
     private PeerConfig peerConfig;
+    Logger logger;
 
     public MulticastSocketC(String hostname, int port, int selfId, String name, PeerConfig peerConfig) throws IOException {
         super(port);
         this.group = Inet4Address.getByName(hostname);
-        this.name = name;
         this.selfId = selfId;
         this.peerConfig = peerConfig;
         this.setTimeToLive(1);
         this.joinGroup(this.group);
+        logger = new Logger(this, name);
     }
 
     public boolean send(byte[] data) {
         try {
             DatagramPacket outPacket = new DatagramPacket(data, data.length, group, getLocalPort()); // create the packet to send through the socket
             send(outPacket);
-            debug(String.format("sent %5d bytes in: %s", data.length, new String(data).split(" ", 2)[0]));
+            logger.print(String.format("sent %5d bytes in: %s", data.length, new String(data).split(" ", 2)[0]));
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -42,7 +42,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
 
     @Override
     public void run() {
-        debug("Waiting for multicast...");
+        logger.print("Waiting for multicast...");
         while (true) {
             //wait for multicast message + receive the response (blocking)
             byte[] responseBytes = new byte[65507]; // create buffer to receive response, max UDP Datagram size
@@ -57,14 +57,8 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
             Message m = new Message(inPacket);
             if (!m.isOwnMessage(this.selfId)) {
                 peerConfig.threadPool.submit(new Dispatcher(m, peerConfig)); // send a new task to the threadpool
-                debug(String.format("received %9s from Peer %3d (%d bytes in body)", m.action, m.senderId, m.body.length));
+                logger.print(String.format("received %9s from Peer %3d (%d bytes in body)", m.action, m.senderId, m.body.length));
             }
         }
-    }
-
-    //send a message with information about which multicastsocket is displaying the message
-    private void debug(String debugMessage) {
-        System.out.println(String.format("[MulticastSocketC:%9s] - " + debugMessage, this.name));
-
     }
 }

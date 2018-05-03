@@ -14,13 +14,14 @@ public class Message {
     public int chunkNo;
     public int replicationDegree;
     public byte[] body = new byte[0];
+    private Logger logger = new Logger(this);
 
     public Message(DatagramPacket packet) {
         try {
             this.parseMessage(packet);
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println(String.format("[Message] - not a valid message (%d bytes)...ignoring", packet.getData()));
+            logger.err(String.format("[Message] - not a valid message (%d bytes)...ignoring", packet.getData().length));
         }
     }
 

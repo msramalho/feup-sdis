@@ -2,12 +2,14 @@ package src.client;
 
 import src.localStorage.InternalState;
 import src.main.*;
+import src.util.Logger;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
 public class TestApp {
+    private static Logger logger = new Logger("TestApp");
     public static void main(String args[]) {
         String peerId = args[0];
         String action = args[1];
@@ -18,7 +20,7 @@ public class TestApp {
             stub = (InitiatorPeer) registry.lookup(peerId);
 
         } catch (Exception e) {
-            System.err.println("Client exception: " + e.toString());
+            logger.err("Client exception: " + e.toString());
             e.printStackTrace();
         }
 
@@ -27,9 +29,10 @@ public class TestApp {
         String enhancedVersion = "1.1";
         if (action.substring(action.length() - 3).equals("ENH")) version = enhancedVersion;
         try {
+            assert stub != null;
             stub.updateProtocolVersion(version); // send the correct protocol version
         } catch (RemoteException e) {
-            System.out.println(e.getMessage());
+            logger.err(e.getMessage());
         }
 
         switch (action) {
@@ -40,7 +43,7 @@ public class TestApp {
                     int replicationDegree = Integer.parseInt(args[3]);
                     stub.backup(file, replicationDegree);
                 } catch (RemoteException e) {
-                    System.out.println(e.getMessage());
+                    logger.err(e.getMessage());
                 }
                 break;
             case "RESTOREENH":
@@ -49,7 +52,7 @@ public class TestApp {
                     String file = args[2];
                     stub.restore(file);
                 } catch (RemoteException e) {
-                    System.out.println(e.getMessage());
+                    logger.err(e.getMessage());
                 }
                 break;
             case "DELETEENH":
@@ -58,7 +61,7 @@ public class TestApp {
                     String file = args[2];
                     stub.delete(file);
                 } catch (RemoteException e) {
-                    System.out.println(e.getMessage());
+                    logger.err(e.getMessage());
                 }
                 break;
             case "RECLAIMENH":
@@ -67,16 +70,16 @@ public class TestApp {
                     int maxDiskSpace = Integer.parseInt(args[2]);
                     stub.reclaim(maxDiskSpace);
                 } catch (RemoteException e) {
-                    System.out.println(e.getMessage());
+                    logger.err(e.getMessage());
                 }
                 break;
             case "STATEENH":
             case "STATE":
                 try {
                     InternalState state = stub.state();
-                    System.out.println(state);
+                    logger.err(state.toString());
                 } catch (RemoteException e) {
-                    System.out.println(e.getMessage());
+                    logger.err(e.getMessage());
                 }
                 break;
         }
