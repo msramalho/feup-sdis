@@ -36,8 +36,7 @@ public class LocalChunk extends Chunk implements Serializable {
                 totalRead += lastRead > 0 ? lastRead : 0; // only update for positive values
             }
             chunk = new byte[totalRead];
-            for (int i = 0; i < totalRead; i++)
-                chunk[i] = tempChunk[i];
+            System.arraycopy(tempChunk, 0, chunk, 0, totalRead);
 
             System.out.println("[LocalChunk.loadFromTCP] - read: " + totalRead + " bytes");
         } catch (IOException e) {

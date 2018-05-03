@@ -11,7 +11,7 @@ import java.net.Socket;
 
 
 public class P_GetChunk extends Protocol {
-    public P_GetChunk(Dispatcher d) { super(d); }
+    P_GetChunk(Dispatcher d) { super(d); }
 
     @Override
     public void run() {

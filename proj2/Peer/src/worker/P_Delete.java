@@ -3,10 +3,8 @@ package src.worker;
 import src.localStorage.StoredChunk;
 import src.util.Message;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 public class P_Delete extends Protocol {
-    public P_Delete(Dispatcher d) { super(d); }
+    P_Delete(Dispatcher d) { super(d); }
 
     @Override
     public void run() {

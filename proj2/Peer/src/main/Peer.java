@@ -10,8 +10,8 @@ import src.localStorage.LocalFile;
 import src.util.Message;
 
 public class Peer implements InitiatorPeer {
-    static LocalFile localFile;
-    static PeerConfig peerConfig;
+    private static LocalFile localFile;
+    private static PeerConfig peerConfig;
 
     public static void main(String[] args) {
         try {
@@ -42,21 +42,21 @@ public class Peer implements InitiatorPeer {
 
         // maintain proper state of internal database every 10s
         while (true) {
-            try { Thread.sleep(10000); } catch (InterruptedException e) {}
+            try { Thread.sleep(10000); } catch (InterruptedException ignored) {}
             peerConfig.internalState.asyncChecks();
         }
     }
 
 
     @Override
-    public void backup(String pathname, int replicationDegree) throws RemoteException {
+    public void backup(String pathname, int replicationDegree) {
         System.out.println("[Peer_RMI] - BACKUP started");
         localFile = new LocalFile(pathname, replicationDegree, peerConfig);
         localFile.backup();
     }
 
     @Override
-    public void restore(String pathname) throws RemoteException {
+    public void restore(String pathname) {
         System.out.println("[Peer_RMI] - RESTORE started");
         localFile = new LocalFile(pathname, 0, peerConfig);
         try {
@@ -68,20 +68,20 @@ public class Peer implements InitiatorPeer {
     }
 
     @Override
-    public void delete(String pathname) throws RemoteException {
+    public void delete(String pathname) {
         System.out.println("[Peer_RMI] - DELETE started");
         localFile = new LocalFile(pathname, 0, peerConfig);
         localFile.deleteFile();
     }
 
     @Override
-    public void reclaim(int maxDiskSpace) throws RemoteException {
+    public void reclaim(int maxDiskSpace) {
         System.out.println("[Peer_RMI] - RECLAIM started");
         peerConfig.internalState.reclaimKBytes(maxDiskSpace);
     }
 
     @Override
-    public InternalState state() throws RemoteException {
+    public InternalState state() {
         System.out.println("[Peer_RMI] - STATE started");
         //TODO: complete with section 4. Client interface: Retrieve local service state information, do so by completing: addMissingInfoForClient
         InternalState is = peerConfig.internalState;
@@ -90,7 +90,7 @@ public class Peer implements InitiatorPeer {
     }
 
     @Override
-    public void updateProtocolVersion(String newVersion) throws RemoteException {
+    public void updateProtocolVersion(String newVersion) {
         peerConfig.protocolVersion = newVersion;
         System.out.println("[Peer_RMI] - Using version: " + newVersion);
     }

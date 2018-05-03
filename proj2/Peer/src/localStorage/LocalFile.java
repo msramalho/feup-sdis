@@ -21,14 +21,15 @@ import java.util.concurrent.Future;
 import static java.lang.Integer.min;
 
 public class LocalFile {
-    PeerConfig peerConfig;
-    public static Integer CHUNK_SIZE = 64000;
+    private PeerConfig peerConfig;
+    static Integer CHUNK_SIZE = 64000;
 
     public String fileId;
-    String filename; // relative filename in the current file system
     public Integer replicationDegree; //desired replication degree
-    ArrayList<LocalChunk> chunks;
-    public int numChunks;
+
+    private String filename; // relative filename in the current file system
+    private ArrayList<LocalChunk> chunks;
+    private int numChunks;
 
     public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
         this.peerConfig = peerConfig;
@@ -46,7 +47,7 @@ public class LocalFile {
         // read from the filesystem into an input stream
         File file = new File(this.filename);
         int file_size = (int) file.length();
-        FileInputStream inStream = null;
+        FileInputStream inStream;
         try {
             inStream = new FileInputStream(file);
         } catch (FileNotFoundException e) {
@@ -116,9 +117,9 @@ public class LocalFile {
         f.getParentFile().mkdirs();
         f.createNewFile();
         FileOutputStream fos = new FileOutputStream(f, true); // true means append
-        for (int i = 0; i < chunks.size(); i++)
-            if (chunks.get(i) != null && chunks.get(i).chunk != null)
-                fos.write(chunks.get(i).chunk);
+        for (LocalChunk chunk : chunks)
+            if (chunk != null && chunk.chunk != null)
+                fos.write(chunk.chunk);
         fos.close();
         System.out.println("[LocalFile] - File reconstruction completed: " + path);
     }

@@ -50,7 +50,7 @@ public class BackupChunk implements Runnable {
 
             System.out.println("[BackupChunk] - waiting for chunk " + c.chunkNo + " " + wait + "ms (got " + c.countAcks() + "/" + c.replicationDegree + " replies)");
 
-            try { Thread.sleep(wait); } catch (InterruptedException e) {}
+            try { Thread.sleep(wait); } catch (InterruptedException ignored) {}
             i++;
         } while (i < BackupChunk.PUTCHUNK_ATTEMPTS && c.countAcks() < c.replicationDegree);
 

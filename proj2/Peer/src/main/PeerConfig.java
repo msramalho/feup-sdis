@@ -1,6 +1,7 @@
 package src.main;
 
 import src.localStorage.InternalState;
+import src.util.Logger;
 import src.util.Message;
 import src.util.MulticastSocketC;
 
@@ -12,14 +13,17 @@ public class PeerConfig {
     public static final String DEFAULT_VERSION = "1.0";
     public String protocolVersion;
     public Integer id; // the peer id
-    InetAddress sapIp; // service access point IP
     public InetAddress machineIp = null; // Ip address of current machine, for TCP connections
-    Integer sapPort; // service access point port
     public MulticastSocketC mcControl; // Multicast Control Socket
     public MulticastSocketC mcBackup; // Multicast Back Up Socket
     public MulticastSocketC mcRestore; // Multicast Restore Socket
     public ExecutorService threadPool; //global threadpool for services
     public InternalState internalState; //manager for the internal state database (non-volatile memory)
+
+    private InetAddress sapIp; // service access point IP
+    private Integer sapPort; // service access point port
+
+    Logger logger = new Logger(this);
 
     public PeerConfig(String[] args) throws Exception {
         if (args.length < 7)
@@ -47,7 +51,7 @@ public class PeerConfig {
      * @param sap <hostname:Port>, <IP:Port> or just <Port> in which case the IP is from localhost
      * @throws UnknownHostException when Inet4Address.getByName fails for the given IP/hostname
      */
-    protected void loadServiceAccessPoint(String sap) throws UnknownHostException {
+    private void loadServiceAccessPoint(String sap) throws UnknownHostException {
         String hostname = "localhost"; // if no other is given
         if (sap.contains(":")) {//ip and port
             String sapParts[] = sap.split(":");
@@ -59,7 +63,7 @@ public class PeerConfig {
         this.sapIp = Inet4Address.getByName(hostname);
     }
 
-    public void initialize() {
+    void initialize() {
         //threads for building the requests queues
         (new Thread(this.mcControl)).start();
         (new Thread(this.mcBackup)).start();

@@ -1,5 +1,6 @@
 package src.localStorage;
 
+import src.util.Logger;
 import src.util.Message;
 
 import java.io.Serializable;
@@ -13,6 +14,7 @@ public abstract class Chunk implements Serializable {
     public HashSet<Integer> peersAcks = new HashSet<>(); // a set of the IDs of Peers that have saved this chunk
     public transient byte[] chunk = null; // the chunk bytes for this chunk
     public boolean gotAnswer = false; // true if the current peer saw a CHUNK message while sleeping
+    transient Logger logger = new Logger(this);
 
     public Chunk() {}
 
@@ -37,9 +39,7 @@ public abstract class Chunk implements Serializable {
 
     public static String getUniqueId(String fileId, int chunkNo) { return fileId + "_" + chunkNo; }
 
-    public String getShortId() {
-        return fileId.substring(0, 10) + "_" + chunkNo;
-    }
+    public String getShortId() { return fileId.substring(0, 10) + "_" + chunkNo; }
 
     @Override
     public boolean equals(Object o) {

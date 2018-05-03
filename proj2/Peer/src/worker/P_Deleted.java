@@ -3,7 +3,7 @@ package src.worker;
 import src.localStorage.LocalChunk;
 
 public class P_Deleted extends Protocol {
-    public P_Deleted(Dispatcher d) {super(d);}
+    P_Deleted(Dispatcher d) {super(d);}
 
     @Override
     public void run() {

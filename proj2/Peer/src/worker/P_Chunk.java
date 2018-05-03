@@ -5,7 +5,7 @@ import src.localStorage.LocalChunk;
 import src.main.PeerConfig;
 
 public class P_Chunk extends Protocol {
-    public P_Chunk(Dispatcher d) { super(d); }
+    P_Chunk(Dispatcher d) { super(d); }
 
     @Override
     public void run() {

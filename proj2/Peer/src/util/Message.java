@@ -44,7 +44,7 @@ public class Message {
         if (parts.length == 2) this.body = Arrays.copyOfRange(packet.getData(), headerBytes + 4, packet.getLength());//save body if it exists (64kB chunks)
     }
 
-    public boolean isOwnMessage(int selfId) {
+    boolean isOwnMessage(int selfId) {
         return this.senderId == selfId;
     }
 
