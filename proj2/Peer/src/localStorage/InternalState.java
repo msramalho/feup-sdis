@@ -10,21 +10,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InternalState implements Serializable {
-    public static transient String internalStateFolder = "internal_state_peer_%d";
+    static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.ser";
     public long occupiedSpace; // bytes that this peer can occupy in the file system
     public long allowedSpace = (long) (16 * Math.pow(2, 20)); // bytes that this peer can occupy in the file system
     // public long allowedSpace = (long) (1 * Math.pow(2, 17)); // bytes that this peer can occupy in the file system
 
-    public static int peerId;
+    private static int peerId;
 
     public ConcurrentHashMap<String, LocalChunk> localChunks; // local files being backed up - file_id_chukNo => LocalChunk
     public ConcurrentHashMap<String, StoredChunk> storedChunks; // others' chunks - <file_id>_<chunkNo> => StoredChunk
 
-    public InternalState() {
+    private InternalState() {
         this.localChunks = new ConcurrentHashMap<>();
         this.storedChunks = new ConcurrentHashMap<>();
     }
@@ -78,7 +79,7 @@ public class InternalState implements Serializable {
     public void asyncChecks() { // works like a one-time garbage collector
         // try to delete all the chunks that failed to delete contents on disc when DELETE came
         for (StoredChunk sChunk : storedChunks.values())
-            if (sChunk.deleted == true && sChunk.savedLocally)
+            if (sChunk.deleted && sChunk.savedLocally)
                 deleteStoredChunk(sChunk, true);
         removeEmptyFolders(internalStateFolder);
     }
@@ -89,6 +90,7 @@ public class InternalState implements Serializable {
         if (!f.exists()) return 0;
         String listFiles[] = f.list();
         long totalSize = 0;
+        assert listFiles != null;
         for (String file : listFiles) {
             File folder = new File(dir + "/" + file);
             if (folder.isDirectory())
@@ -118,9 +120,9 @@ public class InternalState implements Serializable {
 
     private long getFileSpace(String filename) { return new File(filename).length(); }
 
-    public static long folderSize(File directory) {
+    private static long folderSize(File directory) {
         long length = 0;
-        for (File file : directory.listFiles()) {
+        for (File file : Objects.requireNonNull(directory.listFiles())) {
             if (file.isFile())
                 length += file.length();
             else
@@ -175,9 +177,8 @@ public class InternalState implements Serializable {
     }
 
     //add or update a given local chunk information
-    public InternalState addLocalChunk(LocalChunk localChunk) {
+    public void addLocalChunk(LocalChunk localChunk) {
         localChunks.put(localChunk.getUniqueId(), localChunk);
-        return this;
     }
 
     //add or update a given stored chunk  information
@@ -248,12 +249,8 @@ public class InternalState implements Serializable {
     }
 
     // return the path to the chunk in this peer's filesystem
-    public String getChunkPath(StoredChunk sChunk) {
-        return internalStateFolder + "/" + sChunk.fileId + "/" + sChunk.chunkNo;
-    }
+    private String getChunkPath(StoredChunk sChunk) { return internalStateFolder + "/" + sChunk.fileId + "/" + sChunk.chunkNo; }
 
-    private static String getDatabaseName() {
-        return internalStateFolder + "/" + internalStateFilename;
-    }
+    private static String getDatabaseName() { return internalStateFolder + "/" + internalStateFilename; }
 
 }

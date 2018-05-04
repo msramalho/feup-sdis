@@ -4,8 +4,8 @@ import src.localStorage.LocalChunk;
 
 import java.util.ArrayList;
 
-public class P_Adele extends Protocol {
-    public P_Adele(Dispatcher d) {super(d);}
+public class P_Hello extends Protocol {
+    P_Hello(Dispatcher d) {super(d);}
 
     @Override
     public void run() {

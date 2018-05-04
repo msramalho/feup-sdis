@@ -3,7 +3,7 @@ package src.worker;
 import src.localStorage.StoredChunk;
 
 public class P_Removed extends Protocol {
-    public P_Removed(Dispatcher d) {
+    P_Removed(Dispatcher d) {
         super(d);
     }
 

@@ -5,7 +5,7 @@ import src.util.Message;
 
 public class P_PutChunk extends Protocol {
 
-    public P_PutChunk(Dispatcher d) { super(d); }
+    P_PutChunk(Dispatcher d) { super(d); }
 
     @Override
     public void run() {

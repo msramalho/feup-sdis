@@ -1,7 +1,9 @@
 package src.util;
 
 import java.net.DatagramPacket;
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * parses a packet string into a queryable object
@@ -14,13 +16,14 @@ public class Message {
     public int chunkNo;
     public int replicationDegree;
     public byte[] body = new byte[0];
+    private Logger logger = new Logger(this);
 
     public Message(DatagramPacket packet) {
         try {
             this.parseMessage(packet);
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println(String.format("[Message] - not a valid message (%d bytes)...ignoring", packet.getData()));
+            logger.err(String.format("[Message] - not a valid message (%d bytes)...ignoring", packet.getData().length));
         }
     }
 
@@ -44,7 +47,7 @@ public class Message {
         if (parts.length == 2) this.body = Arrays.copyOfRange(packet.getData(), headerBytes + 4, packet.getLength());//save body if it exists (64kB chunks)
     }
 
-    public boolean isOwnMessage(int selfId) {
+    boolean isOwnMessage(int selfId) {
         return this.senderId == selfId;
     }
 
@@ -60,9 +63,20 @@ public class Message {
 
     public boolean isRemoved() { return this.action.equals("REMOVED"); }
 
-    public boolean isAdele() { return this.action.equals("ADELE"); }
+    public boolean isHello() { return this.action.equals("HELLO"); }
 
     public boolean isDeleted() { return this.action.equals("DELETED");}
+
+    public AbstractMap.SimpleEntry<String, Integer> getTCPCoordinates(){
+        //parse the body of the message, which should contain IP:Port of the TCP socket on the other Peer
+        String[] parts = new String(body).split(":");
+        if (parts.length != 2) {
+            logger.err(String.format("Expected IP:Port but got: %s", new String(body)));
+            System.exit(1);
+        }
+        return new AbstractMap.SimpleEntry<>(parts[0], Integer.parseInt(parts[1]));
+    }
+
 
     public static byte[] createMessage(String header) { return Message.createMessage(header, new byte[0]); }
 

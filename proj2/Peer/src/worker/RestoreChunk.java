@@ -20,18 +20,15 @@ public class RestoreChunk implements Callable {
 
     @Override
     public Object call() {
-        System.out.println("here1 " + localChunk.getShortId());
         LocalChunk lChunk = peerConfig.internalState.getLocalChunk(localChunk.getUniqueId());
         if (lChunk == null) return null; // this is not a local file
         lChunk.chunk = null; // equivalent to empty cache
 
-        System.out.println("here2");
         // handle ENHANCEMENT_2
         byte[] getChunkBody = new byte[0];
-        if (peerConfig.isEnhanced() && peerConfig.machineIp != null) {
-            // if is enhanced, send the IP:Port of the TCP connection to the peeer
-            lChunk.initiateSocket();
-            String chunkBody = String.format("%s:%s", peerConfig.machineIp.getHostAddress(), lChunk.socket.getLocalPort());
+        if (peerConfig.isEnhanced() && peerConfig.machineIp != null && lChunk.startTCP()) {
+            // if is enhanced, send the IP:Port of the TCP connection to the peer and TCP started succesfully
+            String chunkBody = String.format("%s:%s", peerConfig.machineIp.getHostAddress(), lChunk.tcp.socket.getLocalPort());
             getChunkBody = chunkBody.getBytes();
         }
 
@@ -39,7 +36,7 @@ public class RestoreChunk implements Callable {
 
         for (int i = 0; i < RestoreChunk.RESTORE_ATTEMPTS && lChunk.chunk == null; i++) {
             //no ongoing TCP connection - this will be false again if TCP connection fails
-            if (lChunk.socket == null || i == 0) peerConfig.mcControl.send(message); //create and send message through multicast
+            if (lChunk.tcp.dead() || i == 0) peerConfig.mcControl.send(message); //create and send message through multicast
 
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
             System.out.println("[RestoreChunk] - waiting for CHUNK " + lChunk.chunkNo + " for " + wait + "ms");
