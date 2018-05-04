@@ -1,7 +1,9 @@
 package src.util;
 
 import java.net.DatagramPacket;
+import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * parses a packet string into a queryable object
@@ -64,6 +66,17 @@ public class Message {
     public boolean isAdele() { return this.action.equals("ADELE"); }
 
     public boolean isDeleted() { return this.action.equals("DELETED");}
+
+    public AbstractMap.SimpleEntry<String, Integer> getTCPCoordinates(){
+        //parse the body of the message, which should contain IP:Port of the TCP socket on the other Peer
+        String[] parts = new String(body).split(":");
+        if (parts.length != 2) {
+            logger.err(String.format("Expected IP:Port but got: %s", new String(body)));
+            System.exit(1);
+        }
+        return new AbstractMap.SimpleEntry<>(parts[0], Integer.parseInt(parts[1]));
+    }
+
 
     public static byte[] createMessage(String header) { return Message.createMessage(header, new byte[0]); }
 

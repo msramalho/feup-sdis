@@ -37,7 +37,7 @@ public abstract class Chunk implements Serializable {
 
     public String getUniqueId() { return StoredChunk.getUniqueId(fileId, chunkNo); }
 
-    public static String getUniqueId(String fileId, int chunkNo) { return fileId + "_" + chunkNo; }
+    static String getUniqueId(String fileId, int chunkNo) { return fileId + "_" + chunkNo; }
 
     public String getShortId() { return fileId.substring(0, 10) + "_" + chunkNo; }
 

@@ -4,10 +4,12 @@ import src.localStorage.StoredChunk;
 import src.main.Peer;
 import src.main.PeerConfig;
 import src.util.Message;
+import src.util.TcpClient;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.AbstractMap;
 
 
 public class P_GetChunk extends Protocol {
@@ -44,26 +46,13 @@ public class P_GetChunk extends Protocol {
             //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
             d.peerConfig.mcRestore.send(Message.createMessage(String.format("CHUNK %s %d %s %d\r\n\r\n", usingVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo), messageBody));
 
-            if (usingEnhancedVersion) { // ENHANCEMENT_2 continuation
-                try {
-                    //parse the body of the message, which should contain IP:Port of the TCP socket on the other Peer
-                    String[] parts = new String(d.message.body).split(":"); ;
-                    String peerIp = parts[0];
-                    int peerPort = Integer.parseInt(parts[1]);
-
-                    Socket clientSocket = new Socket(peerIp, peerPort);
-                    DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-                    outToServer.write(sChunk.chunk, 0, sChunk.chunk.length);
-                    outToServer.flush();
-                    clientSocket.close(); // sends EOF
-                    System.out.println("[Protocol:GetChunk] - chunk " + sChunk.getShortId() + " sent through TCP (" + sChunk.chunk.length + " bytes)");
-                } catch (IOException e) {
-                    System.out.println("[Protocol:GetChunk] - enhancement 2 unable to connect to TCP");
-                    e.printStackTrace();
-                }
+            // ENHANCEMENT_2 continuation - try sending chunk through TCP
+            if (usingEnhancedVersion) {
+                TcpClient tcp = new TcpClient();
+                if (tcp.sendChunk(d.message, sChunk.chunk))
+                    logger.print("chunk " + sChunk.getShortId() + " sent through TCP (" + sChunk.chunk.length + " bytes)");
             }
         }
-
 
         sChunk.inProcess = false;
     }
