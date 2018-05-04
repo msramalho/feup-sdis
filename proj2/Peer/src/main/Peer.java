@@ -38,8 +38,8 @@ public class Peer implements InitiatorPeer {
         logger.print(String.format("Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
         peerConfig.initialize();
 
-        if (peerConfig.isEnhanced())  // only send ADELE if is enhanced
-            peerConfig.mcControl.send(Message.createMessage(String.format("ADELE %s %d 0\r\n\r\n", peerConfig.protocolVersion, peerConfig.id)));
+        if (peerConfig.isEnhanced())  // only send HELLO if is enhanced
+            peerConfig.mcControl.send(Message.createMessage(String.format("HELLO %s %d 0\r\n\r\n", peerConfig.protocolVersion, peerConfig.id)));
 
         // maintain proper state of internal database every 10s
         while (true) {
