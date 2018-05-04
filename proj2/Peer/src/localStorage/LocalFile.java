@@ -22,7 +22,7 @@ import static java.lang.Integer.min;
 
 public class LocalFile {
     private PeerConfig peerConfig;
-    static Integer CHUNK_SIZE = 64000;
+    public static Integer CHUNK_SIZE = 64000;
 
     public String fileId;
     public Integer replicationDegree; //desired replication degree

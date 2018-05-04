@@ -9,7 +9,7 @@ public class StoredChunk extends Chunk implements Serializable {
     boolean savedLocally = false; //true if this peer has a copy of the chunk, false otherwise
     public boolean inProcess = false; //true if this Chunk is being handled in a GETCHUNK received message
 
-    // constructor needed for serialization
+    // TODO: test if constructor is needed for serialization
     public StoredChunk() { }
 
     public StoredChunk(Message message) {super(message);}

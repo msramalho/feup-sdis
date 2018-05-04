@@ -1,50 +1,30 @@
 package src.localStorage;
 
+import src.util.TcpServer;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class LocalChunk extends Chunk implements Serializable {
-    public transient ServerSocket socket = null; //socket used for TCP connection for the current chunk
+    public transient TcpServer tcp = null;
 
-    public LocalChunk(String fileId, int chunkNo) { super(fileId, chunkNo); }
+    public LocalChunk(String fileId, int chunkNo) {
+        super(fileId, chunkNo);
+    }
 
-    public LocalChunk(String fileId, int chunkNo, Integer replicationDegree, byte[] chunk) {super(fileId, chunkNo, replicationDegree, chunk); }
-
-    public void initiateSocket() {
-        try {
-            socket = new ServerSocket(0);
-        } catch (IOException e) {
-            System.out.println("[LocalChunk] - unable to open new socket, maybe all ports are being used");
-            e.printStackTrace();
-        }
+    public LocalChunk(String fileId, int chunkNo, Integer replicationDegree, byte[] chunk) {
+        super(fileId, chunkNo, replicationDegree, chunk);
     }
 
     // uses the previously opened ServerSocket to receive the chunk bytes through TCP
-    public void loadFromTCP() {
-        try {
-            socket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
-            socket.setSoTimeout(1000);
-            Socket connectionSocket = socket.accept();
-            socket.close();
-            DataInputStream inFromClient = new DataInputStream(connectionSocket.getInputStream());
+    public boolean loadFromTCP() {
+        return tcp.receiveChunk(this);
+    }
 
-            int totalRead = 0, lastRead = 1;
-            byte[] tempChunk = new byte[LocalFile.CHUNK_SIZE];
-            while (totalRead < LocalFile.CHUNK_SIZE && lastRead >= 0) {
-                lastRead = inFromClient.read(tempChunk, totalRead, 64000 - totalRead);
-                totalRead += lastRead > 0 ? lastRead : 0; // only update for positive values
-            }
-            chunk = new byte[totalRead];
-            System.arraycopy(tempChunk, 0, chunk, 0, totalRead);
-
-            System.out.println("[LocalChunk.loadFromTCP] - read: " + totalRead + " bytes");
-        } catch (IOException e) {
-            chunk = null;
-            socket = null;
-            System.out.println("[Protocol:Chunk] - unable to receive chunk through TCP, defaulting back to old protocol");
-            // e.printStackTrace();
-        }
+    public boolean startTCP() {
+        tcp = tcp == null ? new TcpServer() : tcp; // singleton
+        return tcp.start();
     }
 
 

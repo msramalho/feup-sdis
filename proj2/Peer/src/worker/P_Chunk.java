@@ -17,11 +17,9 @@ public class P_Chunk extends Protocol {
         } // if not, check if this CHUNK is about a LocalChunk
         else if ((chunk = d.peerConfig.internalState.getLocalChunk(d.message)) != null) {
             chunk.gotAnswer = true;
-            //only use TCP if this Peer is enhanced, if the Peer that sent the CHUNK message is enhanced and if this Peer was able to create the socket
-            if (!d.peerConfig.isEnhanced() || !PeerConfig.isMessageEnhanced(d.message) || ((LocalChunk) chunk).socket == null)
+            //only use TCP if this Peer is enhanced, if the Peer that sent the CHUNK message is enhanced and if this Peer was able to create the socket, the TCP read is done in the if
+            if (!d.peerConfig.isEnhanced() || !PeerConfig.isMessageEnhanced(d.message) || ((LocalChunk) chunk).tcp.dead() || !((LocalChunk) chunk).loadFromTCP()) // ENHANCEMENT_2
                 chunk.chunk = d.message.body; // save the received value
-            else  // if the socket was created successfully
-                ((LocalChunk) chunk).loadFromTCP(); // ENHANCEMENT_2
         }
     }
 }
