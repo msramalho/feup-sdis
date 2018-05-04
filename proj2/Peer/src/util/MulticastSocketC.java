@@ -16,7 +16,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
     private InetAddress group;
     private int selfId; //saves the id of the owner peer to reject own messages
     private PeerConfig peerConfig;
-    Logger logger;
+    private Logger logger;
 
     public MulticastSocketC(String hostname, int port, int selfId, String name, PeerConfig peerConfig) throws IOException {
         super(port);
