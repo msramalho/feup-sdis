@@ -18,7 +18,7 @@ public class Peer implements InitiatorPeer {
         try {
             peerConfig = new PeerConfig(args);//create peer
         } catch (Exception e) {
-            System.err.println("[Peer] - cannot parse cmd line args");
+            logger.err("cannot parse cmd line args");
             e.printStackTrace();
             return;
         }

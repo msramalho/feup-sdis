@@ -29,14 +29,14 @@ public class P_PutChunk extends Protocol {
         sleepRandom();
 
         //conclude the store process
-        System.out.println(String.format("[Protocol:PutChunk] - perceived replication degree for chunk %s: %d/%d", sChunk.getShortId(), sChunk.countAcks(), sChunk.replicationDegree));
+        logger.print(String.format("perceived replication degree for chunk %s: %d/%d", sChunk.getShortId(), sChunk.countAcks(), sChunk.replicationDegree));
         if (sChunk.countAcks() < sChunk.replicationDegree) {
 
             // check if enough disk space is available
             if (d.peerConfig.internalState.availableSpace() < d.message.body.length) { // if there isn't enough memory, try to free
-                System.out.println("[Protocol:PutChunk] - there isn't enough memory for chunk: " + sChunk.getShortId());
+                logger.print("there isn't enough memory for chunk: " + sChunk.getShortId());
                 if (!d.peerConfig.internalState.freeMemory(d.peerConfig, d.message.body.length)) { // if unable to free memory
-                    System.out.println("[Protocol:PutChunk] - and cannot free enough memory for chunk: " + sChunk.getShortId());
+                    logger.print("and cannot free enough memory for chunk: " + sChunk.getShortId());
                     return;
                 }
             }

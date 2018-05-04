@@ -1,6 +1,7 @@
 package src.localStorage;
 
 import src.main.PeerConfig;
+import src.util.Logger;
 import src.util.Message;
 import src.worker.RemoveChunk;
 
@@ -16,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InternalState implements Serializable {
     static transient String internalStateFolder = "internal_state_peer_%d";
     private static transient String internalStateFilename = "database.ser";
+    private static transient Logger logger = new Logger("InternalState");
     public long occupiedSpace; // bytes that this peer can occupy in the file system
     public long allowedSpace = (long) (16 * Math.pow(2, 20)); // bytes that this peer can occupy in the file system
     // public long allowedSpace = (long) (1 * Math.pow(2, 17)); // bytes that this peer can occupy in the file system
@@ -49,7 +51,7 @@ public class InternalState implements Serializable {
             in.close();
             fileIn.close();
         } catch (Exception e) {
-            System.out.println("[InternalState] - unable to load the 'database' file, may not exist yet");
+            logger.print("unable to load the 'database' file, may not exist yet");
             // e.printStackTrace();
         }
         if (is == null) is = new InternalState();
@@ -73,7 +75,6 @@ public class InternalState implements Serializable {
             i.printStackTrace();
         }
         updateOccupiedSpace();
-        // System.out.println("[InternalState] - saved: " + this);
     }
 
     public void asyncChecks() { // works like a one-time garbage collector
@@ -110,7 +111,7 @@ public class InternalState implements Serializable {
         try {
             new File(getDatabaseName()).createNewFile(); // create if not exists
         } catch (IOException e) {
-            System.out.println("[InternalState] - unable to create or load file");
+            logger.print("unable to create or load file");
             e.printStackTrace();
         }
 
@@ -162,12 +163,12 @@ public class InternalState implements Serializable {
     public synchronized StoredChunk getStoredChunk(Message m) {
         StoredChunk sChunk = storedChunks.get(Chunk.getUniqueId(m.fileId, m.chunkNo));
         if (sChunk != null && sChunk.savedLocally && sChunk.chunk == null) {
-            System.out.println(String.format("[InternalState] - reading (%s) from memory", sChunk.getShortId()));
+            logger.print(String.format("reading (%s) from memory", sChunk.getShortId()));
             Path p = FileSystems.getDefault().getPath("", getChunkPath(sChunk));
             try {
                 sChunk.chunk = Files.readAllBytes(p);
             } catch (IOException e) {
-                System.out.println(String.format("[InternalState] - unable to read chunk from memory (%s) this chunk will be marked as unsaved locally", sChunk.getUniqueId()));
+                logger.print(String.format("unable to read chunk from memory (%s) this chunk will be marked as unsaved locally", sChunk.getUniqueId()));
                 sChunk.savedLocally = false;
                 save();
                 e.printStackTrace();
@@ -199,9 +200,8 @@ public class InternalState implements Serializable {
             sChunk.setSavedLocally(true);
             sChunk.deleted = false;
             sChunk.addAck(peerId);
-            // System.out.println("[InternalState] - chunk " + sChunk.chunkNo + " saved successfully");
         } catch (IOException i) {
-            System.out.println("[InternalState] - failed to save chunk " + sChunk.getUniqueId() + " locally");
+            logger.print("failed to save chunk " + sChunk.getUniqueId() + " locally");
             i.printStackTrace();
         }
     }
@@ -210,12 +210,12 @@ public class InternalState implements Serializable {
         boolean res = false;
         File file = new File(getChunkPath(sChunk));
         if (file.delete()) {
-            System.out.println("[InternalState] - chunk: " + sChunk.getShortId() + " deleted");
+            logger.print("chunk: " + sChunk.getShortId() + " deleted");
             sChunk.savedLocally = false;
             sChunk.peersAcks.remove(peerId);
             res = true;
         } else {
-            System.out.println("[InternalState] - unable to delete chunk: " + sChunk.getUniqueId());
+            logger.err("unable to delete chunk: " + sChunk.getUniqueId());
         }
         sChunk.deleted = dueToDELETE;
         save();
@@ -230,7 +230,7 @@ public class InternalState implements Serializable {
                     storedChunk.savedLocally = false;
 
         save();
-        System.out.println("[InternalState] - allowedSpace after: " + allowedSpace);
+        logger.print("allowedSpace after: " + allowedSpace);
     }
 
     public void addMissingInfoForClient() {

@@ -31,7 +31,7 @@ public abstract class Protocol {
     public void sleepRandom(int from) {
         try {
             int sleepFor = ThreadLocalRandom.current().nextInt(from, 401);
-            System.out.println(String.format("[Protocol:%9s] - sleep for %3d ms", d.message.action, sleepFor));
+            logger.print(String.format("[Protocol:%9s] - sleep for %3d ms", d.message.action, sleepFor));
             Thread.sleep(sleepFor);
         } catch (InterruptedException e) {
             e.printStackTrace();

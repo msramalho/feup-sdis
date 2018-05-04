@@ -29,6 +29,6 @@ public class P_Delete extends Protocol {
         // commit changes to non-volatile memory
         d.peerConfig.internalState.save();
 
-        System.out.println(String.format("[Protocol:Delete] - deleted %d chunk(s)", count));
+        logger.print(String.format("deleted %d chunk(s)", count));
     }
 }
