@@ -1,6 +1,7 @@
 package src.worker.clustering;
 
 import src.main.Cluster;
+import src.util.LockException;
 import src.util.Message;
 import src.worker.Dispatcher;
 
@@ -13,12 +14,12 @@ public class P_Join extends ProtocolCluster {
     public P_Join(Dispatcher d) { super(d); }
 
     @Override
-    public void run() {
+    public void run() throws LockException {
         if (!hasCluster()) return;
 
         // restart the count of peers in this cluster
         cluster.clearPeers();
-        cluster.processingJoin = true;
+        cluster.lock("processing_join");
 
         // TODO: should PRESENT include the requesting peer?
         // TODO: should PRESENT change a flag to ASSESSING so that if two peers send JOIN there isn't a cock up? especially if the peers hashset dor the cluster is reset
@@ -28,12 +29,13 @@ public class P_Join extends ProtocolCluster {
         // sleep for 1 second (While I am asleep, the other Peer's PRESENT Messages will make)
         sleep(1000);
 
-        // send AVAILABLE <version> <id> <level> <receiverId> if there is an available slot
-        //TODO: if it receives an available like (same level and same destination) the one about to be sent, it aborts
-        if (cluster.peers.size() < Cluster.MAX_SIZE) {
-            d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d %d", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, d.message.senderId));
-        }
+        // send AVAILABLE <version> <id> <level> <receiverId> if there is an available slot and no one silenced me
+        if (cluster.peers.size() < Cluster.MAX_SIZE && !cluster.locked("available_silenced"))
+            sendAvailable();
+    }
 
-
+    private void sendAvailable() {
+        //TODO: include info about the multiast groups of all the clusters in this level and in the above
+        d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d %d", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, d.message.senderId));
     }
 }

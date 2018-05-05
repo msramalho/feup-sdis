@@ -1,5 +1,6 @@
 package src.worker;
 
+import src.util.LockException;
 import src.util.Logger;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -10,7 +11,7 @@ public abstract class Protocol {
 
     public Protocol(Dispatcher d) { this.d = d; }
 
-    public abstract void run();
+    public abstract void run() throws LockException;
 
     protected void sleep(Integer miliseconds) {
         try { Thread.sleep(miliseconds); } catch (InterruptedException ignored) { }

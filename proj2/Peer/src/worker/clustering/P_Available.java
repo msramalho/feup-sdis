@@ -1,5 +1,6 @@
 package src.worker.clustering;
 
+import src.util.LockException;
 import src.worker.Dispatcher;
 
 /**
@@ -11,12 +12,13 @@ public class P_Available extends ProtocolCluster {
     public P_Available(Dispatcher d) { super(d); }
 
     @Override
-    public void run() {
+    public void run() throws LockException {
         //TODO: extract content of if into two methods
         if (isGlobal() && d.message.receiverId == d.peerConfig.id) { // case 1
+            //TODO: get the information in the body of the accepted so I can officially join this cluster and all the ones in the levels above
 
-        } else if (hasCluster() && cluster.processingJoin) { // case 2
-            cluster.silencedAvailable = true;
+        } else if (hasCluster() && cluster.locked("processing_join")) { // case 2
+            cluster.lock("available_silenced");
         }
     }
 }
