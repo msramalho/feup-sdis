@@ -116,9 +116,11 @@ public class LocalFile {
         f.getParentFile().mkdirs();
         f.createNewFile();
         FileOutputStream fos = new FileOutputStream(f, true); // true means append
-        for (int i = 0; i < chunks.size(); i++)
+        for (int i = 0; i < chunks.size(); i++){
+            System.out.println("[ BEATRIZ ] : " + chunks.get(i).chunk.getBytes);
             if (chunks.get(i) != null && chunks.get(i).chunk != null)
                 fos.write(chunks.get(i).chunk);
+        }
         fos.close();
         System.out.println("[LocalFile] - File reconstruction completed: " + path);
     }
