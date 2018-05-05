@@ -37,7 +37,7 @@ public class Message {
         this.action = args[0];
         this.protocolVersion = args[1];
         this.senderId = Integer.parseInt(args[2]);
-        this.fileId = args[3];
+        this.fileId = (args.length >= 4) ? args[3] : ""; // save file id if it exists
 
         this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
         this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
@@ -66,7 +66,7 @@ public class Message {
 
     public boolean isDeleted() { return this.action.equals("DELETED");}
 
-    public AbstractMap.SimpleEntry<String, Integer> getTCPCoordinates(){
+    public AbstractMap.SimpleEntry<String, Integer> getTCPCoordinates() {
         //parse the body of the message, which should contain IP:Port of the TCP socket on the other Peer
         String[] parts = new String(body).split(":");
         if (parts.length != 2) {
