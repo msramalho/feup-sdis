@@ -1,15 +1,9 @@
 package src.worker;
 
 import src.localStorage.StoredChunk;
-import src.main.Peer;
 import src.main.PeerConfig;
 import src.util.Message;
 import src.util.TcpClient;
-
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
-import java.util.AbstractMap;
 
 
 public class P_GetChunk extends Protocol {

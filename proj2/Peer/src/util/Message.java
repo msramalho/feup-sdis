@@ -3,7 +3,6 @@ package src.util;
 import java.net.DatagramPacket;
 import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.Map;
 
 /**
  * parses a packet string into a queryable object
