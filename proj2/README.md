@@ -50,6 +50,7 @@ When a Peer initiates:
  * Send a `JOIN <LEVEL>` to the global McControl with `LEVEL = 0`
      * If a Peer (actually a Peer from a cluster at `LEVEL`) answers (there is a slot available in its cluster) all others are silenced. The new Peer and the responding Peer exchange information about the upper Clusters so that the new peer can listen on all important channels. 
      * If no Peer answers, then this Peer will [create its own cluster](#create-new-cluster)
+     
 When a Peer joins a Cluster:
  * Internally check if the cluster is full
  * If it is full, make this cluster join [a higher level cluster](#higher-level-clusters)
