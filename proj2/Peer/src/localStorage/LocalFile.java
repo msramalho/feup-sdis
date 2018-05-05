@@ -1,5 +1,6 @@
 package src.localStorage;
 
+import src.util.Logger;
 import src.worker.BackupChunk;
 import src.main.PeerConfig;
 import src.worker.DeleteFile;
@@ -30,6 +31,9 @@ public class LocalFile {
     private ArrayList<LocalChunk> chunks;
     private int numChunks;
 
+    private Logger logger = new Logger("LocalFile");
+
+
     public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
         this.peerConfig = peerConfig;
         this.filename = filename;
@@ -41,7 +45,7 @@ public class LocalFile {
     }
 
     public void backup() {
-        System.out.println("[LocalFile] - splitting file: " + filename);
+        logger.print("splitting file: " + filename);
 
         // read from the filesystem into an input stream
         File file = new File(this.filename);
@@ -50,7 +54,7 @@ public class LocalFile {
         try {
             inStream = new FileInputStream(file);
         } catch (FileNotFoundException e) {
-            System.out.println("[LocalFile] - unable to read file: " + this.filename);
+            logger.err("unable to read file: " + this.filename);
             return;
         }
 
@@ -69,7 +73,7 @@ public class LocalFile {
             BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk, true);
             peerConfig.threadPool.submit(bcWorker);
             i++;
-            System.out.println(String.format("Chunk %d has %d bytes (read: %d out of %d)", i, chunkSize, totalBytesRead, file_size));
+            logger.print(String.format("Chunk %d has %d bytes (read: %d out of %d)", i, chunkSize, totalBytesRead, file_size));
         }
         if ((file_size % CHUNK_SIZE) == 0) // if last chunk is 64K send chunk with size 0
             peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, i, replicationDegree, new byte[0]), true));
@@ -82,7 +86,7 @@ public class LocalFile {
     }
 
     public void reconstructFile() throws IOException, ExecutionException, InterruptedException {
-        System.out.println("[LocalFile] - reconstructing file: " + filename);
+        logger.print("reconstructing file: " + filename);
 
         ArrayList<Future<LocalChunk>> futureChunks = new ArrayList<>();
         chunks = new ArrayList<>();
@@ -95,18 +99,16 @@ public class LocalFile {
         for (Future<LocalChunk> fChunk : futureChunks) {
             LocalChunk lChunk;
             lChunk = fChunk.get();
-            // System.out.println(String.format("chunk %d of %d has %d bytes", lChunk.chunkNo, numChunks, lChunk.chunk.length));
             if (lChunk == null || lChunk.chunk == null) {
-                System.out.println("[LocalFile] - at least one chunk could not be retrieved from peers...aborting");
+                logger.print("at least one chunk could not be retrieved from peers...aborting");
                 return;
             } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length == 0)) {
-                System.out.println("[LocalFile] - received a 0 byte chunk that is not the last...aborting");
+                logger.print("received a 0 byte chunk that is not the last...aborting");
                 return;
             } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length != LocalFile.CHUNK_SIZE)) {
-                System.out.println("[LocalFile] - received a " + lChunk.chunk.length + " byte chunk that is not the last, should always be: " + LocalFile.CHUNK_SIZE + "...aborting");
+                logger.print("received a " + lChunk.chunk.length + " byte chunk that is not the last, should always be: " + LocalFile.CHUNK_SIZE + "...aborting");
                 return;
             }
-
 
             chunks.set(lChunk.chunkNo, lChunk);
         }
@@ -120,7 +122,7 @@ public class LocalFile {
             if (chunk != null && chunk.chunk != null)
                 fos.write(chunk.chunk);
         fos.close();
-        System.out.println("[LocalFile] - File reconstruction completed: " + path);
+        logger.print("File reconstruction completed: " + path);
     }
 
     public void deleteFile() {
@@ -134,7 +136,7 @@ public class LocalFile {
             BasicFileAttributes metadata = Files.readAttributes(Paths.get(filename), BasicFileAttributes.class);
             hashSource = filename + metadata.creationTime() + metadata.lastModifiedTime() + metadata.size();
         } catch (IOException e) {
-            System.out.println("[LocalFile] - Unable to read file's metadata, using filename only for the chunk");
+            logger.err("Unable to read file's metadata, using filename only for the chunk");
         }
 
         try {

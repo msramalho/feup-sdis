@@ -3,6 +3,7 @@ package src.worker;
 import src.localStorage.Chunk;
 import src.localStorage.LocalChunk;
 import src.main.PeerConfig;
+import src.util.Logger;
 import src.util.Message;
 
 //PUTCHUNK <Version> <SenderId> <FileId> <ChunkNo> <ReplicationDeg> <CRLF><CRLF><Body>
@@ -11,6 +12,7 @@ public class BackupChunk implements Runnable {
     private PeerConfig peerConfig;
     private Chunk initialChunk;
     private boolean isLocalChunk;
+    private Logger logger = new Logger("BackupChunk");
 
     public BackupChunk(PeerConfig peerConfig, Chunk initialChunk, boolean isLocalChunk) {
         this.peerConfig = peerConfig;
@@ -31,7 +33,7 @@ public class BackupChunk implements Runnable {
                 c = initialChunk;
                 peerConfig.internalState.addLocalChunk((LocalChunk) c);
             } else {
-                System.out.println("[BackupChunk] - chunk: " + c + " is already backed up");
+                logger.print("chunk: " + c + " is already backed up");
                 c.chunk = initialChunk.chunk;
                 // return;
                 // this local chunk is already being sent by the current peer, abort} and has enough copies - could have if (lChunk.replicationDegree <= lChunk.peersAcks.size()), but nothing is said
@@ -48,12 +50,12 @@ public class BackupChunk implements Runnable {
             peerConfig.multicast.backup.send(message); // send message through multicast
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
 
-            System.out.println("[BackupChunk] - waiting for chunk " + c.chunkNo + " " + wait + "ms (got " + c.countAcks() + "/" + c.replicationDegree + " replies)");
+            logger.print("waiting for chunk " + c.chunkNo + " " + wait + "ms (got " + c.countAcks() + "/" + c.replicationDegree + " replies)");
 
             try { Thread.sleep(wait); } catch (InterruptedException ignored) {}
             i++;
         } while (i < BackupChunk.PUTCHUNK_ATTEMPTS && c.countAcks() < c.replicationDegree);
 
-        System.out.println("[BackupChunk] - backup completed after " + (i) + " attempt(s), with " + c.countAcks() + "/" + initialChunk.replicationDegree + " replies");
+        logger.print("backup completed after " + (i) + " attempt(s), with " + c.countAcks() + "/" + initialChunk.replicationDegree + " replies");
     }
 }

@@ -2,6 +2,7 @@ package src.worker;
 
 import src.localStorage.LocalChunk;
 import src.main.PeerConfig;
+import src.util.Logger;
 import src.util.Message;
 
 import java.util.concurrent.Callable;
@@ -12,6 +13,7 @@ public class RestoreChunk implements Callable {
     private static int RESTORE_ATTEMPTS = 5;
     private PeerConfig peerConfig;
     private LocalChunk localChunk;
+    private Logger logger = new Logger("RestoreChunk");
 
     public RestoreChunk(PeerConfig peerConfig, LocalChunk localChunk) {
         this.peerConfig = peerConfig;
@@ -39,7 +41,7 @@ public class RestoreChunk implements Callable {
             if (lChunk.noTcp() || i == 0) peerConfig.multicast.control.send(message); //create and send message through multicast
 
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
-            System.out.println("[RestoreChunk] - waiting for CHUNK " + lChunk.chunkNo + " for " + wait + "ms");
+            logger.print("waiting for CHUNK " + lChunk.chunkNo + " for " + wait + "ms");
             try { Thread.sleep(wait); } catch (InterruptedException ignored) {}
         }
         return lChunk;
