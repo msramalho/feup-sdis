@@ -12,6 +12,8 @@ public class Message {
     public String protocolVersion;
     public int senderId;
     public String fileId;
+    public int level;
+    public int receiverId;
     public int chunkNo;
     public int replicationDegree;
     public byte[] body = new byte[0];
@@ -22,25 +24,40 @@ public class Message {
             this.parseMessage(packet);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.err(String.format("[Message] - not a valid message (%d bytes)...ignoring", packet.getData().length));
+            logger.err(String.format("not a valid message (%d bytes)...ignoring", packet.getData().length));
         }
     }
 
-    //<MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
+    //
+
+    /**
+     * <MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
+     * or
+     * <MessageType> <Version> <SenderId> [<Level> <receiverId> <CRLF><CRLF>[<Body>]
+     */
     private void parseMessage(DatagramPacket packet) {
-        String packetMessage = new String(packet.getData());
-        packetMessage = packetMessage.substring(0, Math.min(packet.getLength(), packetMessage.length()));
+        String packetMessage = new String(packet.getData()); // byte[] -> String
+        packetMessage = packetMessage.substring(0, Math.min(packet.getLength(), packetMessage.length())); // trim
         String[] parts = packetMessage.split("\r\n\r\n", 2); // split only once
         int headerBytes = parts[0].length();
         parts[0] = parts[0].replaceAll("^ +| +$|( )+", "$1").trim(); //the message may have more than one space between field, this cleans it
+
+        // process header
         String[] args = parts[0].split(" ");
         this.action = args[0];
         this.protocolVersion = args[1];
         this.senderId = Integer.parseInt(args[2]);
-        this.fileId = (args.length >= 4) ? args[3] : ""; // save file id if it exists
 
-        this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
-        this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
+        // the difference between the two types of messages is that fileId is a string and level is not
+        if (args.length >= 4 && Utils.isInt(args[3])) {
+            this.level = Integer.parseInt(args[3]); // save the cluster level
+            this.receiverId = (args.length >= 5) ? Integer.parseInt(args[4]) : -1; // save receiverId if it exists
+        } else {
+            this.fileId = (args.length >= 4) ? args[3] : ""; // save file id if it exists
+            this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
+            this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
+        }
+
 
         // retrieve the bytes received that belong to the body
         if (parts.length == 2) this.body = Arrays.copyOfRange(packet.getData(), headerBytes + 4, packet.getLength());//save body if it exists (64kB chunks)
@@ -107,4 +124,5 @@ public class Message {
                 (chunkNo == message.chunkNo || chunkNo == -1);
     }
 
+    public String getBodyStr() { return new String(body); }
 }
