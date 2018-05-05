@@ -12,18 +12,18 @@ public class MulticastChannels {
     /**
      * explicit constructor
      */
-    public MulticastChannels(PeerConfig peerConfig, String mccIp, Integer mccPort, String mcbIp, Integer mcbPort, String mcrIp, Integer mcrPort) throws IOException {
+    public MulticastChannels(PeerConfig peerConfig, String mccIp, Integer mccPort, String mcbIp, Integer mcbPort, String mcrIp, Integer mcrPort, int depth) throws IOException {
         //setup sockets and join group for <mccIP> <mccPort>, <mdbIp> <mdbPort> and <mdrIp> <mdrPort>, respectively
-        control = new MulticastSocketC(mccIp, mccPort, "MCControl", peerConfig);
-        backup = new MulticastSocketC(mcbIp, mcbPort, "MCBackup", peerConfig);
-        restore = new MulticastSocketC(mcrIp, mcrPort, "MCRestore", peerConfig);
+        control = new MulticastSocketC(mccIp, mccPort, "MCControl", peerConfig, depth);
+        backup = new MulticastSocketC(mcbIp, mcbPort, "MCBackup", peerConfig, depth);
+        restore = new MulticastSocketC(mcrIp, mcrPort, "MCRestore", peerConfig, depth);
     }
 
     /**
      * Constructor from the command line arguments
      */
     public MulticastChannels(PeerConfig peerConfig, String[] args) throws IOException {
-        this(peerConfig, args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]), args[7], Integer.parseInt(args[8]));
+        this(peerConfig, args[3], Integer.parseInt(args[4]), args[5], Integer.parseInt(args[6]), args[7], Integer.parseInt(args[8]), -1); // depth -1 for the global multicastchannels, which come from the command line
     }
 
     /**

@@ -6,6 +6,7 @@ import src.util.Message;
 import src.util.MulticastChannels;
 
 import java.net.*;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -18,6 +19,7 @@ public class PeerConfig {
     public ExecutorService threadPool; //global threadpool for services
     public InternalState internalState; //manager for the internal state database (non-volatile memory)
 
+    public ArrayList<Cluster> clusters = new ArrayList<>();
     private InetAddress sapIp; // service access point IP
     private Integer sapPort; // service access point port
 
@@ -69,5 +71,12 @@ public class PeerConfig {
             logger.print("unable to get current machine Ip address, enhanced GETCHUNK will not happen");
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Make this peer join or create a cluster
+     */
+    public void joinCluster() {
+        multicast.control.send(Message.create("JOIN %s %d", protocolVersion, id));
     }
 }

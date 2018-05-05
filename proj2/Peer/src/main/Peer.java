@@ -12,7 +12,7 @@ import src.util.Message;
 public class Peer implements InitiatorPeer {
     private static LocalFile localFile;
     private static PeerConfig peerConfig;
-    static Logger logger = new Logger("Peer");
+    private static Logger logger = new Logger("Peer");
 
     public static void main(String[] args) {
         try {
