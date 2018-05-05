@@ -12,7 +12,7 @@ public class Message {
     public String protocolVersion;
     public int senderId;
     public String fileId;
-    public int level;
+    public int level = -1;
     public int receiverId;
     public int chunkNo;
     public int replicationDegree;
