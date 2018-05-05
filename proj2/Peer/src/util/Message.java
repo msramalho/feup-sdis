@@ -52,20 +52,6 @@ public class Message {
 
     public boolean isPutchunk() { return this.action.equals("PUTCHUNK"); }
 
-    public boolean isGetChunk() { return this.action.equals("GETCHUNK"); }
-
-    public boolean isStored() { return this.action.equals("STORED"); }
-
-    public boolean isChunk() { return this.action.equals("CHUNK"); }
-
-    public boolean isDelete() { return this.action.equals("DELETE"); }
-
-    public boolean isRemoved() { return this.action.equals("REMOVED"); }
-
-    public boolean isHello() { return this.action.equals("HELLO"); }
-
-    public boolean isDeleted() { return this.action.equals("DELETED");}
-
     public AbstractMap.SimpleEntry<String, Integer> getTCPCoordinates() {
         //parse the body of the message, which should contain IP:Port of the TCP socket on the other Peer
         String[] parts = new String(body).split(":");

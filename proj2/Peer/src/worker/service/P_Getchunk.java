@@ -8,8 +8,8 @@ import src.worker.Dispatcher;
 import src.worker.Protocol;
 
 
-public class P_GetChunk extends Protocol {
-    public P_GetChunk(Dispatcher d) { super(d); }
+public class P_Getchunk extends Protocol {
+    public P_Getchunk(Dispatcher d) { super(d); }
 
     @Override
     public void run() {

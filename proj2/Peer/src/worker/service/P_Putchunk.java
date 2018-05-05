@@ -5,9 +5,9 @@ import src.util.Message;
 import src.worker.Dispatcher;
 import src.worker.Protocol;
 
-public class P_PutChunk extends Protocol {
+public class P_Putchunk extends Protocol {
 
-    public P_PutChunk(Dispatcher d) { super(d); }
+    public P_Putchunk(Dispatcher d) { super(d); }
 
     @Override
     public void run() {
