@@ -2,7 +2,7 @@ package src.worker;
 
 import src.main.PeerConfig;
 import src.util.Message;
-import src.worker.Service.*;
+import src.worker.service.*;
 
 public class Dispatcher implements Runnable {
     public Message message;

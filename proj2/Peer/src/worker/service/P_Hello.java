@@ -1,4 +1,4 @@
-package src.worker.Service;
+package src.worker.service;
 
 import src.localStorage.LocalChunk;
 import src.worker.DeleteFile;
