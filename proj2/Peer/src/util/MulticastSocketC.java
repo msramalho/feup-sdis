@@ -17,13 +17,13 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
     private PeerConfig peerConfig;
     private Logger logger;
     private boolean active = true;
-    private int depth; // the depth of the cluster for this MC. The global has -1
+    private int level; // the level of the cluster for this MC. The global has -1
 
-    public MulticastSocketC(String hostname, int port, String name, PeerConfig peerConfig, int depth) throws IOException {
+    public MulticastSocketC(String hostname, int port, String name, PeerConfig peerConfig, int level) throws IOException {
         super(port);
         this.group = Inet4Address.getByName(hostname);
         this.peerConfig = peerConfig;
-        this.depth = depth;
+        this.level = level;
         this.setTimeToLive(1);
         this.joinGroup(this.group);
         logger = new Logger(this, name);
@@ -60,7 +60,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
             // processed the received message: either send to queue or add task to threadpool
             Message m = new Message(inPacket);
             if (!m.isOwnMessage(peerConfig.id)) { // reject own messages
-                peerConfig.threadPool.submit(new Dispatcher(m, peerConfig, depth)); // send a new task to the threadpool
+                peerConfig.threadPool.submit(new Dispatcher(m, peerConfig, level)); // send a new task to the threadpool
                 logger.print(String.format("received %9s from Peer %3d (%d bytes in body)", m.action, m.senderId, m.body.length));
             }
         }

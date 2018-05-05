@@ -11,12 +11,12 @@ public class Dispatcher implements Runnable {
     public Message message;
     public PeerConfig peerConfig;
     private static Logger logger = new Logger("Dispatcher");
-    public int depth;
+    public int level;
 
-    public Dispatcher(Message message, PeerConfig peerConfig, int depth) {
+    public Dispatcher(Message message, PeerConfig peerConfig, int level) {
         this.message = message;
         this.peerConfig = peerConfig;
-        this.depth = depth;
+        this.level = level;
     }
 
     @Override
