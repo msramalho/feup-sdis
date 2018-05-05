@@ -50,6 +50,6 @@ public class P_PutChunk extends Protocol {
 
     private void sendStored(StoredChunk sChunk) {
         //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-        d.peerConfig.mcControl.send(Message.createMessage(String.format("STORED %s %d %s %d\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo)));
+        d.peerConfig.multicast.control.send(Message.createMessage(String.format("STORED %s %d %s %d\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo)));
     }
 }

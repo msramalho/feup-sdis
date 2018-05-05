@@ -38,7 +38,7 @@ public class P_GetChunk extends Protocol {
             } else messageBody = sChunk.chunk;
 
             //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
-            d.peerConfig.mcRestore.send(Message.createMessage(String.format("CHUNK %s %d %s %d\r\n\r\n", usingVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo), messageBody));
+            d.peerConfig.multicast.restore.send(Message.createMessage(String.format("CHUNK %s %d %s %d\r\n\r\n", usingVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo), messageBody));
 
             // ENHANCEMENT_2 continuation - try sending chunk through TCP
             if (usingEnhancedVersion) {

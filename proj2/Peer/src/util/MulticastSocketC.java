@@ -14,14 +14,13 @@ import java.net.MulticastSocket;
  */
 public class MulticastSocketC extends MulticastSocket implements Runnable {
     private InetAddress group;
-    private int selfId; //saves the id of the owner peer to reject own messages
     private PeerConfig peerConfig;
     private Logger logger;
+    private boolean active = true;
 
-    public MulticastSocketC(String hostname, int port, int selfId, String name, PeerConfig peerConfig) throws IOException {
+    public MulticastSocketC(String hostname, int port, String name, PeerConfig peerConfig) throws IOException {
         super(port);
         this.group = Inet4Address.getByName(hostname);
-        this.selfId = selfId;
         this.peerConfig = peerConfig;
         this.setTimeToLive(1);
         this.joinGroup(this.group);
@@ -40,13 +39,18 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
         return true;
     }
 
+    public void stop() {
+        this.active = false;
+    }
+
     @Override
     public void run() {
         logger.print("Waiting for multicast...");
-        while (true) {
+        while (active) {
             //wait for multicast message + receive the response (blocking)
             byte[] responseBytes = new byte[65507]; // create buffer to receive response, max UDP Datagram size
             DatagramPacket inPacket = new DatagramPacket(responseBytes, responseBytes.length);
+
             try {
                 this.receive(inPacket);
             } catch (IOException e) {
@@ -55,7 +59,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
 
             // processed the received message: either send to queue or add task to threadpool
             Message m = new Message(inPacket);
-            if (!m.isOwnMessage(this.selfId)) {
+            if (!m.isOwnMessage(peerConfig.id)) { // reject own messages
                 peerConfig.threadPool.submit(new Dispatcher(m, peerConfig)); // send a new task to the threadpool
                 logger.print(String.format("received %9s from Peer %3d (%d bytes in body)", m.action, m.senderId, m.body.length));
             }

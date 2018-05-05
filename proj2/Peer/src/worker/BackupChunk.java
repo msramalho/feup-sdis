@@ -45,7 +45,7 @@ public class BackupChunk implements Runnable {
         //wait for STORED replies
         int i = 0;
         do {
-            peerConfig.mcBackup.send(message); // send message through multicast
+            peerConfig.multicast.backup.send(message); // send message through multicast
             int wait = (int) Math.pow(2, i) * 1000; // calculate the wait delay in milliseconds
 
             System.out.println("[BackupChunk] - waiting for chunk " + c.chunkNo + " " + wait + "ms (got " + c.countAcks() + "/" + c.replicationDegree + " replies)");
