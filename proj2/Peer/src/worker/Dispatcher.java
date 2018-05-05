@@ -2,10 +2,11 @@ package src.worker;
 
 import src.main.PeerConfig;
 import src.util.Message;
+import src.worker.Service.*;
 
 public class Dispatcher implements Runnable {
-    Message message;
-    PeerConfig peerConfig;
+    public Message message;
+    public PeerConfig peerConfig;
 
     public Dispatcher(Message message, PeerConfig peerConfig) {
         this.message = message;

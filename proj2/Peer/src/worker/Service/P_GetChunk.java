@@ -1,13 +1,15 @@
-package src.worker;
+package src.worker.Service;
 
 import src.localStorage.StoredChunk;
 import src.main.PeerConfig;
 import src.util.Message;
 import src.util.TcpClient;
+import src.worker.Dispatcher;
+import src.worker.Protocol;
 
 
 public class P_GetChunk extends Protocol {
-    P_GetChunk(Dispatcher d) { super(d); }
+    public P_GetChunk(Dispatcher d) { super(d); }
 
     @Override
     public void run() {
@@ -38,7 +40,7 @@ public class P_GetChunk extends Protocol {
             } else messageBody = sChunk.chunk;
 
             //CHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF><Body>
-            d.peerConfig.multicast.restore.send(Message.createMessage(String.format("CHUNK %s %d %s %d\r\n\r\n", usingVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo), messageBody));
+            d.peerConfig.multicast.restore.send(Message.create("CHUNK %s %d %s %d\r\n\r\n", messageBody, usingVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo));
 
             // ENHANCEMENT_2 continuation - try sending chunk through TCP
             if (usingEnhancedVersion) {

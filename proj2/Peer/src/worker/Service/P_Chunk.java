@@ -1,11 +1,13 @@
-package src.worker;
+package src.worker.Service;
 
 import src.localStorage.Chunk;
 import src.localStorage.LocalChunk;
 import src.main.PeerConfig;
+import src.worker.Dispatcher;
+import src.worker.Protocol;
 
 public class P_Chunk extends Protocol {
-    P_Chunk(Dispatcher d) { super(d); }
+    public P_Chunk(Dispatcher d) { super(d); }
 
     @Override
     public void run() {

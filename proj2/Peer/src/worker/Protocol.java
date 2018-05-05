@@ -5,8 +5,8 @@ import src.util.Logger;
 import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class Protocol {
-    Dispatcher d;
-    Logger logger = new Logger(this);
+    protected Dispatcher d;
+    protected Logger logger = new Logger(this);
 
     public Protocol(Dispatcher d) { this.d = d; }
 

@@ -1,11 +1,13 @@
-package src.worker;
+package src.worker.Service;
 
 import src.localStorage.StoredChunk;
 import src.util.Message;
+import src.worker.Dispatcher;
+import src.worker.Protocol;
 
 public class P_PutChunk extends Protocol {
 
-    P_PutChunk(Dispatcher d) { super(d); }
+    public P_PutChunk(Dispatcher d) { super(d); }
 
     @Override
     public void run() {
@@ -50,6 +52,6 @@ public class P_PutChunk extends Protocol {
 
     private void sendStored(StoredChunk sChunk) {
         //STORED <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
-        d.peerConfig.multicast.control.send(Message.createMessage(String.format("STORED %s %d %s %d\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo)));
+        d.peerConfig.multicast.control.send(Message.create("STORED %s %d %s %d\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, sChunk.fileId, sChunk.chunkNo));
     }
 }
