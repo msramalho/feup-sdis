@@ -1,6 +1,7 @@
 package src.worker;
 
 import src.main.PeerConfig;
+import src.util.LockException;
 import src.util.Logger;
 import src.util.Message;
 import src.util.Utils;
@@ -23,13 +24,19 @@ public class Dispatcher implements Runnable {
     public void run() {
         // dispatch the message to the proper protocol handler
         Protocol p = getProtocol();
-        if (p != null) p.run();
-        else logger.err("Unable to find and instantiate protocol class '" + getProtocolName("*") + "' with constructor (Dispatcher d)'");
+
+        // run the protocol if it was found -> ignored all LockExceptions because they are just to prevent redundancy
+        if (p != null) {
+            try { p.run(); } catch (LockException ignored) {}
+        } else{
+            logger.err("Unable to find and instantiate protocol class '" + getProtocolName("*") + "' with constructor (Dispatcher d)'");
+        }
     }
 
 
     /**
      * Try to find the protocol in the service package and then in the clustering package
+     *
      * @return
      */
     private Protocol getProtocol() {
