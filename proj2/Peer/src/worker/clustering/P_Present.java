@@ -3,7 +3,7 @@ package src.worker.clustering;
 import src.worker.Dispatcher;
 
 /**
- * Adds the peerId of the sender to the hashset of the cluster at this level
+ * Adds the peerId of the sender to the hashset of my cluster at this level
  */
 public class P_Present extends ProtocolCluster {
     public P_Present(Dispatcher d) { super(d); }

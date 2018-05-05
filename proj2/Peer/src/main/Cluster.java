@@ -10,6 +10,7 @@ public class Cluster {
     // TODO: decide if useful: int level; // the level at which it is located (starts at 0) - can be inferred from the clusters arraylist, but this is useful
     public MulticastChannels multicast;
     public HashSet<Integer> peers;
+    public boolean processingJoin = false; // flag that is true if a JOIN is being processed
 
     public void clearPeers() {
         peers = new HashSet<>();

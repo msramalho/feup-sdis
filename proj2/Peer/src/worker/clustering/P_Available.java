@@ -12,6 +12,11 @@ public class P_Available extends ProtocolCluster {
 
     @Override
     public void run() {
+        //TODO: extract content of if into two methods
+        if (isGlobal() && d.message.receiverId == d.peerConfig.id) { // case 1
 
+        } else if (hasCluster() && cluster.processingJoin) { // case 2
+            cluster.silencedAvailable = true;
+        }
     }
 }

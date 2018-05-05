@@ -7,15 +7,24 @@ import src.worker.Protocol;
 /**
  * Provide additional functionality that all the Protocols in clustering should have: access to a cluster
  */
-public abstract class ProtocolCluster extends Protocol {
-    Cluster cluster;
+abstract class ProtocolCluster extends Protocol {
+    Cluster cluster = null;
 
-    public ProtocolCluster(Dispatcher d) {
+    ProtocolCluster(Dispatcher d) {
         super(d);
-        if (d.depth != -1) { // if this is not a message on the global multicast channel
-            cluster = d.peerConfig.clusters.get(d.depth);
-        } else if (d.message.level >= -1 && d.message.level < d.peerConfig.clusters.size()) { // this message was sent on the global multicast but it is about a specific cluster
-            cluster = d.peerConfig.clusters.get(d.message.level);
-        }
+        int level = -1;
+
+        if (d.level != -1)  // if this is not a message on the global multicast channel
+            level = d.level;
+        else if (d.message.level >= -1) // this message was sent on the global multicast but it is about a specific cluster
+            level = d.message.level;
+
+        // load cluster if it exists
+        if (level < d.peerConfig.clusters.size())
+            cluster = d.peerConfig.clusters.get(level);
     }
+
+    boolean hasCluster() { return cluster != null; }
+
+    boolean isGlobal() { return d.level == -1; }
 }

@@ -4,13 +4,21 @@ import src.main.Cluster;
 import src.util.Message;
 import src.worker.Dispatcher;
 
+/**
+ * This peer receives a JOIN (only go through the global MCs so cluster should not be null)
+ * If I have a cluster on the desired level I will check if there is an available slot, like my other Peers in that level
+ * If I have a slot and I saw no AVAILABLE response to this, I will shut up (OPTIONAL as long as the joining peer only considers one)
+ */
 public class P_Join extends ProtocolCluster {
     public P_Join(Dispatcher d) { super(d); }
 
     @Override
     public void run() {
+        if (!hasCluster()) return;
+
         // restart the count of peers in this cluster
         cluster.clearPeers();
+        cluster.processingJoin = true;
 
         // TODO: should PRESENT include the requesting peer?
         // TODO: should PRESENT change a flag to ASSESSING so that if two peers send JOIN there isn't a cock up? especially if the peers hashset dor the cluster is reset
