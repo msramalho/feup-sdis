@@ -3,18 +3,12 @@ package src.worker.clustering;
 import src.main.Cluster;
 import src.util.Message;
 import src.worker.Dispatcher;
-import src.worker.Protocol;
 
-public class P_Join extends Protocol {
-    public P_Join(Dispatcher d) {
-        super(d);
-    }
+public class P_Join extends ProtocolCluster {
+    public P_Join(Dispatcher d) { super(d); }
 
     @Override
     public void run() {
-        // TODO: test if level exists??
-        Cluster cluster = d.peerConfig.clusters.get(d.message.level);
-
         // restart the count of peers in this cluster
         cluster.clearPeers();
 
