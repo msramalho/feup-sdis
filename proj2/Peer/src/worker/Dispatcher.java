@@ -3,7 +3,7 @@ package src.worker;
 import src.main.PeerConfig;
 import src.util.Logger;
 import src.util.Message;
-import src.worker.service.*;
+import src.util.Utils;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -11,10 +11,12 @@ public class Dispatcher implements Runnable {
     public Message message;
     public PeerConfig peerConfig;
     private static Logger logger = new Logger("Dispatcher");
+    public int depth;
 
-    public Dispatcher(Message message, PeerConfig peerConfig) {
+    public Dispatcher(Message message, PeerConfig peerConfig, int depth) {
         this.message = message;
         this.peerConfig = peerConfig;
+        this.depth = depth;
     }
 
     @Override
@@ -55,6 +57,6 @@ public class Dispatcher implements Runnable {
      * @return a string with the expected classname for the protocol that handles this message
      */
     private String getProtocolName(String packageName) {
-        return "src.worker." + packageName + ".P_" + message.action.substring(0, 1).toUpperCase() + message.action.substring(1).toLowerCase();
+        return "src.worker." + packageName + ".P_" + Utils.capitalize(message.action);
     }
 }
