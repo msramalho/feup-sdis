@@ -39,3 +39,19 @@ If a Peer from cluster X sends that cluster's address then all the other Peers i
 
 The new peer will use the first available `Id` and map into a Multicast Adress by incrementing `Id` from `224.0.0.0`
 
+
+## Try to join a Cluster
+When a Peer loggs into the network it will send a `HELLO <PeerId> <LEVEL>` message. This means this peer has no Cluster for level `<LEVEL>` (initially it is 0). Every cluster in that LEVEL which has an available slot shall respond with `AVAILABLE <PeerId> <ClusterId>` and stop should it receive the sam message from any other. The Peer will then join that Cluster. The available message shall specify which Peer it is available to to avoid errors.
+
+## Higher Level Clusters
+All peers know the 3 default/global Multicast groups.
+
+When a Peer initiates:
+ * Send a `JOIN <LEVEL>` to the global McControl with `LEVEL = 0`
+     * If a Peer answers (there is a slot available in its cluster) all others are silenced. The new Peer and the responding Peer exchange information about the upper Clusters so that the new peer can listen on all important channels.
+     * If no Peer answers, then this Peer will [create its own cluster]()
+
+
+
+
+
