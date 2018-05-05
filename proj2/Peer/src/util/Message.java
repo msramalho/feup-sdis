@@ -77,9 +77,13 @@ public class Message {
     }
 
 
-    public static byte[] createMessage(String header) { return Message.createMessage(header, new byte[0]); }
+    public static byte[] create(String header, Object... options) { return Message.create(header, new byte[0], options); }
 
-    public static byte[] createMessage(String header, byte[] body) {
+    public static byte[] create(String header, byte[] body, Object... options) { return Message.create(String.format(header, options), body); }
+
+    public static byte[] create(String header) { return Message.create(header, new byte[0]); }
+
+    public static byte[] create(String header, byte[] body) {
         byte[] head = header.getBytes();
         byte[] combined = new byte[head.length + body.length];
 
