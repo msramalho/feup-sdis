@@ -26,6 +26,10 @@ public class Dispatcher implements Runnable {
     }
 
 
+    /**
+     * Try to find the protocol in the service package and then in the clustering package
+     * @return
+     */
     private Protocol getProtocol() {
         Protocol p = getProtocol("service");
         if (p != null) return p;
