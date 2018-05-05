@@ -3,7 +3,7 @@ package src.main;
 import src.localStorage.InternalState;
 import src.util.Logger;
 import src.util.Message;
-import src.util.MulticastSocketC;
+import src.util.MulticastChannels;
 
 import java.net.*;
 import java.util.concurrent.ExecutorService;
@@ -14,9 +14,7 @@ public class PeerConfig {
     public String protocolVersion;
     public Integer id; // the peer id
     public InetAddress machineIp = null; // Ip address of current machine, for TCP connections
-    public MulticastSocketC mcControl; // Multicast Control Socket
-    public MulticastSocketC mcBackup; // Multicast Back Up Socket
-    public MulticastSocketC mcRestore; // Multicast Restore Socket
+    public MulticastChannels multicast;
     public ExecutorService threadPool; //global threadpool for services
     public InternalState internalState; //manager for the internal state database (non-volatile memory)
 
@@ -38,10 +36,7 @@ public class PeerConfig {
         readMachineIp();
         logger.print(internalState.toString());
 
-        //setup sockets and join group for <mccIP> <mccPort>, <mdbIp> <mdbPort> and <mdrIp> <mdrPort>, respectively
-        mcControl = new MulticastSocketC(args[3], Integer.parseInt(args[4]), id, "MCControl", this);
-        mcBackup = new MulticastSocketC(args[5], Integer.parseInt(args[6]), id, "MCBackup", this);
-        mcRestore = new MulticastSocketC(args[7], Integer.parseInt(args[8]), id, "MCRestore", this);
+        multicast = new MulticastChannels(this, args);
     }
 
 
@@ -61,13 +56,6 @@ public class PeerConfig {
             this.sapPort = Integer.parseInt(sap);
         }
         this.sapIp = Inet4Address.getByName(hostname);
-    }
-
-    void initialize() {
-        //threads for building the requests queues
-        (new Thread(this.mcControl)).start();
-        (new Thread(this.mcBackup)).start();
-        (new Thread(this.mcRestore)).start();
     }
 
     public boolean isEnhanced() { return !protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }

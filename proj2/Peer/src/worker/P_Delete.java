@@ -23,7 +23,7 @@ public class P_Delete extends Protocol {
         }
 
         if (hasChunk) {
-            d.peerConfig.mcControl.send(Message.createMessage(String.format("DELETED %s %d %s\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.fileId)));
+            d.peerConfig.multicast.control.send(Message.createMessage(String.format("DELETED %s %d %s\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.fileId)));
         }
 
         // commit changes to non-volatile memory
