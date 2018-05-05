@@ -115,6 +115,7 @@ public class LocalFile {
 
         String path = InternalState.internalStateFolder + "/restored_" + filename;
         File f = new File(path);
+        f.delete(); //delete the file if it already exists so that there the data is not appended to the old file
         f.getParentFile().mkdirs();
         f.createNewFile();
         FileOutputStream fos = new FileOutputStream(f, true); // true means append
