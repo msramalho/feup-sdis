@@ -1,7 +1,7 @@
-# SDIS 2016/2017: Project 1 -- Distributed Backup Service
+# SDIS 2016/2017: Project 2 -- Distributed Backup Service w/ Peer Clustering
 
-SDIS 2016/2017 - 2nd Semester  
-Project 1 -- Distributed Backup Service  
+SDIS 2016/2017 - 2nd Semester
+Project 2 -- Distributed Backup Service w/ Peer Clustering
 
 [Official script](https://web.fe.up.pt/~pfs/aulas/sd2018/projs/proj1/proj1.html)
 
@@ -26,3 +26,16 @@ Project 1 -- Distributed Backup Service
 
 #### NOTE
 If you append an `e` to the testApph.sh action, this will instead call the enhanced version of the subprotocol, if it exists, or the default if it doesn't: * `sh testApp.sh largePenguin.jpg 1 2e` - on peer `1`, start action `2e` (RESTOREENH) of file `largePenguin.jpg` (uses TCP btw)
+
+
+# Protocols
+
+## Create new Cluster
+When a new cluster is created it needs to query on the global McControl for available ClusterIds and then map the id into a Multicast address, which must be between:  `224.0.0.0` and `239.255.255.255`.
+
+The Peer forming a new Cluster will send a `CLUSTERING` message and every cluster must send a `CLUSTER <ClusterId>` for their cluster.
+
+If a Peer from cluster X sends that cluster's address then all the other Peers in the cluster will be prevented from doing so for that `CLUSTERING` message. 
+
+The new peer will use the first available `Id` and map into a Multicast Adress by incrementing `Id` from `224.0.0.0`
+
