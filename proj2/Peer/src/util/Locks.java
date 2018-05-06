@@ -9,7 +9,7 @@ public class Locks {
     HashSet<String> locks = new HashSet<>();
 
     public void lock(String lock) throws LockException {
-        if (locked(lock)) { throw new LockException(); }
+        if (locked(lock)) { throw new LockException("Already locked for " + lock); }
         locks.add(lock);
     }
 
