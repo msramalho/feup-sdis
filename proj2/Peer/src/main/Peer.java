@@ -38,7 +38,7 @@ public class Peer implements InitiatorPeer {
         logger.print(String.format("Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
         
         peerConfig.multicast.listen();
-        peerConfig.joinCluster();
+        peerConfig.joinCluster(0);
 
         if (peerConfig.isEnhanced())  // only send HELLO if is enhanced
             peerConfig.multicast.control.send(Message.create("HELLO %s %d 0\r\n\r\n", peerConfig.protocolVersion, peerConfig.id));

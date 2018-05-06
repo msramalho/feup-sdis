@@ -74,9 +74,9 @@ public class PeerConfig {
     }
 
     /**
-     * Make this peer join or create a cluster
+     * Make this peer join or create a cluster at a given level
      */
-    public void joinCluster() {
-        multicast.control.send(Message.create("JOIN %s %d", protocolVersion, id));
+    void joinCluster(int level) {
+        multicast.control.send(Message.create("JOIN %s %d %d", protocolVersion, id, level));
     }
 }
