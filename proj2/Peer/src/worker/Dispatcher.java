@@ -27,7 +27,7 @@ public class Dispatcher implements Runnable {
 
         // run the protocol if it was found -> ignored all LockExceptions because they are just to prevent redundancy
         if (p != null) {
-            try { p.run(); } catch (LockException ignored) {}
+            try { p.run(); } catch (LockException e) {logger.err(e.getMessage());}
         } else{
             logger.err("Unable to find and instantiate protocol class '" + getProtocolName("*") + "' with constructor (Dispatcher d)'");
         }
