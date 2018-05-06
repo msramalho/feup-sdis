@@ -31,10 +31,12 @@ public abstract class Protocol {
     }
 
     private void sleepRandom(int from) {
-        int sleepFor = ThreadLocalRandom.current().nextInt(from, 401);
-        logger.print(String.format("sleep for %3d ms", d.message.action, sleepFor));
-        Utils.sleep(sleepFor);
+        int miliseconds = ThreadLocalRandom.current().nextInt(from, 401);
+        logger.print(String.format("sleep for %3d ms", d.message.action, miliseconds));
+        sleep(miliseconds);
     }
+
+    protected void sleep(int miliseconds) { Utils.sleep(miliseconds); }
 
 
 }
