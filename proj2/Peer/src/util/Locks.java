@@ -8,9 +8,9 @@ import java.util.HashSet;
 public class Locks {
     HashSet<String> locks = new HashSet<>();
 
-    public void lock(String lock) throws LockException {
+    public boolean lock(String lock) throws LockException {
         if (locked(lock)) { throw new LockException("Already locked for " + lock); }
-        locks.add(lock);
+        return locks.add(lock);
     }
 
     public void unlock(String lock) { locks.remove(lock); }
