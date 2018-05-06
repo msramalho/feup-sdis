@@ -6,7 +6,7 @@ public class Utils {
         return original.substring(0, 1).toUpperCase() + original.substring(1).toLowerCase();
     }
 
-    public static boolean isInt(String source) {
+    static boolean isInt(String source) {
         try {
             Integer.parseInt(source);
             return true;
@@ -14,4 +14,7 @@ public class Utils {
             return false;
         }
     }
+
+    public static void sleep(Integer miliseconds) { try { Thread.sleep(miliseconds); } catch (InterruptedException ignored) { } }
+
 }

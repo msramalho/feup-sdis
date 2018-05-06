@@ -2,6 +2,7 @@ package src.worker;
 
 import src.util.LockException;
 import src.util.Logger;
+import src.util.Utils;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -12,10 +13,6 @@ public abstract class Protocol {
     public Protocol(Dispatcher d) { this.d = d; }
 
     public abstract void run() throws LockException;
-
-    protected void sleep(Integer miliseconds) {
-        try { Thread.sleep(miliseconds); } catch (InterruptedException ignored) { }
-    }
 
     /**
      * sleep time is longer for Peers with lower percentage of disk space occupied
@@ -36,7 +33,7 @@ public abstract class Protocol {
     private void sleepRandom(int from) {
         int sleepFor = ThreadLocalRandom.current().nextInt(from, 401);
         logger.print(String.format("sleep for %3d ms", d.message.action, sleepFor));
-        sleep(sleepFor);
+        Utils.sleep(sleepFor);
     }
 
 
