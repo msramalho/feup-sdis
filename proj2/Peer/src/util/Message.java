@@ -29,8 +29,6 @@ public class Message {
         }
     }
 
-    //
-
     /**
      * <MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
      * or
@@ -44,6 +42,7 @@ public class Message {
         parts[0] = parts[0].replaceAll("^ +| +$|( )+", "$1").trim(); //the message may have more than one space between field, this cleans it
 
         // process header
+        logger.print("header: " + parts[0]);
         String[] args = parts[0].split(" ");
         this.action = args[0];
         this.protocolVersion = args[1];
@@ -98,35 +97,6 @@ public class Message {
         System.arraycopy(head, 0, combined, 0, head.length);
         System.arraycopy(body, 0, combined, head.length, body.length);
         return combined;
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "action='" + action + '\'' +
-                ", protocolVersion='" + protocolVersion + '\'' +
-                ", senderId=" + senderId +
-                ", fileId='" + fileId + '\'' +
-                ", chunkNo=" + chunkNo +
-                ", replicationDegree=" + replicationDegree +
-                '}';
-    }
-
-    /**
-     * comapare two messages -> used for queue.contains(...)
-     * To be the same, they must have the same action, the same fileId and (if present) the same chunkNo
-     *
-     * @param o the object to comapre this to
-     * @return true if messages match
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Message message = (Message) o;
-        return action.equals(message.action) &&
-                fileId.equals(message.fileId) &&
-                (chunkNo == message.chunkNo || chunkNo == -1);
     }
 
     public String getBodyStr() { return new String(body); }
