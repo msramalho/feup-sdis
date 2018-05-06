@@ -61,7 +61,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
             Message m = new Message(inPacket);
             if (!m.isOwnMessage(peerConfig.id)) { // reject own messages
                 peerConfig.threadPool.submit(new Dispatcher(m, peerConfig, level)); // send a new task to the threadpool
-                logger.print(String.format("received %9s from Peer %3d (%d bytes in body)", m.action, m.senderId, m.body.length));
+                logger.print(String.format("received %s from Peer %d (%d bytes in body)", m.header, m.senderId, m.body.length));
             }
         }
     }
