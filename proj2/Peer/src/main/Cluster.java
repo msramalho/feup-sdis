@@ -11,7 +11,5 @@ public class Cluster extends Locks {
     public MulticastChannels multicast;
     public HashSet<Integer> peers;
 
-    public void clearPeers() {
-        peers = new HashSet<>();
-    }
+    public void clearPeers() { peers = new HashSet<>(); }
 }
