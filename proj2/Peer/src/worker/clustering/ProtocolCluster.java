@@ -20,7 +20,7 @@ abstract class ProtocolCluster extends Protocol {
             level = d.message.level;
 
         // load cluster if it exists
-        if (level < d.peerConfig.clusters.size())
+        if (level >= 0 && level < d.peerConfig.clusters.size())
             cluster = d.peerConfig.clusters.get(level);
     }
 
