@@ -92,7 +92,7 @@ public class Message {
     public static byte[] create(String header) { return Message.create(header, new byte[0]); }
 
     public static byte[] create(String header, byte[] body) {
-        byte[] head = header.getBytes();
+        byte[] head = (header + "\r\n\r\n").getBytes();
         byte[] combined = new byte[head.length + body.length];
 
         System.arraycopy(head, 0, combined, 0, head.length);

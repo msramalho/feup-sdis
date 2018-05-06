@@ -41,7 +41,7 @@ public class Peer implements InitiatorPeer {
         peerConfig.joinCluster(0);
 
         if (peerConfig.isEnhanced())  // only send HELLO if is enhanced
-            peerConfig.multicast.control.send(Message.create("HELLO %s %d 0\r\n\r\n", peerConfig.protocolVersion, peerConfig.id));
+            peerConfig.multicast.control.send(Message.create("HELLO %s %d 0", peerConfig.protocolVersion, peerConfig.id));
 
         // maintain proper state of internal database every 10s
         while (true) {

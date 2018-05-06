@@ -34,7 +34,7 @@ public class RestoreChunk implements Callable {
             getChunkBody = chunkBody.getBytes();
         }
 
-        byte[] message = Message.create("GETCHUNK %s %d %s %d \r\n\r\n", getChunkBody, peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo);
+        byte[] message = Message.create("GETCHUNK %s %d %s %d", getChunkBody, peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo);
 
         for (int i = 0; i < RestoreChunk.RESTORE_ATTEMPTS && lChunk.chunk == null; i++) {
             //no ongoing TCP connection - this will be false again if TCP connection fails

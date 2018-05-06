@@ -17,7 +17,7 @@ public class DeleteFile implements Runnable {
     @Override
     public void run() {
         // send DELETE message
-        peerConfig.multicast.control.send(Message.create("DELETE %s %d %s\r\n\r\n", peerConfig.protocolVersion, peerConfig.id, localChunk.fileId));
+        peerConfig.multicast.control.send(Message.create("DELETE %s %d %s", peerConfig.protocolVersion, peerConfig.id, localChunk.fileId));
 
         // update localChunks to know they have been deleted
         for (LocalChunk lChunk: peerConfig.internalState.localChunks.values())
