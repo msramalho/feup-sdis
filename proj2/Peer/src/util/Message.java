@@ -13,6 +13,7 @@ public class Message {
     public int senderId;
     public String fileId;
     public int level = -1;
+    public int clusterId = -1;
     public int receiverId;
     public int chunkNo;
     public int replicationDegree;
@@ -33,7 +34,7 @@ public class Message {
     /**
      * <MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
      * or
-     * <MessageType> <Version> <SenderId> [<Level> <receiverId> <CRLF><CRLF>[<Body>]
+     * <MessageType> <Version> <SenderId> [<Level>[:<ClusterId>] <receiverId>] <CRLF><CRLF>[<Body>]
      */
     private void parseMessage(DatagramPacket packet) {
         String packetMessage = new String(packet.getData()); // byte[] -> String
@@ -48,11 +49,17 @@ public class Message {
         this.protocolVersion = args[1];
         this.senderId = Integer.parseInt(args[2]);
 
-        // the difference between the two types of messages is that fileId is a string and level is not
-        if (args.length >= 4 && Utils.isInt(args[3])) {
-            this.level = Integer.parseInt(args[3]); // save the cluster level
+        // the difference between the two types of messages is that fileId is a string and level is not, but if level is string it is because of level:clusterId
+        if (args.length >= 4 && (Utils.isInt(args[3]) || args[3].contains(":"))) { // cluster message
+            if (args[3].contains(":")) {
+                String[] clusterParts = args[3].split(":"); // <Level>:<ClusterId>
+                this.level = Integer.parseInt(clusterParts[0]);
+                this.clusterId = Integer.parseInt(clusterParts[1]);
+            } else {
+                this.level = Integer.parseInt(args[3]); // save the cluster level
+            }
             this.receiverId = (args.length >= 5) ? Integer.parseInt(args[4]) : -1; // save receiverId if it exists
-        } else {
+        } else { // service message
             this.fileId = (args.length >= 4) ? args[3] : ""; // save file id if it exists
             this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
             this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
@@ -63,9 +70,7 @@ public class Message {
         if (parts.length == 2) this.body = Arrays.copyOfRange(packet.getData(), headerBytes + 4, packet.getLength());//save body if it exists (64kB chunks)
     }
 
-    boolean isOwnMessage(int selfId) {
-        return this.senderId == selfId;
-    }
+    boolean isOwnMessage(int selfId) { return this.senderId == selfId; }
 
     public boolean isPutchunk() { return this.action.equals("PUTCHUNK"); }
 
