@@ -8,6 +8,7 @@ import java.util.Arrays;
  * parses a packet string into a queryable object
  */
 public class Message {
+    public String header;
     public String action;
     public String protocolVersion;
     public int senderId;
@@ -42,12 +43,13 @@ public class Message {
         parts[0] = parts[0].replaceAll("^ +| +$|( )+", "$1").trim(); //the message may have more than one space between field, this cleans it
 
         // process header
-        logger.print("header: " + parts[0]);
-        String[] args = parts[0].split(" ");
+        this.header = parts[0];
+        String[] args = header.split(" ");
         this.action = args[0];
         this.protocolVersion = args[1];
         this.senderId = Integer.parseInt(args[2]);
 
+        //TODO: decide if clusterId is really necessary in messages
         // the difference between the two types of messages is that fileId is a string and level is not, but if level is string it is because of level:clusterId
         if (args.length >= 4 && (Utils.isInt(args[3]) || args[3].contains(":"))) { // cluster message
             if (args[3].contains(":")) {
