@@ -1,16 +1,14 @@
 package src.main;
 
 import src.localStorage.InternalState;
-import src.util.Logger;
-import src.util.Message;
-import src.util.MulticastChannels;
+import src.util.*;
+// import src.main.Cluster;
 
 import java.net.*;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PeerConfig {
+public class PeerConfig extends Locks {
     public static final String DEFAULT_VERSION = "1.0";
     public String protocolVersion;
     public Integer id; // the peer id
@@ -19,7 +17,7 @@ public class PeerConfig {
     public ExecutorService threadPool; //global threadpool for services
     public InternalState internalState; //manager for the internal state database (non-volatile memory)
 
-    public ArrayList<Cluster> clusters = new ArrayList<>();
+    public ArrayListC<Cluster> clusters = new ArrayListC<>();
     private InetAddress sapIp; // service access point IP
     private Integer sapPort; // service access point port
 
@@ -78,5 +76,14 @@ public class PeerConfig {
      */
     void joinCluster(int level) {
         multicast.control.send(Message.create("JOIN %s %d %d", protocolVersion, id, level));
+        Utils.sleep(3000);
+        if (clusters.size() <= level) {
+            logger.print("No cluster is available... creating my own");
+            //TODO: get cluster ID from highest protocol
+            Cluster newC = new Cluster(999, level);
+            clusters.set(level, newC);
+            newC.loadMulticast(this);
+        }
+        unlock("joining_cluster_" + level);
     }
 }

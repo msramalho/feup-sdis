@@ -17,25 +17,34 @@ public class P_Join extends ProtocolCluster {
     public void run() throws LockException {
         if (!hasCluster()) return;
 
-        // restart the count of peers in this cluster
-        cluster.clearPeers();
         cluster.lock("processing_join");
+        cluster.clearPeers();// restart the count of peers in this cluster
 
         // TODO: should PRESENT include the requesting peer?
         // TODO: should PRESENT change a flag to ASSESSING so that if two peers send JOIN there isn't a cock up? especially if the peers hashset dor the cluster is reset
         // every peer sends PRESENT
         cluster.multicast.control.send(Message.create("PRESENT %s %d", d.peerConfig.protocolVersion, d.peerConfig.id));
 
-        // sleep for 1 second (While I am asleep, the other Peer's PRESENT Messages will make)
+        // sleep for 1 second (While I am asleep, the other Peer's PRESENT Messages will be counted)
         sleep(1000);
 
         // send AVAILABLE <version> <id> <level> <receiverId> if there is an available slot and no one silenced me
         if (cluster.peers.size() < Cluster.MAX_SIZE && !cluster.locked("available_silenced"))
             sendAvailable();
+
+        cluster.unlock("processing_join");
+        cluster.unlock("available_silenced");
     }
 
+    /**
+     * Join every cluster ID of the clusters above in the body of the AVAILABLE version senderId level:clusterId receiverId + body
+     */
     private void sendAvailable() {
-        //TODO: include info about the multiast groups of all the clusters in this level and in the above
-        d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d %d", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, d.message.senderId));
+        StringBuilder upper = new StringBuilder(); // upperClustersInfo
+        for (int i = d.message.level; i < d.peerConfig.clusters.size(); i++)
+            upper.append(" ").append(i + ":" + d.peerConfig.clusters.get(i).id);
+
+        logger.print("Sending available for: " + upper.toString());
+        d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d:%d %d", upper.toString().trim().getBytes(), d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, cluster.id, d.message.senderId));
     }
 }
