@@ -32,7 +32,7 @@ public class P_Getchunk extends Protocol {
         if (!sChunk.gotAnswer) {
             byte[] messageBody;
             String usingVersion = PeerConfig.DEFAULT_VERSION;
-            boolean usingEnhancedVersion = d.peerConfig.isEnhanced() && PeerConfig.isMessageEnhanced(d.message);//both are enhanced
+            boolean usingEnhancedVersion = d.peerConfig.isEnhanced() && PeerConfig.isMessageEnhanced(d.message) && d.message.hasTcpInfo();//both are enhanced and the sender sent the tcp coordinates
             //handle ENHANCEMENT_2
             if (usingEnhancedVersion) {
                 messageBody = new byte[0];
@@ -45,7 +45,7 @@ public class P_Getchunk extends Protocol {
             // ENHANCEMENT_2 continuation - try sending chunk through TCP
             if (usingEnhancedVersion) {
                 TcpClient tcp = new TcpClient();
-                if (tcp.sendChunk(d.message, sChunk.chunk))
+                if (tcp.send(d.message, sChunk.chunk))
                     logger.print("chunk " + sChunk.getShortId() + " sent through TCP (" + sChunk.chunk.length + " bytes)");
             }
         }

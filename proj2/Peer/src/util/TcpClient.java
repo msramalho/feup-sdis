@@ -10,8 +10,9 @@ public class TcpClient {
 
     public TcpClient() { }
 
-    public boolean sendChunk(Message message, byte[] chunk) {
+    public boolean send(Message message, byte[] chunk) {
         AbstractMap.SimpleEntry<String, Integer> tcpCoordinates = message.getTCPCoordinates();
+        logger.print("making TCP available on:" + tcpCoordinates.getKey() + ":" + tcpCoordinates.getValue());
         try {
             Socket clientSocket = new Socket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
@@ -25,4 +26,7 @@ public class TcpClient {
         }
         return false;
     }
+
+    public void send(Message message, String data) {send(message, data.getBytes()); }
+
 }

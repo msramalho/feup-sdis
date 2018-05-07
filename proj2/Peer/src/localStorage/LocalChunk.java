@@ -12,14 +12,17 @@ public class LocalChunk extends Chunk implements Serializable {
     public LocalChunk(String fileId, int chunkNo, Integer replicationDegree, byte[] chunk) { super(fileId, chunkNo, replicationDegree, chunk); }
 
     // uses the previously opened ServerSocket to receive the chunk bytes through TCP
-    public boolean loadFromTCP() { return tcp.receiveChunk(this); }
+    public boolean loadFromTCP() {
+        chunk = tcp.receive();
+        return chunk != null;
+    }
 
     public boolean startTCP() {
         tcp = tcp == null ? new TcpServer() : tcp; // singleton
         return tcp.start();
     }
 
-    public boolean noTcp(){
+    public boolean noTcp() {
         return tcp == null || tcp.dead();
     }
 

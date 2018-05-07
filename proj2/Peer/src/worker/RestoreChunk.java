@@ -5,6 +5,7 @@ import src.main.PeerConfig;
 import src.util.Logger;
 import src.util.Message;
 
+import java.net.UnknownHostException;
 import java.util.concurrent.Callable;
 
 // send GETCHUNK <Version> <SenderId> <FileId> <ChunkNo> <CRLF><CRLF>
@@ -28,10 +29,13 @@ public class RestoreChunk implements Callable {
 
         // handle ENHANCEMENT_2
         byte[] getChunkBody = new byte[0];
-        if (peerConfig.isEnhanced() && peerConfig.machineIp != null && lChunk.startTCP()) {
-            // if is enhanced, send the IP:Port of the TCP connection to the peer and TCP started succesfully
-            String chunkBody = String.format("%s:%s", peerConfig.machineIp.getHostAddress(), lChunk.tcp.socket.getLocalPort());
-            getChunkBody = chunkBody.getBytes();
+        if (peerConfig.isEnhanced() && lChunk.startTCP()) {
+            try {
+                // if is enhanced, send the IP:Port of the TCP connection to the peer and TCP started succesfully
+                getChunkBody = lChunk.tcp.getCoordinates().getBytes();
+            } catch (UnknownHostException e) {
+                logger.err("Unable to get Host to send TCP coordinates in GETCHUNK");
+            }
         }
 
         byte[] message = Message.create("GETCHUNK %s %d %s %d", getChunkBody, peerConfig.protocolVersion, peerConfig.id, lChunk.fileId, lChunk.chunkNo);

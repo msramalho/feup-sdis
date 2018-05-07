@@ -1,16 +1,17 @@
 package src.util;
 
-import src.localStorage.LocalChunk;
 import src.localStorage.LocalFile;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class TcpServer {
     private Logger logger = new Logger(this);
-    public ServerSocket socket;
+    private ServerSocket socket;
 
     public TcpServer() { }
 
@@ -25,34 +26,39 @@ public class TcpServer {
         return false;
     }
 
-    public boolean dead(){
-        return socket == null;
+    public boolean dead() { return socket == null; }
+
+    public String getCoordinates() throws UnknownHostException {
+        return String.format("%s:%s", InetAddress.getLocalHost().getHostAddress(), socket.getLocalPort());
     }
 
-    public boolean receiveChunk(LocalChunk localChunk){
+    public byte[] receive() {
         try {
+            // prepare socket
             socket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
-            socket.setSoTimeout(1000);
+            socket.setSoTimeout(300);
             Socket connectionSocket = socket.accept();
             socket.close();
             DataInputStream inFromClient = new DataInputStream(connectionSocket.getInputStream());
 
+            // read into byte[]
             int totalRead = 0, lastRead = 1;
             byte[] tempChunk = new byte[LocalFile.CHUNK_SIZE];
             while (totalRead < LocalFile.CHUNK_SIZE && lastRead >= 0) {
                 lastRead = inFromClient.read(tempChunk, totalRead, LocalFile.CHUNK_SIZE - totalRead);
                 totalRead += lastRead > 0 ? lastRead : 0; // only update for positive values
             }
-            localChunk.chunk = new byte[totalRead];
-            System.arraycopy(tempChunk, 0, localChunk.chunk, 0, totalRead);
 
             logger.print("read: " + totalRead + " bytes from tcp");
-            return true;
+            byte[] received = new byte[totalRead];
+            System.arraycopy(tempChunk, 0, received, 0, totalRead);
+
+            return received;
         } catch (IOException e) {
             socket = null;
             logger.err("unable to receive chunk through TCP, defaulting back to old protocol");
             e.printStackTrace();
         }
-        return false;
+        return null;
     }
 }
