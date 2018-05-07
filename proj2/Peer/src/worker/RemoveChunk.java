@@ -19,7 +19,7 @@ public class RemoveChunk implements Runnable {
         // delete from local storage
         peerConfig.internalState.deleteStoredChunk(storedChunk, false);
 
-        // send REMOVE Message for others to hear
+        // sendLine REMOVE Message for others to hear
         peerConfig.multicast.control.send(Message.create("REMOVED %s %d %s %d", peerConfig.protocolVersion, peerConfig.id, storedChunk.fileId, storedChunk.chunkNo));
     }
 }

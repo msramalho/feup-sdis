@@ -12,7 +12,6 @@ public class PeerConfig extends Locks {
     public static final String DEFAULT_VERSION = "1.0";
     public String protocolVersion;
     public Integer id; // the peer id
-    public InetAddress machineIp = null; // Ip address of current machine, for TCP connections
     public MulticastChannels multicast;
     public ExecutorService threadPool; //global threadpool for services
     public InternalState internalState; //manager for the internal state database (non-volatile memory)
@@ -33,7 +32,6 @@ public class PeerConfig extends Locks {
         id = Integer.parseInt(args[1]);
         loadServiceAccessPoint(args[2]);
         internalState = InternalState.load(id);
-        readMachineIp();
         logger.print(internalState.toString());
 
         multicast = new MulticastChannels(this, args);
@@ -61,15 +59,6 @@ public class PeerConfig extends Locks {
     public boolean isEnhanced() { return !protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }
 
     public static boolean isMessageEnhanced(Message m) { return !m.protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }
-
-    private void readMachineIp() {
-        try {
-            machineIp = InetAddress.getLocalHost(); // use .getHostAddress() for the Ip string
-        } catch (UnknownHostException e) {
-            logger.print("unable to get current machine Ip address, enhanced GETCHUNK will not happen");
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Make this peer join or create a cluster at a given level

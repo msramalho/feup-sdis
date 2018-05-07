@@ -4,6 +4,7 @@ import src.util.LockException;
 import src.util.Logger;
 import src.util.Utils;
 
+import java.net.UnknownHostException;
 import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class Protocol {
@@ -12,7 +13,7 @@ public abstract class Protocol {
 
     public Protocol(Dispatcher d) { this.d = d; }
 
-    public abstract void run() throws LockException;
+    public abstract void run() throws LockException, UnknownHostException;
 
     /**
      * sleep time is longer for Peers with lower percentage of disk space occupied

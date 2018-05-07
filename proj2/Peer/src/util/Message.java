@@ -75,6 +75,8 @@ public class Message {
 
     public boolean isPutchunk() { return this.action.equals("PUTCHUNK"); }
 
+    public boolean hasTcpInfo() { return getBodyStr().split(":").length == 2; }
+
     public AbstractMap.SimpleEntry<String, Integer> getTCPCoordinates() {
         //parse the body of the message, which should contain IP:Port of the TCP socket on the other Peer
         String[] parts = new String(body).split(":");

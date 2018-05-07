@@ -3,7 +3,10 @@ package src.worker.clustering;
 import src.main.Cluster;
 import src.util.LockException;
 import src.util.Message;
+import src.util.TcpServer;
 import src.worker.Dispatcher;
+
+import java.net.UnknownHostException;
 
 /**
  * This peer receives a JOIN (only go through the global MCs so cluster should not be null)
@@ -11,10 +14,12 @@ import src.worker.Dispatcher;
  * If I have a slot and I saw no AVAILABLE response to this, I will shut up (OPTIONAL as long as the joining peer only considers one)
  */
 public class P_Join extends ProtocolCluster {
+    TcpServer tcp;
+
     public P_Join(Dispatcher d) { super(d); }
 
     @Override
-    public void run() throws LockException {
+    public void run() throws LockException, UnknownHostException {
         if (!hasCluster()) return;
 
         cluster.lock("processing_join");
@@ -39,12 +44,22 @@ public class P_Join extends ProtocolCluster {
     /**
      * Join every cluster ID of the clusters above in the body of the AVAILABLE version senderId level:clusterId receiverId + body
      */
-    private void sendAvailable() {
-        StringBuilder upper = new StringBuilder(); // upperClustersInfo
-        for (int i = d.message.level; i < d.peerConfig.clusters.size(); i++)
-            upper.append(" ").append(i + ":" + d.peerConfig.clusters.get(i).id);
+    private void sendAvailable() throws UnknownHostException {
+        // StringBuilder upper = new StringBuilder(); // upperClustersInfo
+        // for (int i = d.message.level; i < d.peerConfig.clusters.size(); i++)
+        //     upper.append(" ").append(i + ":" + d.peerConfig.clusters.get(i).id);
+        // upper.append('\n').append()
+        tcp = new TcpServer();
+        if (tcp.start()) {
+            d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d:%d %d", tcp.getCoordinates().getBytes(), d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, cluster.id, d.message.senderId));
+            String answer = tcp.readLine();
 
-        logger.print("Sending available for: " + upper.toString());
-        d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d:%d %d", upper.toString().trim().getBytes(), d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, cluster.id, d.message.senderId));
+            logger.print(answer.length() + " - " + answer);
+
+            tcp.sendLine("you are welcome");
+
+            // tcp.close();
+        }
+
     }
 }

@@ -2,6 +2,7 @@ package src.worker.clustering;
 
 import src.main.Cluster;
 import src.util.LockException;
+import src.util.TcpClient;
 import src.util.Utils;
 import src.worker.Dispatcher;
 
@@ -16,15 +17,20 @@ public class P_Available extends ProtocolCluster {
     @Override
     public void run() throws LockException {
         if (isGlobal() && d.message.receiverId == d.peerConfig.id && d.peerConfig.clusters.size() <= d.message.level && d.peerConfig.lock("joining_cluster_" + d.message.level)) { // case 1
-            for (String clusterId : d.message.getBodyStr().split(" ")) {
-                Utils.ClusterInfo c = Utils.splitCluster(clusterId);
+            TcpClient tcpClient = new TcpClient();
+            tcpClient.sendLine(d.message, "Accept");
+            String clusterInfo = tcpClient.readLine();
+            logger.print(clusterInfo);
 
-                Cluster newC = new Cluster(c.clusterId, c.level);
-                d.peerConfig.clusters.set(c.level, newC);
-                newC.loadMulticast(d.peerConfig);
-
-                logger.print("Joined cluster " + newC.id + " at level " + newC.level);
-            }
+            // for (String clusterId : d.message.getBodyStr().split(" ")) {
+            //     Utils.ClusterInfo c = Utils.splitCluster(clusterId);
+            //
+            //     Cluster newC = new Cluster(c.clusterId, c.level);
+            //     d.peerConfig.clusters.set(c.level, newC);
+            //     newC.loadMulticast(d.peerConfig);
+            //
+            //     logger.print("Joined cluster " + newC.id + " at level " + newC.level);
+            // }
         } else if (hasCluster() && cluster.locked("processing_join")) { // case 2
             cluster.lock("available_silenced");
         }

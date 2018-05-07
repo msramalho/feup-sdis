@@ -7,6 +7,7 @@ import src.util.Message;
 import src.util.Utils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.UnknownHostException;
 
 public class Dispatcher implements Runnable {
     public Message message;
@@ -27,8 +28,15 @@ public class Dispatcher implements Runnable {
 
         // run the protocol if it was found -> ignored all LockExceptions because they are just to prevent redundancy
         if (p != null) {
-            try { p.run(); } catch (LockException e) {logger.err(e.getMessage());}
-        } else{
+            try {
+                p.run();
+            } catch (LockException e) {
+                logger.err(e.getMessage());
+            } catch (UnknownHostException e) {
+                //TODO: complete TCP in AVAILABLE
+                logger.err("Unable to acquire host IP: " + e.getMessage());
+            }
+        } else {
             logger.err("Unable to find and instantiate protocol class '" + getProtocolName("*") + "' with constructor (Dispatcher d)'");
         }
     }
