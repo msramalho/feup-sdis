@@ -3,6 +3,7 @@ package src.util;
 import java.net.DatagramPacket;
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * parses a packet string into a queryable object
@@ -34,9 +35,10 @@ public class Message {
      * <MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
      * or
      * <MessageType> <Version> <SenderId> [<Level>[:<ClusterId>] <receiverId>] <CRLF><CRLF>[<Body>]
+     * @throws Exception 
      */
-    private void parseMessage(DatagramPacket packet) {
-        String packetMessage = new String(packet.getData()); // byte[] -> String
+    private void parseMessage(DatagramPacket packet) throws Exception {
+        String packetMessage = new String(Cryptography.decrypt(packet.getData())); // byte[] -> String
         packetMessage = packetMessage.substring(0, Math.min(packet.getLength(), packetMessage.length())); // trim
         String[] parts = packetMessage.split("\r\n\r\n", 2); // split only once
         int headerBytes = parts[0].length();
@@ -97,10 +99,18 @@ public class Message {
     public static byte[] create(String header, byte[] body) {
         byte[] head = (header + "\r\n\r\n").getBytes();
         byte[] combined = new byte[head.length + body.length];
+        byte[] encryptedData = new byte[head.length + body.length];
 
         System.arraycopy(head, 0, combined, 0, head.length);
         System.arraycopy(body, 0, combined, head.length, body.length);
-        return combined;
+        
+        try {
+			encryptedData = Cryptography.encrypt(combined);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        
+        return encryptedData;
     }
 
     public String getBodyStr() { return new String(body); }
