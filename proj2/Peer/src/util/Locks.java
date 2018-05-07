@@ -1,12 +1,12 @@
 package src.util;
 
-import java.util.HashSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * Provide a simple interface for classes to use that allow to communicate between threads
  */
 public class Locks {
-    HashSet<String> locks = new HashSet<>();
+    private ConcurrentSkipListSet<String> locks = new ConcurrentSkipListSet<>();
 
     public boolean lock(String lock) throws LockException {
         if (locked(lock)) { throw new LockException("Already locked for " + lock); }
