@@ -14,7 +14,6 @@ public class LocalChunk extends Chunk implements Serializable {
     // uses the previously opened ServerSocket to receive the chunk bytes through TCP
     public boolean loadFromTCP() {
         chunk = tcp.receive();
-        tcp.close();
         return chunk != null;
     }
 

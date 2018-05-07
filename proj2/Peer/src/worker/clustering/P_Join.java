@@ -45,18 +45,19 @@ public class P_Join extends ProtocolCluster {
      * Join every cluster ID of the clusters above in the body of the AVAILABLE version senderId level:clusterId receiverId + body
      */
     private void sendAvailable() throws UnknownHostException {
-        // StringBuilder upper = new StringBuilder(); // upperClustersInfo
-        // for (int i = d.message.level; i < d.peerConfig.clusters.size(); i++)
-        //     upper.append(" ").append(i + ":" + d.peerConfig.clusters.get(i).id);
-        // upper.append('\n').append()
+        //TODO: simplify for
+        StringBuilder upper = new StringBuilder(); // upperClustersInfo
+        for (int i = d.message.level; i < d.peerConfig.clusters.size(); i++)
+            upper.append(" ").append(i + ":" + d.peerConfig.clusters.get(i).id);
+
+
         tcp = new TcpServer();
         if (tcp.start()) {
             d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d:%d %d", tcp.getCoordinates().getBytes(), d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, cluster.id, d.message.senderId));
-            String answer = tcp.readLine();
+            if (tcp.readLine().equals("ACCEPTED")) {
+                tcp.sendLine(upper.toString());
+            }
 
-            logger.print(answer.length() + " - " + answer);
-
-            tcp.sendLine("you are welcome");
 
             // tcp.close();
         }

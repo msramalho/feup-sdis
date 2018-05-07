@@ -44,8 +44,8 @@ public class P_Getchunk extends Protocol {
 
             // ENHANCEMENT_2 continuation - try sending chunk through TCP
             if (usingEnhancedVersion) {
-                TcpClient tcp = new TcpClient();
-                if (tcp.send(d.message, sChunk.chunk))
+                TcpClient tcp = new TcpClient(d.message);
+                if (tcp.send(sChunk.chunk))
                     logger.print("chunk " + sChunk.getShortId() + " sent through TCP (" + sChunk.chunk.length + " bytes)");
             }
         }

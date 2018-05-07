@@ -1,9 +1,7 @@
 package src.worker.clustering;
 
-import src.main.Cluster;
 import src.util.LockException;
 import src.util.TcpClient;
-import src.util.Utils;
 import src.worker.Dispatcher;
 
 /**
@@ -17,9 +15,9 @@ public class P_Available extends ProtocolCluster {
     @Override
     public void run() throws LockException {
         if (isGlobal() && d.message.receiverId == d.peerConfig.id && d.peerConfig.clusters.size() <= d.message.level && d.peerConfig.lock("joining_cluster_" + d.message.level)) { // case 1
-            TcpClient tcpClient = new TcpClient();
-            tcpClient.sendLine(d.message, "Accept");
-            String clusterInfo = tcpClient.readLine();
+            TcpClient tcp = new TcpClient(d.message);
+            tcp.sendLine("ACCEPTED");
+            String clusterInfo = tcp.readLine();
             logger.print(clusterInfo);
 
             // for (String clusterId : d.message.getBodyStr().split(" ")) {
