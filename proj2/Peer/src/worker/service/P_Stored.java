@@ -1,13 +1,15 @@
-package src.worker;
+package src.worker.service;
 
 import src.localStorage.Chunk;
 import src.localStorage.StoredChunk;
+import src.worker.Dispatcher;
+import src.worker.Protocol;
 
 // save information about what other peers are saying in the network so we can respect replication degrees
 // only receives STORED that are not about local files, those go to the worker.BackupChunk
 public class P_Stored extends Protocol {
 
-    P_Stored(Dispatcher d) { super(d); }
+    public P_Stored(Dispatcher d) { super(d); }
 
     @Override
     public void run() {

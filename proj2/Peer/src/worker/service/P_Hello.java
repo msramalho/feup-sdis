@@ -1,11 +1,14 @@
-package src.worker;
+package src.worker.service;
 
 import src.localStorage.LocalChunk;
+import src.worker.DeleteFile;
+import src.worker.Dispatcher;
+import src.worker.Protocol;
 
 import java.util.ArrayList;
 
 public class P_Hello extends Protocol {
-    P_Hello(Dispatcher d) {super(d);}
+    public P_Hello(Dispatcher d) {super(d);}
 
     @Override
     public void run() {

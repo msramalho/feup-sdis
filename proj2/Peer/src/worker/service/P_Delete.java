@@ -1,10 +1,12 @@
-package src.worker;
+package src.worker.service;
 
 import src.localStorage.StoredChunk;
 import src.util.Message;
+import src.worker.Dispatcher;
+import src.worker.Protocol;
 
 public class P_Delete extends Protocol {
-    P_Delete(Dispatcher d) { super(d); }
+    public P_Delete(Dispatcher d) { super(d); }
 
     @Override
     public void run() {
@@ -23,7 +25,7 @@ public class P_Delete extends Protocol {
         }
 
         if (hasChunk) {
-            d.peerConfig.multicast.control.send(Message.createMessage(String.format("DELETED %s %d %s\r\n\r\n", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.fileId)));
+            d.peerConfig.multicast.control.send(Message.create("DELETED %s %d %s", d.peerConfig.protocolVersion, d.peerConfig.id, d.message.fileId));
         }
 
         // commit changes to non-volatile memory

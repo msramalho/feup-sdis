@@ -1,9 +1,11 @@
-package src.worker;
+package src.worker.service;
 
 import src.localStorage.LocalChunk;
+import src.worker.Dispatcher;
+import src.worker.Protocol;
 
 public class P_Deleted extends Protocol {
-    P_Deleted(Dispatcher d) { super(d); }
+    public P_Deleted(Dispatcher d) { super(d); }
 
     @Override
     public void run() {

@@ -1,23 +1,25 @@
 package src.util;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.util.AbstractMap;
 
-public class TcpClient {
-    private Logger logger = new Logger(this);
-
-    public TcpClient() { }
-
-    public boolean sendChunk(Message message, byte[] chunk) {
+public class TcpClient extends Tcp {
+    public TcpClient(Message message) {
         AbstractMap.SimpleEntry<String, Integer> tcpCoordinates = message.getTCPCoordinates();
         try {
-            Socket clientSocket = new Socket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
-            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+            socket = new Socket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
+        } catch (IOException e) {
+            logger.err("Unable to open TCP socket: " + e.getMessage());
+        }
+    }
+
+    public boolean send(byte[] chunk) {
+        try {
+            DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
             outToServer.write(chunk, 0, chunk.length);
             outToServer.flush();
-            clientSocket.close(); // sends EOF
+            socket.close(); // sends EOF
             return true;
         } catch (IOException e) {
             logger.err("Unable to connect to TCP");
@@ -25,4 +27,8 @@ public class TcpClient {
         }
         return false;
     }
+
+    @Override
+    public void socketChecks() {}
+
 }

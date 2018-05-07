@@ -1,23 +1,22 @@
 package src.main;
 
 import src.localStorage.InternalState;
-import src.util.Logger;
-import src.util.Message;
-import src.util.MulticastChannels;
+import src.util.*;
+// import src.main.Cluster;
 
 import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PeerConfig {
+public class PeerConfig extends Locks {
     public static final String DEFAULT_VERSION = "1.0";
     public String protocolVersion;
     public Integer id; // the peer id
-    public InetAddress machineIp = null; // Ip address of current machine, for TCP connections
     public MulticastChannels multicast;
     public ExecutorService threadPool; //global threadpool for services
     public InternalState internalState; //manager for the internal state database (non-volatile memory)
 
+    public ArrayListC<Cluster> clusters = new ArrayListC<>();
     private InetAddress sapIp; // service access point IP
     private Integer sapPort; // service access point port
 
@@ -33,7 +32,6 @@ public class PeerConfig {
         id = Integer.parseInt(args[1]);
         loadServiceAccessPoint(args[2]);
         internalState = InternalState.load(id);
-        readMachineIp();
         logger.print(internalState.toString());
 
         multicast = new MulticastChannels(this, args);
@@ -62,12 +60,19 @@ public class PeerConfig {
 
     public static boolean isMessageEnhanced(Message m) { return !m.protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }
 
-    private void readMachineIp() {
-        try {
-            machineIp = InetAddress.getLocalHost(); // use .getHostAddress() for the Ip string
-        } catch (UnknownHostException e) {
-            logger.print("unable to get current machine Ip address, enhanced GETCHUNK will not happen");
-            e.printStackTrace();
+    /**
+     * Make this peer join or create a cluster at a given level
+     */
+    void joinCluster(int level) {
+        multicast.control.send(Message.create("JOIN %s %d %d", protocolVersion, id, level));
+        Utils.sleep(3000);
+        if (clusters.size() <= level) {
+            logger.print("No cluster is available... creating my own");
+            //TODO: get cluster ID from highest protocol
+            Cluster newC = new Cluster(999, level);
+            clusters.set(level, newC);
+            newC.loadMulticast(this);
         }
+        unlock("joining_cluster_" + level);
     }
 }
