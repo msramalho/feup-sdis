@@ -30,6 +30,7 @@ public class P_Available extends ProtocolCluster {
                 d.peerConfig.clusters.set(c.level, newC);
                 newC.loadMulticast(d.peerConfig);
 
+                tcp.close();
                 logger.print("Joined cluster " + newC.id + " at level " + newC.level);
             }
         } else if (hasCluster() && cluster.locked("processing_join")) { // case 2

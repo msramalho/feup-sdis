@@ -12,18 +12,16 @@ public abstract class Tcp {
 
     public abstract void socketChecks() throws IOException;
 
-    public boolean sendLine(String data) {
+    public void sendLine(String data) {
         try {
             socketChecks();
             DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
             outToServer.writeBytes(data + "\n");
             outToServer.flush();
             logger.print("SENT: " + data);
-            return true;
         } catch (IOException e) {
             logger.err("Unable to connect to send through TCP: " + e.getMessage());
         }
-        return false;
     }
 
     public String readLine() {
@@ -37,5 +35,13 @@ public abstract class Tcp {
             logger.err("Unable to read line:" + e.getMessage());
         }
         return null;
+    }
+
+    public void close() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            logger.err("Unable to close TCP socket: " + e.getMessage());
+        }
     }
 }

@@ -57,7 +57,7 @@ public class P_Join extends ProtocolCluster {
             if (tcp.readLine().equals("ACCEPTED")) {
                 tcp.sendLine(upper.toString());
             }
-
+            tcp.close();
         }
 
     }
