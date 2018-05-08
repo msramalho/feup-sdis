@@ -34,7 +34,7 @@ public class P_Join extends ProtocolCluster {
         sleep(1000);
 
         // send AVAILABLE <version> <id> <level> <receiverId> if there is an available slot and no one silenced me
-        if (cluster.peers.size() < Cluster.MAX_SIZE && !cluster.locked("available_silenced"))
+        if (cluster.peers.size() + 1 < Cluster.MAX_SIZE && !cluster.locked("available_silenced"))
             sendAvailable();
 
         cluster.unlock("processing_join");
@@ -48,7 +48,7 @@ public class P_Join extends ProtocolCluster {
         //TODO: simplify for
         StringBuilder upper = new StringBuilder(); // upperClustersInfo
         for (int i = d.message.level; i < d.peerConfig.clusters.size(); i++)
-            upper.append(" ").append(i + ":" + d.peerConfig.clusters.get(i).id);
+            upper.append(i + ":" + d.peerConfig.clusters.get(i).id).append(" ");
 
 
         tcp = new TcpServer();
@@ -58,8 +58,6 @@ public class P_Join extends ProtocolCluster {
                 tcp.sendLine(upper.toString());
             }
 
-
-            // tcp.close();
         }
 
     }
