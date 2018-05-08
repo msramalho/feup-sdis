@@ -22,7 +22,7 @@ public class PeerConfig extends Locks {
 
     public Integer maxClusterId = -1; // the maximum cluster id observed
 
-    Logger logger = new Logger(this);
+    private Logger logger = new Logger(this);
 
     public PeerConfig(String[] args) throws Exception {
         if (args.length < 7)
@@ -72,8 +72,6 @@ public class PeerConfig extends Locks {
         Utils.sleep(3000);
         if (clusters.size() <= level) {
             logger.print("No cluster is available... creating my own");
-            //TODO: get cluster ID from highest protocol
-            // Cluster newC = new Cluster(level, 999);
             Cluster newC = Cluster.getNewCluster(level, this);
             logger.print("New Cluster: " + newC.id + ", after Protocol MAXCLUSTER");
             clusters.set(level, newC);
