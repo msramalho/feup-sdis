@@ -34,7 +34,7 @@ public class P_Join extends ProtocolCluster {
         sleep(1000);
 
         // send AVAILABLE <version> <id> <level> <receiverId> if there is an available slot and no one silenced me
-        if (cluster.peers.size() + 1 < Cluster.MAX_SIZE && !cluster.locked("available_silenced"))
+        if (!cluster.isFull() && !cluster.locked("available_silenced"))
             sendAvailable();
 
         cluster.unlock("processing_join");

@@ -37,4 +37,8 @@ public class Cluster extends Locks {
         Utils.sleep(1000);
         return new Cluster(level, peerConfig.nextClusterId());
     }
+
+    public boolean isFull(){
+        return peers.size() + 1 >= Cluster.MAX_SIZE;
+    }
 }
