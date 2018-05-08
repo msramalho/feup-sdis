@@ -50,12 +50,16 @@ public class P_Join extends ProtocolCluster {
         for (int i = d.message.level; i < d.peerConfig.clusters.size(); i++)
             upper.append(i + ":" + d.peerConfig.clusters.get(i).id).append(" ");
 
-
         tcp = new TcpServer();
         if (tcp.start()) {
             d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d:%d %d", tcp.getCoordinates().getBytes(), d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, cluster.id, d.message.senderId));
             if (tcp.readLine().equals("ACCEPTED")) {
                 tcp.sendLine(upper.toString());
+                //TODO: repeat the full logic for all the upper clusters the peer has joined
+                cluster.peers.add(d.message.senderId);
+                if (cluster.isFull()) {
+                    //TODO: if the cluster is full after adding the new peer, CREATE an upper level and AFTER see if there is any available with level higher by one than the upper created
+                }
             }
             tcp.close();
         }
