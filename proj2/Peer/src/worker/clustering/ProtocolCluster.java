@@ -16,7 +16,7 @@ abstract class ProtocolCluster extends Protocol {
 
         if (d.level != -1)  // if this is not a message on the global multicast channel
             level = d.level;
-        else if (d.message.level >= -1) // this message was sent on the global multicast but it is about a specific cluster
+        else if (d.message.level > -1) // this message was sent on the global multicast but it is about a specific cluster
             level = d.message.level;
 
         // load cluster if it exists
