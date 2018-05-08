@@ -20,6 +20,8 @@ public class PeerConfig extends Locks {
     private InetAddress sapIp; // service access point IP
     private Integer sapPort; // service access point port
 
+    public Integer maxClusterId = -1; // the maximum cluster id observed
+
     Logger logger = new Logger(this);
 
     public PeerConfig(String[] args) throws Exception {
@@ -60,6 +62,8 @@ public class PeerConfig extends Locks {
 
     public static boolean isMessageEnhanced(Message m) { return !m.protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }
 
+    public void updateMaxClusterId(int clusterId) { maxClusterId = Math.max(maxClusterId, clusterId); }
+
     /**
      * Make this peer join or create a cluster at a given level
      */
@@ -69,10 +73,18 @@ public class PeerConfig extends Locks {
         if (clusters.size() <= level) {
             logger.print("No cluster is available... creating my own");
             //TODO: get cluster ID from highest protocol
-            Cluster newC = new Cluster(999, level);
+            // Cluster newC = new Cluster(level, 999);
+            Cluster newC = Cluster.getNewCluster(level, this);
+            logger.print("New Cluster: " + newC.id + ", after Protocol MAXCLUSTER");
             clusters.set(level, newC);
             newC.loadMulticast(this);
         }
         unlock("joining_cluster_" + level);
+    }
+
+    public int nextClusterId() {
+        maxClusterId++;
+        multicast.control.send(Message.create("CLUSTERID %s %d -1:%d", protocolVersion, id, maxClusterId));
+        return maxClusterId;
     }
 }
