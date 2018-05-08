@@ -1,8 +1,6 @@
 package src.main;
 
-import src.util.Locks;
-import src.util.Logger;
-import src.util.MulticastChannels;
+import src.util.*;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -15,9 +13,9 @@ public class Cluster extends Locks {
     public HashSet<Integer> peers;
     private Logger logger = new Logger(this);
 
-    public Cluster(int id, int level) {
-        this.id = id;
+    public Cluster(int level, int id) {
         this.level = level;
+        this.id = id;
     }
 
     public void loadMulticast(PeerConfig peerConfig) {
