@@ -18,17 +18,20 @@ public class JavaSSLServer {
  
     public static void main(String[] args) {
          
-         int port = Integer.parseInt(args[0]);
-         String cypher = args[1];
-         
+        int port = Integer.parseInt(args[0]);
+        String cypher = args[1];
+        
+        System.setProperty("javax.net.ssl.keyStore","/home/diogo/Github/feup-sdis/lab03/mykeystore/examplestore");
+        System.setProperty("javax.net.ssl.keyStorePassword","sdis18");
+
         SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
          
         try {
-            ServerSocket sslServerSocket = 
-                    sslServerSocketFactory.createServerSocket(port);
+            ServerSocket sslServerSocket = sslServerSocketFactory.createServerSocket(port);
             System.out.println("SSL ServerSocket started");
             System.out.println(sslServerSocket.toString());
-             
+            //sslServerSocket.startHandshake();
+            //ServerSocket server = sslServerSocket.accept(); 
             Socket socket = sslServerSocket.accept();
             
             System.out.println("ServerSocket accepted");

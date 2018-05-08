@@ -33,8 +33,12 @@ public class JavaSSLClient {
         String[] list = opnd.split(",");
         String cypher = args[4];
 
-        SSLSocketFactory sslSocketFactory = 
-                (SSLSocketFactory)SSLSocketFactory.getDefault();
+        System.setProperty("javax.net.ssl.trustStore","/home/diogo/Github/feup-sdis/lab03/mykeystore/examplestore");
+        System.setProperty("javax.net.ssl.trustStorePassword","sdis18");
+
+        SSLSocketFactory sslSocketFactory =  (SSLSocketFactory)SSLSocketFactory.getDefault();
+        
+
         try {
             Socket socket = sslSocketFactory.createSocket("localhost", port);
             //socketStrem to receive server communication
@@ -65,32 +69,18 @@ public class JavaSSLClient {
         }     
     }
 
-    public static String AesDecrypt(String encryptContent, String password) {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
-            secureRandom.setSeed(password.getBytes());
-            keyGen.init(128, secureRandom);
-            //SecretKey secretKey = keyGen.generateKey();
-            byte[] enCodeFormat = hexStringToByteArray("sdis18");
-            SecretKeySpec key = new SecretKeySpec(enCodeFormat, "AES");
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, key);
-            return new String(cipher.doFinal(hexStringToByteArray(encryptContent)));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
-    public static byte[] hexStringToByteArray(String s) {   
-    int len = s.length();
-    byte[] data = new byte[len / 2];
-    for (int i = 0; i < len; i += 2) {
-        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                             + Character.digit(s.charAt(i+1), 16));
-    }
-    return data;
-}
+    /*private boolean testSSLSocket(SSLSocket sslSocket) {
+       try {
+        if(DEBUG_ALL) System.out.println("Starting SSL handshake");
+        sslSocket.setSoTimeout(0);
+        sslSocket.startHandshake();
+           return true;
+       } catch (Exception e) {
+        if(DEBUG_ALL) e.printStackTrace();
+           return false;
+       }
+    }*/
+   
      
 }
