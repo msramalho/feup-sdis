@@ -1,22 +1,21 @@
 package src.util;
 
 import java.io.*;
-import java.net.Socket;
 import java.util.AbstractMap;
 import javax.net.ssl.*;
 import java.security.*;
 
 public class TcpClient extends Tcp {
     public TcpClient(Message message) {
-        
+
         AbstractMap.SimpleEntry<String, Integer> tcpCoordinates = message.getTCPCoordinates();
 
         SSLSocketFactory sf = null;
 
-        try{
+        try {
             char[] passphrase = "sdis18".toCharArray();
             KeyStore keystore = KeyStore.getInstance("JKS");
-            keystore.load(new FileInputStream("/home/diogo/Github/feup-sdis/proj2/Peer/src/util/mykeystore/examplestore"), passphrase);
+            keystore.load(new FileInputStream("src/util/mykeystore/examplestore"), passphrase);
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
             tmf.init(keystore);
@@ -25,14 +24,13 @@ public class TcpClient extends Tcp {
             context.init(null, trustManagers, null);
             sf = context.getSocketFactory();
 
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.err("[KEY STORE] - Cant find KeyStore file. Path may be wrong..." + e.getMessage());
-        }     
-        
-        try {
-            socket = sf.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue()); 
-            System.out.println("[TCP SSLClient] - SSL Connected and Message Sent...");
+        }
 
+        try {
+            socket = sf.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
+            System.out.println("[TCP SSLClient] - SSL Connected");
         } catch (IOException e) {
             logger.err("Unable to open TCP w/ SSLSocket: " + e.getMessage());
         }
