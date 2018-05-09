@@ -40,9 +40,6 @@ public class JavaSSLClient{
     OutputStream out = s.getOutputStream();
     out.write("\nConnection established.\n\n".getBytes());
 
-    //int theCharacter = 0;
-    //theCharacter = System.in.read();
-
     MessageDigest messageDigest;
 
     String data = "DELETE CHUNK";
@@ -58,38 +55,13 @@ public class JavaSSLClient{
  
             System.out.println("data:" + data);
             System.out.println("digestedMD5(hex):" + stringBuffer.toString());
+
             out.write(stringBuffer.toString().getBytes());
-
+            out.flush();
         } catch (NoSuchAlgorithmException exception) {
             // TODO Auto-generated catch block
             exception.printStackTrace();
         }
-
-    /*while (theCharacter != '~') // The '~' is an escape character to exit
-    {
-        /*try {
-            String data = theCharacter + "";
-            messageDigest = MessageDigest.getInstance("SHA-256");
-            messageDigest.update(data.getBytes());
-            byte[] messageDigestMD5 = messageDigest.digest();
-            StringBuffer stringBuffer = new StringBuffer();
-            for (byte bytes : messageDigestMD5) {
-                stringBuffer.append(String.format("%02x", bytes & 0xff));
-            }
- 
-            System.out.println("data:" + data);
-            //System.out.println("digestedMD5(hex):" + stringBuffer.toString());
-        } catch (NoSuchAlgorithmException exception) {
-            // TODO Auto-generated catch block
-            exception.printStackTrace();
-        }
-
-        System.out.println("CAR: " + theCharacter);
-        out.write(theCharacter);
-        out.flush();
-        System.out.println("VAI LER ");
-        theCharacter = System.in.read();
-    }*/
 
     out.close();
     s.close();
