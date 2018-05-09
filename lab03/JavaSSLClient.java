@@ -6,9 +6,10 @@ import javax.net.ssl.SSLSocketFactory;
 import com.sun.net.ssl.SSLContext;
 import com.sun.net.ssl.TrustManagerFactory;
 import com.sun.net.ssl.TrustManager;
+import java.security.MessageDigest;
 
 // javac -Xlint:deprecation JavaSSLClient.java
-
+@SuppressWarnings("deprecation")
 public class JavaSSLClient{
 
   private static final String HOST = "localhost";
@@ -39,14 +40,56 @@ public class JavaSSLClient{
     OutputStream out = s.getOutputStream();
     out.write("\nConnection established.\n\n".getBytes());
 
-    int theCharacter = 0;
-    theCharacter = System.in.read();
-    while (theCharacter != '~') // The '~' is an escape character to exit
+    //int theCharacter = 0;
+    //theCharacter = System.in.read();
+
+    MessageDigest messageDigest;
+
+    String data = "DELETE CHUNK";
+
+    try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+            messageDigest.update(data.getBytes());
+            byte[] messageDigestMD5 = messageDigest.digest();
+            StringBuffer stringBuffer = new StringBuffer();
+            for (byte bytes : messageDigestMD5) {
+                stringBuffer.append(String.format("%02x", bytes & 0xff));
+            }
+ 
+            System.out.println("data:" + data);
+            System.out.println("digestedMD5(hex):" + stringBuffer.toString());
+            out.write(stringBuffer.toString().getBytes());
+
+        } catch (NoSuchAlgorithmException exception) {
+            // TODO Auto-generated catch block
+            exception.printStackTrace();
+        }
+
+    /*while (theCharacter != '~') // The '~' is an escape character to exit
     {
-      out.write(theCharacter);
-      out.flush();
-      theCharacter = System.in.read();
-    }
+        /*try {
+            String data = theCharacter + "";
+            messageDigest = MessageDigest.getInstance("SHA-256");
+            messageDigest.update(data.getBytes());
+            byte[] messageDigestMD5 = messageDigest.digest();
+            StringBuffer stringBuffer = new StringBuffer();
+            for (byte bytes : messageDigestMD5) {
+                stringBuffer.append(String.format("%02x", bytes & 0xff));
+            }
+ 
+            System.out.println("data:" + data);
+            //System.out.println("digestedMD5(hex):" + stringBuffer.toString());
+        } catch (NoSuchAlgorithmException exception) {
+            // TODO Auto-generated catch block
+            exception.printStackTrace();
+        }
+
+        System.out.println("CAR: " + theCharacter);
+        out.write(theCharacter);
+        out.flush();
+        System.out.println("VAI LER ");
+        theCharacter = System.in.read();
+    }*/
 
     out.close();
     s.close();

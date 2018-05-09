@@ -22,7 +22,10 @@ public class JavaSSLServer {
     char[] passphrase = "sdis18".toCharArray();
     KeyStore keystore = KeyStore.getInstance("JKS");
     keystore.load(new FileInputStream("/home/diogo/Github/feup-sdis/lab03/mykeystore/examplestore"), passphrase);
+    
+    // Each key manager manages a specific type of key material for use by secure sockets
     KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+    //Get Session
     kmf.init(keystore, passphrase);
     SSLContext context = SSLContext.getInstance("TLS");
     KeyManager[] keyManagers = kmf.getKeyManagers();
