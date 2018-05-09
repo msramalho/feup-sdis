@@ -7,8 +7,15 @@ import com.sun.net.ssl.SSLContext;
 import com.sun.net.ssl.TrustManagerFactory;
 import com.sun.net.ssl.TrustManager;
 import java.security.MessageDigest;
-
+import javax.crypto.Cipher;
+ import javax.crypto.BadPaddingException;
+ import javax.crypto.IllegalBlockSizeException;
+ import javax.crypto.KeyGenerator;
+ import java.security.Key;
+ import java.security.InvalidKeyException;
+ import javax.crypto.spec.IvParameterSpec;
 // javac -Xlint:deprecation JavaSSLClient.java
+  import javax.crypto.spec.SecretKeySpec;
 @SuppressWarnings("deprecation")
 public class JavaSSLClient{
 
@@ -31,39 +38,25 @@ public class JavaSSLClient{
 
     SSLContext context = SSLContext.getInstance("TLS");
     TrustManager[] trustManagers = tmf.getTrustManagers();
-
     context.init(null, trustManagers, null);
-
     SSLSocketFactory sf = context.getSocketFactory();
-
     Socket s = sf.createSocket(HOST, PORT);
     OutputStream out = s.getOutputStream();
-    out.write("\nConnection established.\n\n".getBytes());
 
-    MessageDigest messageDigest;
+    String data = "CHECNK DELETE";
 
-    String data = "DELETE CHUNK";
+    String key = "bad8deadcafef00d";
+    SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes(), "AES");
+    Cipher cipher = Cipher.getInstance("AES");
+    cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+    byte[] recoveredBytes = cipher.doFinal(data.getBytes());
+    
 
-    try {
-            messageDigest = MessageDigest.getInstance("SHA-256");
-            messageDigest.update(data.getBytes());
-            byte[] messageDigestMD5 = messageDigest.digest();
-            StringBuffer stringBuffer = new StringBuffer();
-            for (byte bytes : messageDigestMD5) {
-                stringBuffer.append(String.format("%02x", bytes & 0xff));
-            }
- 
-            System.out.println("data:" + data);
-            System.out.println("digestedMD5(hex):" + stringBuffer.toString());
-
-            out.write(stringBuffer.toString().getBytes());
-            out.flush();
-        } catch (NoSuchAlgorithmException exception) {
-            // TODO Auto-generated catch block
-            exception.printStackTrace();
-        }
-
+    out.write(recoveredBytes);
+    out.flush();
     out.close();
     s.close();
   }
+
+
 }
