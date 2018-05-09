@@ -20,6 +20,7 @@ public class P_Available extends ProtocolCluster {
             TcpClient tcp = new TcpClient(d.message);
             tcp.sendLine("ACCEPTED");
             String clusterInfo = tcp.readLine();
+            tcp.close();
             logger.print("Received clusters to join: " + clusterInfo);
             for (String clusterId : clusterInfo.split(" ")) {
                 logger.print(clusterId);
@@ -30,7 +31,6 @@ public class P_Available extends ProtocolCluster {
                 d.peerConfig.clusters.set(c.level, newC);
                 newC.loadMulticast(d.peerConfig);
 
-                tcp.close();
                 logger.print("Joined cluster " + newC.id + " at level " + newC.level);
             }
         } else if (hasCluster() && cluster.locked("processing_join")) { // case 2
