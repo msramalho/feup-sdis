@@ -1,14 +1,14 @@
 package src.util;
 
 import src.localStorage.LocalFile;
+
 import java.io.*;
 import java.net.*;
 import java.security.*;
 import javax.net.ssl.*;
 
 public class TcpServer extends Tcp {
-    private SSLSocket sslSocket;
-
+    SSLServerSocket serverSocket;
     // TODO Add cipher to SSL Socket
     public boolean start() {
         //Set properties for SSL connection. Key Store for Sercer Peer
@@ -17,14 +17,14 @@ public class TcpServer extends Tcp {
             KeyStore keystore = null;
             SSLServerSocketFactory ssf = null;
             // Read MyKeyStore For Server Side
-            try{
+            try {
                 keystore = KeyStore.getInstance("JKS");
-                keystore.load(new FileInputStream("/home/diogo/Github/feup-sdis/proj2/Peer/src/util/mykeystore/examplestore"), passphrase);
-            } catch (Exception e){
+                keystore.load(new FileInputStream("src/util/mykeystore/examplestore"), passphrase);
+            } catch (Exception e) {
                 logger.err("Cant find File " + e.getMessage());
             }
 
-            try{
+            try {
                 // Each key manager manages a specific type of key material for use by secure sockets
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                 //Get Session started with key
@@ -34,32 +34,36 @@ public class TcpServer extends Tcp {
                 context.init(keyManagers, null, null);
                 ssf = context.getServerSocketFactory();
                 //ServerSocket ss = ssf.createServerSocket(0);
-                System.out.println("[TCP SSLServer] - SSL KeyStore established...");
- 
-            } catch (Exception e){
-                logger.err("[TCP SSLServer] - Cant Create Socket " + e.getMessage());
-            }           
-            sslSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
-            //sslSocket = ssf.createServerSocket(0); 
+                logger.print("SSL KeyStore established...");
 
-            sslSocket.setEnabledCipherSuites(new String[] {"SSL_RSA_WITH_RC4_128_MD5"});
-            System.out.println("[TCP SSLServer] - CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
-            //serverSocket = new ServerSocket(0);
-            sslSocket.setSoTimeout(300);
-            sslSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
-            System.out.println("[TCP SSLServer] - Server wating for client's input...");
+            } catch (Exception e) {
+                logger.err("Cant Create Socket " + e.getMessage());
+            }
+            logger.print("");
+            serverSocket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(0);
+            logger.print("");
+            serverSocket.setNeedClientAuth(true);
+            logger.print("");
+            serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
+            logger.print("");
+            serverSocket.setSoTimeout(300);
+            logger.print("");
+            
+            logger.print("");
 
+            serverSocket.setEnabledCipherSuites(new String[]{"SSL_RSA_WITH_RC4_128_MD5"});
+            logger.print("CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
             return true;
         } catch (IOException e) {
-            logger.err("[TCP SSLServer] - Unable to open new serverSocket, maybe all ports are being used: " + e.getMessage());
+            logger.err("Unable to open new serverSocket, maybe all ports are being used: " + e.getMessage());
         }
         return false;
     }
 
-    public boolean dead() { return sslSocket == null; }
+    public boolean dead() { return socket == null; }
 
     public String getCoordinates() throws UnknownHostException {
-        return String.format("%s:%s", InetAddress.getLocalHost().getHostAddress(), sslSocket.getLocalPort());
+        return String.format("%s:%s", InetAddress.getLocalHost().getHostAddress(), serverSocket.getLocalPort());
     }
 
     public byte[] receive() {
@@ -67,7 +71,7 @@ public class TcpServer extends Tcp {
             // prepare serverSocket
 
             socketChecks();
-            sslSocket.close();
+            socket.close();
             DataInputStream inFromClient = new DataInputStream(socket.getInputStream());
 
             // read into byte[]
@@ -78,21 +82,21 @@ public class TcpServer extends Tcp {
                 totalRead += lastRead > 0 ? lastRead : 0; // only update for positive values
             }
 
-            logger.print("[TCP SSLServer] - read: " + totalRead + " bytes from tcp");
+            logger.print("read: " + totalRead + " bytes from tcp");
             byte[] received = new byte[totalRead];
             System.arraycopy(tempChunk, 0, received, 0, totalRead);
 
             return received;
         } catch (IOException e) {
-            sslSocket = null;
-            logger.err("[TCP SSLServer] - unable to receive data from TCP SSLClient: " + e.getMessage());
+            socket = null;
+            logger.err("unable to receive data from TCP SSLClient: " + e.getMessage());
         }
         return null;
     }
 
     @Override
     public void socketChecks() throws IOException {
-        //if (socket == null) socket = socket.accept();
+        if (socket == null) socket = serverSocket.accept();
     }
 
 
