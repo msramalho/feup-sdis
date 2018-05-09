@@ -33,21 +33,21 @@ public class TcpServer extends Tcp {
                 context.init(keyManagers, null, null);
                 ssf = context.getServerSocketFactory();
                 //ServerSocket ss = ssf.createServerSocket(0);
-                System.out.println("[TcpServer] - SSL Key connected and SSLServerSocket Created...");
+                System.out.println("[TCP SSLServer] - SSL Key connected and SSLServerSocket Created...");
 
             } catch (Exception e){
-                logger.err("Cant Create Socket " + e.getMessage());
+                logger.err("[TCP SSLServer] - Cant Create Socket " + e.getMessage());
             }           
 
             serverSocket = ssf.createServerSocket(0); 
             //serverSocket = new ServerSocket(0);
             serverSocket.setSoTimeout(300);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
-            System.out.println("TCP SERVER");
+            System.out.println("[TCP SSLServer] - Server wating for client's input...");
 
             return true;
         } catch (IOException e) {
-            logger.err("unable to open new serverSocket, maybe all ports are being used: " + e.getMessage());
+            logger.err("[TCP SSLServer] - Unable to open new serverSocket, maybe all ports are being used: " + e.getMessage());
         }
         return false;
     }
@@ -74,14 +74,14 @@ public class TcpServer extends Tcp {
                 totalRead += lastRead > 0 ? lastRead : 0; // only update for positive values
             }
 
-            logger.print("read: " + totalRead + " bytes from tcp");
+            logger.print("[TCP SSLServer] - read: " + totalRead + " bytes from tcp");
             byte[] received = new byte[totalRead];
             System.arraycopy(tempChunk, 0, received, 0, totalRead);
 
             return received;
         } catch (IOException e) {
             serverSocket = null;
-            logger.err("unable to receive data from TCP: " + e.getMessage());
+            logger.err("[TCP SSLServer] - unable to receive data from TCP SSLClient: " + e.getMessage());
         }
         return null;
     }

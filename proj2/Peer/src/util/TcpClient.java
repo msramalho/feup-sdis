@@ -26,15 +26,15 @@ public class TcpClient extends Tcp {
             sf = context.getSocketFactory();
 
         } catch (Exception e){
-            logger.err("Cant find File " + e.getMessage());
+            logger.err("[KEY STORE] - Cant find KeyStore file. Path may be wrong..." + e.getMessage());
         }     
         
         try {
             socket = sf.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue()); 
-            System.out.println("[TCP Client] - SSL Connected and Message Sent...");
+            System.out.println("[TCP SSLClient] - SSL Connected and Message Sent...");
 
         } catch (IOException e) {
-            logger.err("Unable to open TCP Via SSLsocket: " + e.getMessage());
+            logger.err("Unable to open TCP w/ SSLSocket: " + e.getMessage());
         }
     }
 
@@ -46,7 +46,7 @@ public class TcpClient extends Tcp {
             socket.close(); // sends EOF
             return true;
         } catch (IOException e) {
-            logger.err("Unable to connect to TCP");
+            logger.err("Unable to connect to SSLSocket");
             e.printStackTrace();
         }
         return false;
