@@ -1,18 +1,50 @@
 package src.util;
 
 import src.localStorage.LocalFile;
-
 import java.io.*;
 import java.net.*;
+import java.security.*;
+import javax.net.ssl.*;
 
 public class TcpServer extends Tcp {
     private ServerSocket serverSocket;
 
     public boolean start() {
+        //Set properties for SSL connection. Key Store for Sercer Peer
         try {
-            serverSocket = new ServerSocket(0);
+            char[] passphrase = "sdis18".toCharArray();
+            KeyStore keystore = null;
+            SSLServerSocketFactory ssf = null;
+            // Read MyKeyStore For Server Side
+            try{
+                keystore = KeyStore.getInstance("JKS");
+                keystore.load(new FileInputStream("/home/diogo/Github/feup-sdis/proj2/Peer/src/util/mykeystore/examplestore"), passphrase);
+            } catch (Exception e){
+                logger.err("Cant find File " + e.getMessage());
+            }
+
+            try{
+                // Each key manager manages a specific type of key material for use by secure sockets
+                KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                //Get Session started with key
+                kmf.init(keystore, passphrase);
+                SSLContext context = SSLContext.getInstance("TLS");
+                KeyManager[] keyManagers = kmf.getKeyManagers();
+                context.init(keyManagers, null, null);
+                ssf = context.getServerSocketFactory();
+                //ServerSocket ss = ssf.createServerSocket(0);
+                System.out.println("[TcpServer] - SSL Key connected and SSLServerSocket Created...");
+
+            } catch (Exception e){
+                logger.err("Cant Create Socket " + e.getMessage());
+            }           
+
+            serverSocket = ssf.createServerSocket(0); 
+            //serverSocket = new ServerSocket(0);
             serverSocket.setSoTimeout(300);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
+            System.out.println("TCP SERVER");
+
             return true;
         } catch (IOException e) {
             logger.err("unable to open new serverSocket, maybe all ports are being used: " + e.getMessage());
@@ -29,6 +61,7 @@ public class TcpServer extends Tcp {
     public byte[] receive() {
         try {
             // prepare serverSocket
+
             socketChecks();
             serverSocket.close();
             DataInputStream inFromClient = new DataInputStream(socket.getInputStream());
