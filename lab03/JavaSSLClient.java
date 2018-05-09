@@ -1,96 +1,69 @@
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.*;
+import java.net.*;
+import java.security.*;
 import javax.net.ssl.SSLSocketFactory;
-import javax.crypto.KeyGenerator;
-import java.security.SecureRandom;
-import java.security.Key;
-import javax.crypto.spec.SecretKeySpec;
-import java.*;
-import javax.crypto.Cipher;
- 
-// RUN CMD
-// java -Djavax.net.ssl.trustStore=/home/diogo/Github/feup-sdis/lab03/mykeystore/examplestore -Djavax.net.ssl.trustStorePassword=sdis18 JavaSSLClient localhost 5000 + 1,1,1 AES
+import com.sun.net.ssl.SSLContext;
+import com.sun.net.ssl.TrustManagerFactory;
+import com.sun.net.ssl.TrustManager;
+import java.security.MessageDigest;
 
-public class JavaSSLClient {
-    
-    // Default Port 
-    static final int port = 8000;
- 
-    public static void main(String[] args) {
-        
-        String host = args[0];
-        // User's PORT
-        int port = Integer.parseInt(args[1]);
-        String oper = args[2];
-        String opnd = args[3];
-        String[] list = opnd.split(",");
-        String cypher = args[4];
+// javac -Xlint:deprecation JavaSSLClient.java
+@SuppressWarnings("deprecation")
+public class JavaSSLClient{
 
-        SSLSocketFactory sslSocketFactory = 
-                (SSLSocketFactory)SSLSocketFactory.getDefault();
-        try {
-            Socket socket = sslSocketFactory.createSocket("localhost", port);
-            //socketStrem to receive server communication
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            
-            try (BufferedReader bufferedReader = 
-                    new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-                Scanner scanner = new Scanner(System.in);
-                
-                while(true){
-                    System.out.println("Enter Message:");
-                    
-                    String inputLine = scanner.nextLine();
+  private static final String HOST = "localhost";
 
-                    if(inputLine.equals("q")){
-                        break;
-                    }
-                     
-                    
-                    out.println(inputLine);
-                    System.out.println(bufferedReader.readLine());
-                }
+  private static final int PORT = 8080;
+
+  public static void main(String[] args) throws Exception {
+    System.setProperty("javax.net.ssl.trustStore","/home/diogo/Github/feup-sdis/lab03/mykeystore/examplestore");
+    System.setProperty("javax.net.ssl.trustStorePassword","sdis18");
+
+    char[] passphrase = "sdis18".toCharArray();
+    KeyStore keystore = KeyStore.getInstance("JKS");
+    keystore.load(new FileInputStream("/home/diogo/Github/feup-sdis/lab03/mykeystore/examplestore"), passphrase);
+
+    //This class acts as a factory for trust managers based on a source of trust material. 
+    //Each trust manager manages a specific type of trust materia. It uses keystore
+    TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+    tmf.init(keystore);
+
+    SSLContext context = SSLContext.getInstance("TLS");
+    TrustManager[] trustManagers = tmf.getTrustManagers();
+
+    context.init(null, trustManagers, null);
+
+    SSLSocketFactory sf = context.getSocketFactory();
+
+    Socket s = sf.createSocket(HOST, PORT);
+    OutputStream out = s.getOutputStream();
+    out.write("\nConnection established.\n\n".getBytes());
+
+    MessageDigest messageDigest;
+
+    String data = "DELETE CHUNK";
+
+    try {
+            messageDigest = MessageDigest.getInstance("SHA-256");
+            messageDigest.update(data.getBytes());
+            byte[] messageDigestMD5 = messageDigest.digest();
+            StringBuffer stringBuffer = new StringBuffer();
+            for (byte bytes : messageDigestMD5) {
+                stringBuffer.append(String.format("%02x", bytes & 0xff));
             }
-             
-        } catch (IOException ex) {
-            Logger.getLogger(JavaSSLClient.class.getName())
-                    .log(Level.SEVERE, null, ex);
-        }     
-    }
+ 
+            System.out.println("data:" + data);
+            System.out.println("digestedMD5(hex):" + stringBuffer.toString());
 
-    public static String AesDecrypt(String encryptContent, String password) {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
-            secureRandom.setSeed(password.getBytes());
-            keyGen.init(128, secureRandom);
-            //SecretKey secretKey = keyGen.generateKey();
-            byte[] enCodeFormat = hexStringToByteArray("sdis18");
-            SecretKeySpec key = new SecretKeySpec(enCodeFormat, "AES");
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, key);
-            return new String(cipher.doFinal(hexStringToByteArray(encryptContent)));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            out.write(stringBuffer.toString().getBytes());
+            out.flush();
+        } catch (NoSuchAlgorithmException exception) {
+            // TODO Auto-generated catch block
+            exception.printStackTrace();
         }
-    }
 
-    public static byte[] hexStringToByteArray(String s) {   
-    int len = s.length();
-    byte[] data = new byte[len / 2];
-    for (int i = 0; i < len; i += 2) {
-        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                             + Character.digit(s.charAt(i+1), 16));
-    }
-    return data;
-}
-     
+    out.close();
+    s.close();
+  }
 }
