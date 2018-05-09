@@ -7,8 +7,9 @@ import java.security.*;
 import javax.net.ssl.*;
 
 public class TcpServer extends Tcp {
-    private ServerSocket serverSocket;
+    private SSLSocket sslSocket;
 
+    // TODO Add cipher to SSL Socket
     public boolean start() {
         //Set properties for SSL connection. Key Store for Sercer Peer
         try {
@@ -33,16 +34,19 @@ public class TcpServer extends Tcp {
                 context.init(keyManagers, null, null);
                 ssf = context.getServerSocketFactory();
                 //ServerSocket ss = ssf.createServerSocket(0);
-                System.out.println("[TCP SSLServer] - SSL Key connected and SSLServerSocket Created...");
-
+                System.out.println("[TCP SSLServer] - SSL KeyStore established...");
+ 
             } catch (Exception e){
                 logger.err("[TCP SSLServer] - Cant Create Socket " + e.getMessage());
             }           
+            sslSocket = (SSLSocket) SSLSocketFactory.getDefault().createSocket();
+            //sslSocket = ssf.createServerSocket(0); 
 
-            serverSocket = ssf.createServerSocket(0); 
+            sslSocket.setEnabledCipherSuites(new String[] {"SSL_RSA_WITH_RC4_128_MD5"});
+            System.out.println("[TCP SSLServer] - CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
             //serverSocket = new ServerSocket(0);
-            serverSocket.setSoTimeout(300);
-            serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
+            sslSocket.setSoTimeout(300);
+            sslSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
             System.out.println("[TCP SSLServer] - Server wating for client's input...");
 
             return true;
@@ -52,10 +56,10 @@ public class TcpServer extends Tcp {
         return false;
     }
 
-    public boolean dead() { return serverSocket == null; }
+    public boolean dead() { return sslSocket == null; }
 
     public String getCoordinates() throws UnknownHostException {
-        return String.format("%s:%s", InetAddress.getLocalHost().getHostAddress(), serverSocket.getLocalPort());
+        return String.format("%s:%s", InetAddress.getLocalHost().getHostAddress(), sslSocket.getLocalPort());
     }
 
     public byte[] receive() {
@@ -63,7 +67,7 @@ public class TcpServer extends Tcp {
             // prepare serverSocket
 
             socketChecks();
-            serverSocket.close();
+            sslSocket.close();
             DataInputStream inFromClient = new DataInputStream(socket.getInputStream());
 
             // read into byte[]
@@ -80,7 +84,7 @@ public class TcpServer extends Tcp {
 
             return received;
         } catch (IOException e) {
-            serverSocket = null;
+            sslSocket = null;
             logger.err("[TCP SSLServer] - unable to receive data from TCP SSLClient: " + e.getMessage());
         }
         return null;
@@ -88,7 +92,7 @@ public class TcpServer extends Tcp {
 
     @Override
     public void socketChecks() throws IOException {
-        if (socket == null) socket = serverSocket.accept();
+        //if (socket == null) socket = socket.accept();
     }
 
 
