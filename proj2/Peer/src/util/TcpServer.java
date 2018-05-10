@@ -9,25 +9,21 @@ import java.io.*;
 import java.net.*;
 
 public class TcpServer extends Tcp {
-    // private ServerSocket serverSocket;
     private SSLServerSocket serverSocket;
 
     public boolean start() {
         try {
-            SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-
-            serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(0);
-            // serverSocket.setEnabledCipherSuites();
-            serverSocket.setNeedClientAuth(true);  // s is an SSLServerSocket
-            serverSocket.setEnabledCipherSuites(sslServerSocketFactory.getSupportedCipherSuites());
-            // serverSocket = new ServerSocket(0);
-            // serverSocket.setSoTimeout(300);
-            // serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
-
-            System.setProperty("javax.net.ssl.trustStore", "src/util/ssl/truststore");
-            System.setProperty("javax.net.ssl.trustStorePassword", "123456");
             System.setProperty("javax.net.ssl.keyStore", "src/util/ssl/server.keys");
             System.setProperty("javax.net.ssl.keyStorePassword","123456");
+            System.setProperty("javax.net.ssl.trustStore", "src/util/ssl/truststore");
+            System.setProperty("javax.net.ssl.trustStorePassword", "123456");
+
+
+            SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+            serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(0);
+            serverSocket.setNeedClientAuth(true);  // s is an SSLServerSocket
+            serverSocket.setSoTimeout(300);
+            serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
 
             return true;
         } catch (IOException e) {
