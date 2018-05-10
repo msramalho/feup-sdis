@@ -44,4 +44,9 @@ public abstract class Tcp {
             logger.err("Unable to close TCP socket: " + e.getMessage());
         }
     }
+
+    public static void setKeyStoreProperties() {
+        System.setProperty("javax.net.ssl.keyStore", "src/util/ssl/client.keys");
+        System.setProperty("javax.net.ssl.keyStorePassword", "123456");
+    }
 }

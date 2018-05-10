@@ -13,12 +13,11 @@ public class TcpServer extends Tcp {
 
     public boolean start() {
         try {
-            System.setProperty("javax.net.ssl.keyStore", "src/util/ssl/server.keys");
-            System.setProperty("javax.net.ssl.keyStorePassword","123456");
+            // set ssl properties
             System.setProperty("javax.net.ssl.trustStore", "src/util/ssl/truststore");
             System.setProperty("javax.net.ssl.trustStorePassword", "123456");
 
-
+            // create server socket with desired properties
             SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
             serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(0);
             serverSocket.setNeedClientAuth(true);  // s is an SSLServerSocket

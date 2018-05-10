@@ -8,6 +8,7 @@ import src.localStorage.InternalState;
 import src.localStorage.LocalFile;
 import src.util.Logger;
 import src.util.Message;
+import src.util.Tcp;
 
 public class Peer implements InitiatorPeer {
     private static LocalFile localFile;
@@ -34,6 +35,11 @@ public class Peer implements InitiatorPeer {
             logger.err("RMI registry exception: " + e.toString());
             e.printStackTrace();
         }
+
+        //set tcp keystore properties
+        Tcp.setKeyStoreProperties();
+        logger.print("TCP keystore properties set");
+
 
         logger.print(String.format("Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
         
