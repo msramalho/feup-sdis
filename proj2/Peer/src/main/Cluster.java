@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.HashSet;
 
 public class Cluster extends Locks {
-	public static final String ADDRESS_LOWER_BOUND = "224.0.0.0";
-	public static final String ADDRESS_UPPER_BOUND = "239.255.255.255";
-	public static int MAX_SIZE = 2; // the maximum number of peers in a cluster
+    public static final String ADDRESS_LOWER_BOUND = "224.0.0.0";
+    public static final String ADDRESS_UPPER_BOUND = "239.255.255.254";
+    public static int MAX_SIZE = 2; // the maximum number of peers in a cluster
     public int id; // the unique identifier of this cluster
     public int level;
     public MulticastChannels multicast;
