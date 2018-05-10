@@ -8,7 +8,6 @@ import java.net.Socket;
 
 public class TcpClient extends Tcp {
     SSLSocket sslSocket;
-    
     public TcpClient(Message message) {
 
         AbstractMap.SimpleEntry<String, Integer> tcpCoordinates = message.getTCPCoordinates();
@@ -30,17 +29,20 @@ public class TcpClient extends Tcp {
 
         try {
             
-            /* SSL CIPHER CODE
+            //SSL CIPHER CODE
             SSLSocketFactory socketFactory = context.getSocketFactory();
             sslSocket = (SSLSocket) socketFactory.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
             sslSocket.setEnabledCipherSuites(new String[]{"SSL_RSA_WITH_RC4_128_MD5"});
-            logger.print("CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
+            String protocols[]= {"SSL_RSA_WITH_RC4_128_MD5"};
+            sslSocket.setEnabledProtocols(protocols);
+            sslSocket.setEnableSessionCreation(true);
             sslSocket.startHandshake();
-            */
+            
 
-            // SSL SIMPLE
+            /*SSL SIMPLE
             SSLSocketFactory sf = context.getSocketFactory();
-            socket = sf.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
+            socket = sf.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());*/
+
 
         } catch (IOException e) {
             logger.err("Unable to open TCP w/ SSLSocket: " + e.getMessage());
@@ -49,7 +51,7 @@ public class TcpClient extends Tcp {
 
     public boolean send(byte[] chunk) {
         try {
-            DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
+            DataOutputStream outToServer = new DataOutputStream(sslSocket.getOutputStream());
             outToServer.write(chunk, 0, chunk.length);
             outToServer.flush();
             socket.close(); // sends EOF

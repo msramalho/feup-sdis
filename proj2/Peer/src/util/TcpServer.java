@@ -9,8 +9,8 @@ import javax.net.ssl.*;
 
 public class TcpServer extends Tcp {
     // SSL Cipher
-    //SSLServerSocket serverSocket;
-    ServerSocket serverSocket;
+    SSLServerSocket serverSocket;
+    //ServerSocket serverSocket;
     
     // TODO Add cipher to SSL Socket
     public boolean start() {
@@ -42,21 +42,27 @@ public class TcpServer extends Tcp {
                 logger.err("Cant Create Socket " + e.getMessage());
             }
 
-            /* SSL CIPHER
+             
+            //SSL CIPHER
             serverSocket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(0);
             serverSocket.setNeedClientAuth(true);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
             serverSocket.setSoTimeout(300);
             serverSocket.setEnabledCipherSuites(new String[]{"SSL_RSA_WITH_RC4_128_MD5"});
+            String protocols[]= {"SSL_RSA_WITH_RC4_128_MD5"};
+            serverSocket.setEnabledProtocols(protocols);
+            serverSocket.setEnableSessionCreation(true);
+            serverSocket.setUseClientMode(true);
+            serverSocket.setNeedClientAuth(true);
             logger.print("CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
-            */
+            
 
             //SSL SIMPLE
             //serverSocket = new ServerSocket(0);
-            serverSocket = ssf.createServerSocket(0); 
+            /*serverSocket = ssf.createServerSocket(0); 
             serverSocket.setSoTimeout(300);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
-            System.out.println("TCP SERVER");
+            System.out.println("TCP SERVER");*/
 
             return true;
 
@@ -78,6 +84,7 @@ public class TcpServer extends Tcp {
 
             socketChecks();
             socket.close();
+            System.out.print("SERVEEEEERRR " + serverSocket.getUseClientMode());
             DataInputStream inFromClient = new DataInputStream(socket.getInputStream());
 
             // read into byte[]
