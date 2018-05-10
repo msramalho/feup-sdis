@@ -8,15 +8,16 @@ import java.net.Socket;
 
 public class TcpClient extends Tcp {
     SSLSocket sslSocket;
+    
     public TcpClient(Message message) {
 
         AbstractMap.SimpleEntry<String, Integer> tcpCoordinates = message.getTCPCoordinates();
         SSLContext context = null;
+
         try {
             char[] passphrase = "sdis18".toCharArray();
             KeyStore keystore = KeyStore.getInstance("JKS");
             keystore.load(new FileInputStream("src/util/mykeystore/examplestore"), passphrase);
-
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
             tmf.init(keystore);
             context = SSLContext.getInstance("TLS");
@@ -39,9 +40,8 @@ public class TcpClient extends Tcp {
 
             // SSL SIMPLE
             SSLSocketFactory sf = context.getSocketFactory();
-            Socket socket = sf.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
+            socket = sf.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
 
-            logger.print("SSL Connected");
         } catch (IOException e) {
             logger.err("Unable to open TCP w/ SSLSocket: " + e.getMessage());
         }
@@ -55,7 +55,7 @@ public class TcpClient extends Tcp {
             socket.close(); // sends EOF
             return true;
         } catch (IOException e) {
-            logger.err("Unable to connect to SSLSocket");
+            logger.err("Unable to connect to TCP");
             e.printStackTrace();
         }
         return false;

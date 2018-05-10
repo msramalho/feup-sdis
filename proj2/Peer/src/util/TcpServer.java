@@ -16,6 +16,7 @@ public class TcpServer extends Tcp {
     public boolean start() {
         //Set properties for SSL connection. Key Store for Sercer Peer
         try {
+            
             char[] passphrase = "sdis18".toCharArray();
             KeyStore keystore = null;
             SSLServerSocketFactory ssf = null;
@@ -50,6 +51,8 @@ public class TcpServer extends Tcp {
             logger.print("CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
             */
 
+            //SSL SIMPLE
+            //serverSocket = new ServerSocket(0);
             serverSocket = ssf.createServerSocket(0); 
             serverSocket.setSoTimeout(300);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
