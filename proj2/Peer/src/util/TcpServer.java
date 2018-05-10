@@ -56,7 +56,7 @@ public class TcpServer extends Tcp {
             serverSocket.setNeedClientAuth(false);
 
             //Wating for cliente... to do handshake
-            socket = (Socket) serverSocket.accept();
+            socket = (SSLSocket) serverSocket.accept();
             socket.startHandshake();
             logger.print("CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
             
