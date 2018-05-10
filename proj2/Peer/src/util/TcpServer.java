@@ -2,51 +2,29 @@ package src.util;
 
 import src.localStorage.LocalFile;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.net.*;
 import java.security.*;
 import javax.net.ssl.*;
 
 public class TcpServer extends Tcp {
-    // SSL Cipher
-    SSLServerSocket serverSocket;
-    SSLSocket socket;
-    
-    // TODO Add cipher to SSL Socket
+    private SSLServerSocket serverSocket;
+
     public boolean start() {
         //Set properties for SSL connection. Key Store for Sercer Peer
         try {
-            
-            char[] passphrase = "sdis18".toCharArray();
-            KeyStore keystore = null;
-            SSLServerSocketFactory ssf = null;
-            // Read MyKeyStore For Server Side
-            try {
-                keystore = KeyStore.getInstance("JKS");
-                keystore.load(new FileInputStream("src/util/mykeystore/examplestore"), passphrase);
-            } catch (Exception e) {
-                logger.err("Cant find File " + e.getMessage());
-            }
+            System.setProperty("javax.net.ssl.keyStore", "src/util/ssl/server.keys");
+            System.setProperty("javax.net.ssl.keyStorePassword","123456");
+            System.setProperty("javax.net.ssl.trustStore", "src/util/ssl/truststore");
+            System.setProperty("javax.net.ssl.trustStorePassword", "123456");
 
-            try {
-                // Each key manager manages a specific type of key material for use by secure sockets
-                KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                kmf.init(keystore, passphrase);
-                SSLContext context = SSLContext.getInstance("TLS");
-                KeyManager[] keyManagers = kmf.getKeyManagers();
-                context.init(keyManagers, null, null);
-                ssf = context.getServerSocketFactory();
-                logger.print("SSL KeyStore established...");
 
-            } catch (Exception e) {
-                logger.err("Cant Create Socket " + e.getMessage());
-            }
-
-             
-            //SSL CIPHER
-            serverSocket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(0);
-            serverSocket.setNeedClientAuth(false);
-            serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
+            SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+            serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(0);
+            serverSocket.setNeedClientAuth(true);  // s is an SSLServerSocket
             serverSocket.setSoTimeout(300);
             serverSocket.setEnabledCipherSuites(new String[]{"SSL_RSA_WITH_RC4_128_MD5"});
             String protocols[] = {"SSL_RSA_WITH_RC4_128_MD5"};
@@ -66,7 +44,6 @@ public class TcpServer extends Tcp {
             /*serverSocket = ssf.createServerSocket(0); 
             serverSocket.setSoTimeout(300);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
-            System.out.println("TCP SERVER");*/
 
             return true;
 
@@ -115,7 +92,7 @@ public class TcpServer extends Tcp {
 
     @Override
     public void socketChecks() throws IOException {
-        //if (serverSocket == null) serverSocket = serverSocket.accept();
+        if (socket == null) socket = (SSLSocket) serverSocket.accept();
     }
 
 
