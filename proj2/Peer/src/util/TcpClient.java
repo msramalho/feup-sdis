@@ -54,7 +54,7 @@ public class TcpClient extends Tcp {
             DataOutputStream outToServer = new DataOutputStream(sslSocket.getOutputStream());
             outToServer.write(chunk, 0, chunk.length);
             outToServer.flush();
-            socket.close(); // sends EOF
+            sslSocket.close(); // sends EOF
             return true;
         } catch (IOException e) {
             logger.err("Unable to connect to TCP");

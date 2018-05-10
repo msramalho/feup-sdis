@@ -10,7 +10,7 @@ import javax.net.ssl.*;
 public class TcpServer extends Tcp {
     // SSL Cipher
     SSLServerSocket serverSocket;
-    //ServerSocket serverSocket;
+    SSLSocket socket;
     
     // TODO Add cipher to SSL Socket
     public boolean start() {
@@ -45,15 +45,19 @@ public class TcpServer extends Tcp {
              
             //SSL CIPHER
             serverSocket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(0);
-            serverSocket.setNeedClientAuth(true);
+            serverSocket.setNeedClientAuth(false);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
             serverSocket.setSoTimeout(300);
             serverSocket.setEnabledCipherSuites(new String[]{"SSL_RSA_WITH_RC4_128_MD5"});
-            String protocols[]= {"SSL_RSA_WITH_RC4_128_MD5"};
+            String protocols[] = {"SSL_RSA_WITH_RC4_128_MD5"};
             serverSocket.setEnabledProtocols(protocols);
-            serverSocket.setEnableSessionCreation(true);
-            serverSocket.setUseClientMode(true);
-            serverSocket.setNeedClientAuth(true);
+            serverSocket.setEnableSessionCreation(false);
+            serverSocket.setUseClientMode(false);
+            serverSocket.setNeedClientAuth(false);
+
+            //Wating for cliente... to do handshake
+            socket = (Socket) serverSocket.accept();
+            socket.startHandshake();
             logger.print("CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
             
 
@@ -75,16 +79,18 @@ public class TcpServer extends Tcp {
     public boolean dead() { return socket == null; }
 
     public String getCoordinates() throws UnknownHostException {
-        return String.format("%s:%s", InetAddress.getLocalHost().getHostAddress(), serverSocket.getLocalPort());
+        return String.format("%s:%s", InetAddress.getLocalHost().getHostAddress(), socket.getLocalPort());
     }
 
     public byte[] receive() {
+
+        System.out.println("WILL RECEIVE");
+
         try {
             // prepare serverSocket
-
             socketChecks();
             socket.close();
-            System.out.print("SERVEEEEERRR " + serverSocket.getUseClientMode());
+            //System.out.print("SERVEEEEERRR " + serverSocket.getUseClientMode());
             DataInputStream inFromClient = new DataInputStream(socket.getInputStream());
 
             // read into byte[]
@@ -109,7 +115,7 @@ public class TcpServer extends Tcp {
 
     @Override
     public void socketChecks() throws IOException {
-        if (socket == null) socket = serverSocket.accept();
+        //if (serverSocket == null) serverSocket = serverSocket.accept();
     }
 
 
