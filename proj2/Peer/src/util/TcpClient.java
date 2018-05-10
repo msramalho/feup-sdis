@@ -1,14 +1,21 @@
 package src.util;
 
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
-import java.net.Socket;
 import java.util.AbstractMap;
 
 public class TcpClient extends Tcp {
     public TcpClient(Message message) {
         AbstractMap.SimpleEntry<String, Integer> tcpCoordinates = message.getTCPCoordinates();
         try {
-            socket = new Socket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
+            // set ssl properties
+            System.setProperty("javax.net.ssl.trustStore", "src/util/ssl/truststore");
+            System.setProperty("javax.net.ssl.trustStorePassword", "123456");
+
+            // create server socket with desired properties
+            SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            socket = (SSLSocket) sslSocketFactory.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
         } catch (IOException e) {
             logger.err("Unable to open TCP socket: " + e.getMessage());
         }

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bashDjavax.net.debug=all
 
 clear
 rm bin -rf
@@ -31,6 +31,7 @@ VERSION="$4"
 VERSION=${VERSION:-"1.0"}  # If variable not set, use default.
 
 #Usage: <protocolVersion> <peerId> <serviceAccessPoint> <mccIP> <mccPort> <mdbIp> <mdbPort> <mdrIp> <mdrPort>
+#java -cp .:./bin/ -Djavax.net.debug=all src.main.Peer $VERSION $PEERID 8499 239.255.255.255 9000 239.255.255.255 9001 239.255.255.255 9002 # for ssl debug
 java -cp .:./bin/ src.main.Peer $VERSION $PEERID 8499 239.255.255.255 9000 239.255.255.255 9001 239.255.255.255 9002
 
 # Usage: <peerId:default=1> <resetDatabase:default=false> <startRMI:default=false>

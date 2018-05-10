@@ -2,17 +2,28 @@ package src.util;
 
 import src.localStorage.LocalFile;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 import java.io.*;
 import java.net.*;
 
 public class TcpServer extends Tcp {
-    private ServerSocket serverSocket;
+    private SSLServerSocket serverSocket;
 
     public boolean start() {
         try {
-            serverSocket = new ServerSocket(0);
+            // set ssl properties
+            System.setProperty("javax.net.ssl.trustStore", "src/util/ssl/truststore");
+            System.setProperty("javax.net.ssl.trustStorePassword", "123456");
+
+            // create server socket with desired properties
+            SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+            serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(0);
+            serverSocket.setNeedClientAuth(true);  // s is an SSLServerSocket
             serverSocket.setSoTimeout(300);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
+
             return true;
         } catch (IOException e) {
             logger.err("unable to open new serverSocket, maybe all ports are being used: " + e.getMessage());
@@ -55,7 +66,7 @@ public class TcpServer extends Tcp {
 
     @Override
     public void socketChecks() throws IOException {
-        if (socket == null) socket = serverSocket.accept();
+        if (socket == null) socket = (SSLSocket) serverSocket.accept();
     }
 
 
