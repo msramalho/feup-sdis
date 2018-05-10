@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.HashSet;
 
 public class Cluster extends Locks {
-    public static final String ADDRESS_LOWER_BOUND = "224.0.0.0";
-    public static final String ADDRESS_UPPER_BOUND = "239.255.255.254";
-    public static int MAX_SIZE = 2; // the maximum number of peers in a cluster
+    private static final String ADDRESS_LOWER_BOUND = "224.0.0.0";
+    private static final String ADDRESS_UPPER_BOUND = "239.255.255.254";
+    private static int MAX_SIZE = 2; // the maximum number of peers in a cluster
     public int id; // the unique identifier of this cluster
     public int level;
     public MulticastChannels multicast;
@@ -66,7 +66,7 @@ public class Cluster extends Locks {
     /**
      * query the other clusters for their ID so that a new cluster, with a new ID, can be found
      */
-    public static Cluster getNewCluster(int level, PeerConfig peerConfig) {
+    static Cluster getNewCluster(int level, PeerConfig peerConfig) {
         peerConfig.multicast.control.send(Message.create("MAXCLUSTER %s %d", peerConfig.protocolVersion, peerConfig.id));
         Utils.sleep(1000);
         return new Cluster(level, peerConfig.nextClusterId());
