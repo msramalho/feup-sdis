@@ -1,14 +1,14 @@
 package src.util;
 
+import javax.net.ssl.SSLSocket;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Socket;
 
 public abstract class Tcp {
     Logger logger = new Logger(this);
-    Socket socket = null;
+    SSLSocket socket = null;
 
     public abstract void socketChecks() throws IOException;
 
@@ -44,5 +44,10 @@ public abstract class Tcp {
         } catch (IOException e) {
             logger.err("Unable to close TCP socket: " + e.getMessage());
         }
+    }
+
+    public static void setKeyStoreProperties() {
+        System.setProperty("javax.net.ssl.keyStore", "src/util/ssl/client.keys");
+        System.setProperty("javax.net.ssl.keyStorePassword", "123456");
     }
 }
