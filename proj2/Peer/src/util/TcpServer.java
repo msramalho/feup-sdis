@@ -8,7 +8,10 @@ import java.security.*;
 import javax.net.ssl.*;
 
 public class TcpServer extends Tcp {
-    SSLServerSocket serverSocket;
+    // SSL Cipher
+    //SSLServerSocket serverSocket;
+    ServerSocket serverSocket;
+    
     // TODO Add cipher to SSL Socket
     public boolean start() {
         //Set properties for SSL connection. Key Store for Sercer Peer
@@ -27,33 +30,33 @@ public class TcpServer extends Tcp {
             try {
                 // Each key manager manages a specific type of key material for use by secure sockets
                 KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                //Get Session started with key
                 kmf.init(keystore, passphrase);
                 SSLContext context = SSLContext.getInstance("TLS");
                 KeyManager[] keyManagers = kmf.getKeyManagers();
                 context.init(keyManagers, null, null);
                 ssf = context.getServerSocketFactory();
-                //ServerSocket ss = ssf.createServerSocket(0);
                 logger.print("SSL KeyStore established...");
 
             } catch (Exception e) {
                 logger.err("Cant Create Socket " + e.getMessage());
             }
-            logger.print("");
-            serverSocket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(0);
-            logger.print("");
-            serverSocket.setNeedClientAuth(true);
-            logger.print("");
-            serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
-            logger.print("");
-            serverSocket.setSoTimeout(300);
-            logger.print("");
-            
-            logger.print("");
 
+            /* SSL CIPHER
+            serverSocket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(0);
+            serverSocket.setNeedClientAuth(true);
+            serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
+            serverSocket.setSoTimeout(300);
             serverSocket.setEnabledCipherSuites(new String[]{"SSL_RSA_WITH_RC4_128_MD5"});
             logger.print("CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
+            */
+
+            serverSocket = ssf.createServerSocket(0); 
+            serverSocket.setSoTimeout(300);
+            serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
+            System.out.println("TCP SERVER");
+
             return true;
+
         } catch (IOException e) {
             logger.err("Unable to open new serverSocket, maybe all ports are being used: " + e.getMessage());
         }

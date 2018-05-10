@@ -20,7 +20,7 @@ public abstract class Tcp {
             outToServer.flush();
             logger.print("SENT: " + data);
         } catch (IOException e) {
-            logger.err("Unable to connect to send through TCP: " + e.getMessage());
+            logger.err("[TCP] Unable to connect to send through TCP: " + e.getMessage());
         }
     }
 
@@ -32,7 +32,7 @@ public abstract class Tcp {
             logger.print("READ: " + res);
             return res;
         } catch (IOException e) {
-            logger.err("Unable to read line:" + e.getMessage());
+            logger.err("[TCP] Unable to read line:" + e.getMessage());
         }
         return null;
     }
@@ -41,7 +41,7 @@ public abstract class Tcp {
         try {
             socket.close();
         } catch (IOException e) {
-            logger.err("Unable to close TCP socket: " + e.getMessage());
+            logger.err("[TCP] Unable to close TCP socket: " + e.getMessage());
         }
     }
 }

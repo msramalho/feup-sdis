@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.AbstractMap;
 import javax.net.ssl.*;
 import java.security.*;
+import java.net.Socket;
 
 public class TcpClient extends Tcp {
     SSLSocket sslSocket;
@@ -21,21 +22,25 @@ public class TcpClient extends Tcp {
             context = SSLContext.getInstance("TLS");
             TrustManager[] trustManagers = tmf.getTrustManagers();
             context.init(null, trustManagers, null);
+
         } catch (Exception e) {
             logger.err("Cant find KeyStore file. Path may be wrong..." + e.getMessage());
         }
 
         try {
+            
+            /* SSL CIPHER CODE
             SSLSocketFactory socketFactory = context.getSocketFactory();
             sslSocket = (SSLSocket) socketFactory.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
-
             sslSocket.setEnabledCipherSuites(new String[]{"SSL_RSA_WITH_RC4_128_MD5"});
             logger.print("CipherSuite available: SSL_RSA_WITH_RC4_128_MD5");
-
             sslSocket.startHandshake();
+            */
 
-            // socket = sslSocket.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
-            // socket.set
+            // SSL SIMPLE
+            SSLSocketFactory sf = context.getSocketFactory();
+            Socket socket = sf.createSocket(tcpCoordinates.getKey(), tcpCoordinates.getValue());
+
             logger.print("SSL Connected");
         } catch (IOException e) {
             logger.err("Unable to open TCP w/ SSLSocket: " + e.getMessage());
