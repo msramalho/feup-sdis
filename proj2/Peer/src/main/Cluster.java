@@ -41,4 +41,21 @@ public class Cluster extends Locks {
     public boolean isFull(){
         return peers.size() + 1 >= Cluster.MAX_SIZE;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if(this == obj)
+    		return true;
+    	if(obj == null)
+    		return false;
+    	if(!(obj instanceof Cluster))
+    		return false;
+    	Cluster cluster = (Cluster) obj;
+    	return this.level == cluster.level && this.id == cluster.id; 
+    }
+    
+    @Override
+    public int hashCode() {
+    	return level * id;
+    }
 }

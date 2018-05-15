@@ -6,6 +6,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import src.localStorage.InternalState;
 import src.localStorage.LocalFile;
+import src.util.ClusterState;
 import src.util.Logger;
 import src.util.Message;
 
@@ -90,6 +91,11 @@ public class Peer implements InitiatorPeer {
         InternalState is = peerConfig.internalState;
         is.addMissingInfoForClient();
         return is;
+    }
+    
+    public void clusterState() {
+    	logger.print("CLUSTER STATE started");
+    	peerConfig.threadPool.submit(new ClusterState(peerConfig));
     }
 
     @Override
