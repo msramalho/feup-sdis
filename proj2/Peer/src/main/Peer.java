@@ -42,7 +42,7 @@ public class Peer implements InitiatorPeer {
 
 
         logger.print(String.format("Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
-        
+
         peerConfig.multicast.listen();
         peerConfig.joinCluster(0);
 
@@ -81,6 +81,12 @@ public class Peer implements InitiatorPeer {
         logger.print("DELETE started");
         localFile = new LocalFile(pathname, 0, peerConfig);
         localFile.deleteFile();
+    }
+
+    @Override
+    public void goodbye( int peer) {
+        logger.print("GOODBYE Group... Turning Off..");
+        System.exit(0);
     }
 
     @Override

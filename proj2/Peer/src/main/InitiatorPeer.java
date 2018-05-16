@@ -12,8 +12,10 @@ public interface InitiatorPeer extends Remote {
     void restore(String pathname) throws RemoteException;
 
     void delete(String pathname) throws RemoteException;
-
+    
     void reclaim(int maxDiskSpace) throws RemoteException;
+
+    void goodbye(int peer) throws RemoteException;
 
     void updateProtocolVersion(String newVersion) throws RemoteException;
 
