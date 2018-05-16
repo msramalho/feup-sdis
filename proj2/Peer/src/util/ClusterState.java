@@ -1,6 +1,7 @@
 package src.util;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,13 +30,15 @@ public class ClusterState implements Runnable {
 			try {
 				peerConfig.multicast.control.send(Message.create("CLUSTERSTATE %s %d", tcp.getCoordinates().getBytes(), peerConfig.protocolVersion, peerConfig.id));	
 				
-				long startingTime = System.currentTimeMillis();
-				while(System.currentTimeMillis() - startingTime < 3000) {
+				while(true) {
 					tcp.socketAccept();
+					tcp.setTimeout(3000);
 					String receivedMessage = tcp.readLine();
-					parseClusterInfo(receivedMessage);
-					startingTime = System.currentTimeMillis();
-				}				
+					saveClusterInfo(receivedMessage);
+				}	
+			} catch (SocketTimeoutException se) {
+				logger.print("Timeout reached");
+			
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -56,11 +59,11 @@ public class ClusterState implements Runnable {
 
 	}
 	
-	private void parseClusterInfo(String message) {
+	private void saveClusterInfo(String message) {
 		String[] splittedMessage = message.split("/");
 		int peerId = Integer.parseInt(splittedMessage[0]);
 		String[] splittedClusterInfo = splittedMessage[1].split(":");
-		Cluster cluster = new Cluster(Integer.parseInt(splittedClusterInfo[0]), Integer.parseInt(splittedClusterInfo[1]));
+		Cluster cluster = new Cluster(Integer.parseInt(splittedClusterInfo[0].trim()), Integer.parseInt(splittedClusterInfo[1].trim()));
 		if(!clusterInfo.containsKey(cluster)) {
 			clusterInfo.put(cluster, new ArrayList<Integer>(Arrays.asList(peerId)));
 		}else {

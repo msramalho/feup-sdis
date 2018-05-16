@@ -61,5 +61,9 @@ public class TcpServer extends Tcp {
     public void socketAccept() throws IOException {
     	socket = serverSocket.accept();
     }
+    
+    public void setTimeout(int timeout) throws SocketException {
+    	socket.setSoTimeout(timeout);
+    }
 
 }
