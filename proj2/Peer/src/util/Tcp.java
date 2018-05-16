@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.Duration;
+import java.util.concurrent.*;
 
 public abstract class Tcp {
     Logger logger = new Logger(this);
@@ -42,6 +44,20 @@ public abstract class Tcp {
             socket.close();
         } catch (IOException e) {
             logger.err("Unable to close TCP socket: " + e.getMessage());
+        }
+    }
+
+    /**
+     * After miliseconds has passed, the socket is closed
+     * @param miliseconds miliseconds for timeout
+     */
+    public void closeTimeOut(int miliseconds) {
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        final Future handler = es.submit((Runnable) () -> {while(true);});
+        try {
+            handler.get(miliseconds, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+            try { socket.close(); } catch (IOException ignore) { }
         }
     }
 
