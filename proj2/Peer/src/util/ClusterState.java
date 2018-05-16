@@ -32,7 +32,6 @@ public class ClusterState implements Runnable {
 				
 				while(true) {
 					tcp.socketAccept();
-					tcp.setTimeout(3000);
 					String receivedMessage = tcp.readLine();
 					saveClusterInfo(receivedMessage);
 				}	
@@ -44,15 +43,24 @@ public class ClusterState implements Runnable {
 			}
 			tcp.close();
 			
-			
 			StringBuilder info = new StringBuilder();
+			//CLUSTER INFO
 			info.append("ClusterState{\n" + 
-					"   Cluster Ids: [");
+					"   Clusters in the Network: \n");
 			for (Cluster cluster : clusterInfo.keySet()) {
 				info.append(cluster.id).append(",");
 			}
-			info.deleteCharAt(info.length()-2);
+			info.deleteCharAt(info.length()-1);
 			info.append("]\n");
+			
+			//CLUSTER OCCUPATION
+			info.append("   Cluster Occupation: \n");
+			for (Cluster cluster : clusterInfo.keySet()) {
+				info.append("   - Cluster " + cluster.id + ": ");
+				info.append(clusterInfo.get(cluster).size() + "/" + Cluster.MAX_SIZE 
+						+ " = " + String.valueOf(Math.round(100 * clusterInfo.get(cluster).size() / Cluster.MAX_SIZE))).append("%\n");
+			}
+			info.append("}");
 			
 			logger.err(info.toString());
 		}

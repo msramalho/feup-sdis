@@ -18,7 +18,6 @@ public class P_Clusterstate extends ProtocolCluster {
 	@Override
 	public void run() throws LockException, UnknownHostException {
 		
-		sleepRandom();
 		TcpClient tcp = new TcpClient(d.message);
 		
 		StringBuilder upper = new StringBuilder(); // upperClustersInfo		

@@ -11,7 +11,7 @@ public class TcpServer extends Tcp {
     public boolean start() {
         try {
             serverSocket = new ServerSocket(0);
-            //serverSocket.setSoTimeout(300);
+            serverSocket.setSoTimeout(300);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
             return true;
         } catch (IOException e) {
