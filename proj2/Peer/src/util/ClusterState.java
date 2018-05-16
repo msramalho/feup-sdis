@@ -48,17 +48,25 @@ public class ClusterState implements Runnable {
 			info.append("ClusterState{\n" + 
 					"   Clusters in the Network: \n");
 			for (Cluster cluster : clusterInfo.keySet()) {
-				info.append(cluster.id).append(",");
+				info.append(String.format("   - Cluster %3d - Level %2d", cluster.id, cluster.level)).append("\n");
 			}
-			info.deleteCharAt(info.length()-1);
-			info.append("]\n");
+			
+			//PEERS
+			info.append("   Peers in clusters: \n");
+			for (Cluster cluster : clusterInfo.keySet()) {
+				info.append(String.format("   - Cluster %3d: ", cluster.id));
+				info.append(clusterInfo.get(cluster)).append("\n");
+			}
 			
 			//CLUSTER OCCUPATION
 			info.append("   Cluster Occupation: \n");
 			for (Cluster cluster : clusterInfo.keySet()) {
-				info.append("   - Cluster " + cluster.id + ": ");
-				info.append(clusterInfo.get(cluster).size() + "/" + Cluster.MAX_SIZE 
-						+ " = " + String.valueOf(Math.round(100 * clusterInfo.get(cluster).size() / Cluster.MAX_SIZE))).append("%\n");
+				info.append(String.format("   - Cluster %3d: ", cluster.id));
+				//info.append(clusterInfo.get(cluster).size() + "/" + Cluster.MAX_SIZE 
+				//		+ " = " + String.valueOf(Math.round(100 * clusterInfo.get(cluster).size() / Cluster.MAX_SIZE))).append("%\n");
+				String aux = clusterInfo.get(cluster).size() + "/" + Cluster.MAX_SIZE;
+				String percentage = String.valueOf(Math.round(100 * clusterInfo.get(cluster).size() / Cluster.MAX_SIZE));
+				info.append(String.format("%5s %3s%%", aux, percentage)).append("\n");
 			}
 			info.append("}");
 			
