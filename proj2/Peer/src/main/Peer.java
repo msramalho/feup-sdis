@@ -86,6 +86,8 @@ public class Peer implements InitiatorPeer {
     @Override
     public void goodbye( int peer) {
         logger.print("GOODBYE Group... Turning Off..");
+        //peerConfig.sendClose(); //criar metodo no peerconfig
+        //no peerconfig aceder ao ultino cluster e .send message
         System.exit(0);
     }
 

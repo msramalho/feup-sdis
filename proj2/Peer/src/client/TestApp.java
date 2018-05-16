@@ -89,7 +89,7 @@ public class TestApp {
                         stub.goodbye(pId);
 
                     } catch (RemoteException e) {
-                        logger.err(e.getMessage());
+                      
                     }
                     break;
         }
