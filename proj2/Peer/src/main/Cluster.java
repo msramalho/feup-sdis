@@ -66,7 +66,7 @@ public class Cluster extends Locks {
     /**
      * query the other clusters for their ID so that a new cluster, with a new ID, can be found
      */
-    static Cluster getNewCluster(int level, PeerConfig peerConfig) {
+    public static Cluster getNewCluster(int level, PeerConfig peerConfig) {
         peerConfig.multicast.control.send(Message.create("MAXCLUSTER %s %d", peerConfig.protocolVersion, peerConfig.id));
         Utils.sleep(1000);
         return new Cluster(level, peerConfig.nextClusterId());

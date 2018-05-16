@@ -62,6 +62,7 @@ public class P_Join extends ProtocolCluster {
                 if (cluster.isFull() && d.peerConfig.clusters.size() == cluster.level + 1) {
                     // create in level + 1
                     d.peerConfig.clusters.add(Cluster.getNewCluster(cluster.level + 1, d.peerConfig));
+                    //TODO: send information to peers int the previous highest cluster, so that they can also join
                     // join in level + 2, if any exists
                     d.peerConfig.joinCluster(cluster.level + 2, false);
                 }
