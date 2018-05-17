@@ -68,6 +68,13 @@ public class TcpServer extends Tcp {
     public void socketChecks() throws IOException {
         if (socket == null) socket = (SSLSocket) serverSocket.accept();
     }
-
+    
+    public void socketAccept() throws IOException {
+    	socket = serverSocket.accept();
+    }
+    
+    public void setTimeout(int timeout) throws SocketException {
+    	socket.setSoTimeout(timeout);
+    }
 
 }
