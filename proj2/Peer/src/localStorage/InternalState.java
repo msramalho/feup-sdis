@@ -168,7 +168,8 @@ public class InternalState implements Serializable {
             Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
             Date dateFromNow = Date.from(instant);
 
-            if (expirationDate.getTime() - dateFromNow.getTime() < TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES)) {
+            if (expirationDate.getTime() - dateFromNow.getTime() < (lChunk.TIME_TO_LIVE * 20) / 100) {
+            //if (expirationDate.getTime() - dateFromNow.getTime() < TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES)) {
                 peerConfig.threadPool.submit(new RenewChunk(peerConfig, lChunk));
             } 
         }
@@ -185,9 +186,11 @@ public class InternalState implements Serializable {
             Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
             Date dateFromNow = Date.from(instant);
 
-            if (expirationDate.compareTo(dateFromNow) < 0) {
-                deleteStoredChunk(sChunk, true);
-            } 
+            if (!sChunk.deleted && sChunk.savedLocally) {
+                if (expirationDate.compareTo(dateFromNow) < 0) {
+                    deleteStoredChunk(sChunk, true);
+                }
+            }
         }
 
         return true;
@@ -263,11 +266,10 @@ public class InternalState implements Serializable {
     }
 
     public void renewChunk(StoredChunk sChunk) {
-        long oneMinuteInMillis = 60000; //millisecs
         Calendar sChunkExpirationDate = Calendar.getInstance();
         sChunkExpirationDate.setTime(sChunk.getExpirationDate());
 
-        sChunk.setExpirationDate(new Date(sChunkExpirationDate.getTimeInMillis() + oneMinuteInMillis));
+        sChunk.setExpirationDate(new Date(sChunkExpirationDate.getTimeInMillis() + sChunk.TIME_TO_LIVE));
     }
 
     public void reclaimKBytes(int maxDiskSpace) {

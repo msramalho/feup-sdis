@@ -15,6 +15,7 @@ public abstract class Chunk implements Serializable {
     public String fileId = null; //file fileId sent in the backup request
     public int chunkNo = -1;
     public int replicationDegree = 0;
+    public static long TIME_TO_LIVE = 3600;
     public boolean deleted = false;
     public Date expirationDate;
     public HashSet<Integer> peersAcks = new HashSet<>(); // a set of the IDs of Peers that have saved this chunk
@@ -43,12 +44,10 @@ public abstract class Chunk implements Serializable {
         Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
         Date now = Date.from(instant);
 
-        long oneMinuteInMillis = 180000; // 3 minutes in millisecs
         Calendar cal = Calendar.getInstance();
         cal.setTime(now);
 
-        logger.print("");
-        return new Date(cal.getTimeInMillis() + oneMinuteInMillis);
+        return new Date(cal.getTimeInMillis() + TIME_TO_LIVE);
     };
 
     public void addAck(Integer peerId) { peersAcks.add(peerId); }

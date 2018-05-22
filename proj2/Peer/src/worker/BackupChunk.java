@@ -13,7 +13,6 @@ public class BackupChunk implements Runnable {
     private Chunk initialChunk;
     private boolean isLocalChunk;
     private Logger logger = new Logger("BackupChunk");
-    private static int TIME_TO_LIVE = 3000;
 
     public BackupChunk(PeerConfig peerConfig, Chunk initialChunk, boolean isLocalChunk) {
         this.peerConfig = peerConfig;
@@ -28,10 +27,9 @@ public class BackupChunk implements Runnable {
             c = initialChunk;
         } else { // this corresponds to a request to Backup a chunk from the TestApp or InitiatorPeer
             c = peerConfig.internalState.getLocalChunk(initialChunk.getUniqueId());
-            logger.print("");
+
             // try to read the chunk from the internal state, and add it if it is not there.
             if (c == null) {
-                logger.print("");
                 c = initialChunk;
                 peerConfig.internalState.addLocalChunk((LocalChunk) c);
             } else {
@@ -40,12 +38,11 @@ public class BackupChunk implements Runnable {
                 // return;
                 // this local chunk is already being sent by the current peer, abort} and has enough copies - could have if (lChunk.replicationDegree <= lChunk.peersAcks.size()), but nothing is said
             }
-            logger.print("");
             peerConfig.internalState.save();
         }
 
         //create message to send and convert to byte array
-        byte[] message = Message.create("PUTCHUNK %s %d %s %d %d %d %d", c.chunk, peerConfig.protocolVersion, peerConfig.id, c.fileId, c.chunkNo, c.replicationDegree, TIME_TO_LIVE);
+        byte[] message = Message.create("PUTCHUNK %s %d %s %d %d", c.chunk, peerConfig.protocolVersion, peerConfig.id, c.fileId, c.chunkNo, c.replicationDegree);
 
         //wait for STORED replies
         int i = 0;
