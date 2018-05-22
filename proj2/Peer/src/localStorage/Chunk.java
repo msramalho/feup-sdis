@@ -4,6 +4,11 @@ import src.util.Logger;
 import src.util.Message;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 
 public abstract class Chunk implements Serializable {
@@ -11,6 +16,7 @@ public abstract class Chunk implements Serializable {
     public int chunkNo = -1;
     public int replicationDegree = 0;
     public boolean deleted = false;
+    public Date expirationDate;
     public HashSet<Integer> peersAcks = new HashSet<>(); // a set of the IDs of Peers that have saved this chunk
     public transient byte[] chunk = null; // the chunk bytes for this chunk
     public boolean gotAnswer = false; // true if the current peer saw a CHUNK message while sleeping
@@ -29,7 +35,21 @@ public abstract class Chunk implements Serializable {
         this.chunkNo = chunkNo;
         this.chunk = chunk;
         this.replicationDegree = replicationDegree;
+        this.expirationDate = getDefaultExpirationdate();
     }
+
+    private Date getDefaultExpirationdate() {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+        Date now = Date.from(instant);
+
+        long oneMinuteInMillis = 180000; // 3 minutes in millisecs
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(now);
+
+        logger.print("");
+        return new Date(cal.getTimeInMillis() + oneMinuteInMillis);
+    };
 
     public void addAck(Integer peerId) { peersAcks.add(peerId); }
 
@@ -40,6 +60,14 @@ public abstract class Chunk implements Serializable {
     static String getUniqueId(String fileId, int chunkNo) { return fileId + "_" + chunkNo; }
 
     public String getShortId() { return fileId.substring(0, 10) + "_" + chunkNo; }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
 
     @Override
     public boolean equals(Object o) {
