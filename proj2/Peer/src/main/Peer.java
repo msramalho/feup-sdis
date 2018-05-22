@@ -53,7 +53,7 @@ public class Peer implements InitiatorPeer {
         while (true) {
             try { Thread.sleep(10000); } catch (InterruptedException ignored) {}
             peerConfig.internalState.asyncChecks();
-            //peerConfig.internalState.checkLocalChunksExpirationDate(peerConfig);
+            peerConfig.internalState.checkLocalChunksExpirationDate(peerConfig);
             peerConfig.internalState.checkStoredChunksExpirationDate();
         }
     }

@@ -169,7 +169,6 @@ public class InternalState implements Serializable {
             Date dateFromNow = Date.from(instant);
 
             if (expirationDate.getTime() - dateFromNow.getTime() < (lChunk.TIME_TO_LIVE * 20) / 100) {
-            //if (expirationDate.getTime() - dateFromNow.getTime() < TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES)) {
                 peerConfig.threadPool.submit(new RenewChunk(peerConfig, lChunk));
             } 
         }
