@@ -5,6 +5,7 @@ import src.util.*;
 // import src.main.Cluster;
 
 import java.net.*;
+import java.security.SecureRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,6 +22,8 @@ public class PeerConfig extends Locks {
     private Integer sapPort; // service access point port
 
     Logger logger = new Logger(this);
+    
+    public static String key;
 
     public PeerConfig(String[] args) throws Exception {
         if (args.length < 7)
@@ -35,6 +38,13 @@ public class PeerConfig extends Locks {
         logger.print(internalState.toString());
 
         multicast = new MulticastChannels(this, args);
+        
+        if(internalState.encryptionKey == null) {
+        	key = generateKey();
+        	internalState.addKey(key);
+        } else {
+        	key = internalState.encryptionKey;
+        }
     }
 
 
@@ -74,5 +84,9 @@ public class PeerConfig extends Locks {
             newC.loadMulticast(this);
         }
         unlock("joining_cluster_" + level);
+    }
+    
+    private String generateKey() {
+    	return new RandomString().nextString();
     }
 }

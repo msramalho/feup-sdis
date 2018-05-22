@@ -35,6 +35,7 @@ public class BackupChunk implements Runnable {
             } else {
                 logger.print("chunk: " + c + " is already backed up");
                 c.chunk = initialChunk.chunk;
+                c.decryptBytes();
                 // return;
                 // this local chunk is already being sent by the current peer, abort} and has enough copies - could have if (lChunk.replicationDegree <= lChunk.peersAcks.size()), but nothing is said
             }

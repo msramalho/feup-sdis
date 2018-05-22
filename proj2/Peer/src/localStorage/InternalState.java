@@ -21,6 +21,8 @@ public class InternalState implements Serializable {
     public long occupiedSpace; // bytes that this peer can occupy in the file system
     public long allowedSpace = (long) (16 * Math.pow(2, 20)); // bytes that this peer can occupy in the file system
     // public long allowedSpace = (long) (1 * Math.pow(2, 17)); // bytes that this peer can occupy in the file system
+    
+    public String encryptionKey;
 
     private static int peerId;
 
@@ -235,6 +237,11 @@ public class InternalState implements Serializable {
 
     public void addMissingInfoForClient() {
 
+    }
+    
+    public void addKey(String key) {
+        encryptionKey = key;
+        save();
     }
     //------------------------------ util functions
 

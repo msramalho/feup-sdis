@@ -38,7 +38,7 @@ public class Message {
      * @throws Exception 
      */
     private void parseMessage(DatagramPacket packet) throws Exception {
-        String packetMessage = new String(Cryptography.decrypt(packet.getData())); // byte[] -> String
+        String packetMessage = new String(packet.getData()); // byte[] -> String
         packetMessage = packetMessage.substring(0, Math.min(packet.getLength(), packetMessage.length())); // trim
         String[] parts = packetMessage.split("\r\n\r\n", 2); // split only once
         int headerBytes = parts[0].length();
@@ -99,18 +99,11 @@ public class Message {
     public static byte[] create(String header, byte[] body) {
         byte[] head = (header + "\r\n\r\n").getBytes();
         byte[] combined = new byte[head.length + body.length];
-        byte[] encryptedData = new byte[head.length + body.length];
 
         System.arraycopy(head, 0, combined, 0, head.length);
         System.arraycopy(body, 0, combined, head.length, body.length);
         
-        try {
-			encryptedData = Cryptography.encrypt(combined);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-        
-        return encryptedData;
+        return combined;
     }
 
     public String getBodyStr() { return new String(body); }
