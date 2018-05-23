@@ -1,7 +1,9 @@
 package src.worker.clustering;
 
+import src.main.Cluster;
 import src.util.LockException;
 import src.util.TcpClient;
+import src.util.Utils;
 import src.worker.Dispatcher;
 
 /**
@@ -18,17 +20,19 @@ public class P_Available extends ProtocolCluster {
             TcpClient tcp = new TcpClient(d.message);
             tcp.sendLine("ACCEPTED");
             String clusterInfo = tcp.readLine();
-            logger.print(clusterInfo);
+            logger.print("Received clusters to join: " + clusterInfo);
+            for (String clusterId : clusterInfo.split(" ")) {
+                logger.print(clusterId);
 
-            // for (String clusterId : d.message.getBodyStr().split(" ")) {
-            //     Utils.ClusterInfo c = Utils.splitCluster(clusterId);
-            //
-            //     Cluster newC = new Cluster(c.clusterId, c.level);
-            //     d.peerConfig.clusters.set(c.level, newC);
-            //     newC.loadMulticast(d.peerConfig);
-            //
-            //     logger.print("Joined cluster " + newC.id + " at level " + newC.level);
-            // }
+                Utils.ClusterInfo c = Utils.splitCluster(clusterId);
+
+                Cluster newC = new Cluster(c.level, c.clusterId);
+                d.peerConfig.clusters.set(c.level, newC);
+                newC.loadMulticast(d.peerConfig);
+
+                tcp.close();
+                logger.print("Joined cluster " + newC.id + " at level " + newC.level);
+            }
         } else if (hasCluster() && cluster.locked("processing_join")) { // case 2
             cluster.lock("available_silenced");
         }

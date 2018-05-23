@@ -5,7 +5,6 @@ import src.util.Logger;
 import src.util.Utils;
 
 import java.net.UnknownHostException;
-import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class Protocol {
     protected Dispatcher d;
@@ -31,13 +30,8 @@ public abstract class Protocol {
         sleepRandom(4 * percentOccupied);
     }
 
-    private void sleepRandom(int from) {
-        int miliseconds = ThreadLocalRandom.current().nextInt(from, 401);
-        logger.print(String.format("sleep for %3d ms", miliseconds));
-        sleep(miliseconds);
-    }
+    private void sleepRandom(int from) { Utils.sleepRandom(from, 401); }
 
     protected void sleep(int miliseconds) { Utils.sleep(miliseconds); }
-
 
 }

@@ -63,6 +63,7 @@ public class LocalFile {
         // split file and add to worker thread
         int i = 0, totalBytesRead = 0;
         while (totalBytesRead < file_size) {
+            logger.print("");
             int chunkSize = min(LocalFile.CHUNK_SIZE, (file_size - totalBytesRead));
             byte[] temporaryChunk = new byte[chunkSize]; //Temporary Byte Array
             try {
@@ -71,14 +72,16 @@ public class LocalFile {
                 e.printStackTrace();
             }
             LocalChunk localChunk = new LocalChunk(fileId, i, replicationDegree, temporaryChunk);
+            logger.print(localChunk.expirationDate.toString());
             BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk, true);
             peerConfig.threadPool.submit(bcWorker);
             i++;
             logger.print(String.format("Chunk %d has %d bytes (read: %d out of %d)", i, chunkSize, totalBytesRead, file_size));
         }
+        logger.print("");
         if ((file_size % CHUNK_SIZE) == 0) // if last chunk is 64K send chunk with size 0
             peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, i, replicationDegree, new byte[0]), true));
-
+        logger.print("");
         try {
             inStream.close();
         } catch (IOException e) {

@@ -55,9 +55,9 @@ public class Message {
         // the difference between the two types of messages is that fileId is a string and level is not, but if level is string it is because of level:clusterId
         if (args.length >= 4 && (Utils.isInt(args[3]) || args[3].contains(":"))) { // cluster message
             if (args[3].contains(":")) {
-                String[] clusterParts = args[3].split(":"); // <Level>:<ClusterId>
-                this.level = Integer.parseInt(clusterParts[0]);
-                this.clusterId = Integer.parseInt(clusterParts[1]);
+                Utils.ClusterInfo cinfo = Utils.splitCluster(args[3]);// <Level>:<ClusterId>
+                this.level = cinfo.level;
+                this.clusterId = cinfo.clusterId;
             } else {
                 this.level = Integer.parseInt(args[3]); // save the cluster level
             }

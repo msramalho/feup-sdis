@@ -6,8 +6,10 @@ import java.rmi.server.UnicastRemoteObject;
 
 import src.localStorage.InternalState;
 import src.localStorage.LocalFile;
+import src.util.ClusterState;
 import src.util.Logger;
 import src.util.Message;
+import src.util.Tcp;
 
 public class Peer implements InitiatorPeer {
     private static LocalFile localFile;
@@ -35,6 +37,11 @@ public class Peer implements InitiatorPeer {
             e.printStackTrace();
         }
 
+        //set tcp keystore properties
+        Tcp.setKeyStoreProperties();
+        logger.print("TCP keystore properties set");
+
+
         logger.print(String.format("Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
         
         peerConfig.multicast.listen();
@@ -47,6 +54,8 @@ public class Peer implements InitiatorPeer {
         while (true) {
             try { Thread.sleep(10000); } catch (InterruptedException ignored) {}
             peerConfig.internalState.asyncChecks();
+            peerConfig.internalState.checkLocalChunksExpirationDate(peerConfig);
+            peerConfig.internalState.checkStoredChunksExpirationDate();
         }
     }
 
@@ -90,6 +99,11 @@ public class Peer implements InitiatorPeer {
         InternalState is = peerConfig.internalState;
         is.addMissingInfoForClient();
         return is;
+    }
+    
+    public void clusterState() {
+    	logger.print("CLUSTER STATE started");
+    	peerConfig.threadPool.submit(new ClusterState(peerConfig));
     }
 
     @Override
