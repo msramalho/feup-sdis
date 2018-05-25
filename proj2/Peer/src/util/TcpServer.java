@@ -70,7 +70,7 @@ public class TcpServer extends Tcp {
     }
     
     public void socketAccept() throws IOException {
-    	socket = serverSocket.accept();
+    	socket = (SSLSocket) serverSocket.accept();
     }
     
     public void setTimeout(int timeout) throws SocketException {
