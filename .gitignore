@@ -73,5 +73,5 @@ proj2/Peer/storage/*
 proj2/Peer/bin/*
 proj2/Peer/bin2/*
 
-.classpath
-.project
+.classpath/*
+.project/*
