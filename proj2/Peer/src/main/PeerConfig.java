@@ -2,10 +2,8 @@ package src.main;
 
 import src.localStorage.InternalState;
 import src.util.*;
-// import src.main.Cluster;
 
 import java.net.*;
-import java.security.SecureRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,12 +38,12 @@ public class PeerConfig extends Locks {
         logger.print(internalState.toString());
 
         multicast = new MulticastChannels(this, args);
-        
-        if(internalState.encryptionKey == null) {
-        	key = generateKey();
-        	internalState.addKey(key);
+
+        if (internalState.encryptionKey == null) {
+            key = generateKey();
+            internalState.addKey(key);
         } else {
-        	key = internalState.encryptionKey;
+            key = internalState.encryptionKey;
         }
     }
 
@@ -94,9 +92,17 @@ public class PeerConfig extends Locks {
         }
         unlock("joining_cluster_" + level);
     }
-    
+
+    /**
+     * Add a cluster to the cluster list and return it
+     */
+    public Cluster addCluster(Cluster c) {
+        clusters.add(c);
+        return c;
+    }
+
     private String generateKey() {
-    	return new RandomString().nextString();
+        return new RandomString().nextString();
     }
 
     public int nextClusterId() {
