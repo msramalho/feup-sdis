@@ -70,12 +70,13 @@ public class PeerConfig extends Locks {
 
     public static boolean isMessageEnhanced(Message m) { return !m.protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }
 
-    public void updateMaxClusterId(int clusterId) { maxClusterId = Math.max(maxClusterId, clusterId); }
+    public void updateMaxClusterId(int clusterId) { maxClusterId = Math.max(maxClusterId, clusterId);
+        System.out.println("updating to max between " + maxClusterId + " and " + clusterId);}
 
     /**
      * Make this peer join or create a cluster at a given level
      */
-    void joinCluster(int level) { joinCluster(level, true);}
+    public Cluster joinCluster(int level) { return joinCluster(level, true); }
 
     /**
      * Make this peer join or create a cluster at a given level
@@ -91,7 +92,7 @@ public class PeerConfig extends Locks {
             newC.loadMulticast(this);
         }
         unlock("joining_cluster_" + level);
-        return clusters.size() <= level?clusters.get(level):null;
+        return clusters.size() < level ? clusters.get(level - 1) : null;
     }
 
     /**
