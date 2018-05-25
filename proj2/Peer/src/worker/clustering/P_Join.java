@@ -58,21 +58,15 @@ public class P_Join extends ProtocolCluster {
 
                 // if the cluster is now full and there is no upper cluster -> create an upper and see if that can join another
                 if (cluster.isFull() && d.peerConfig.clusters.size() == cluster.level + 1) {
-                    // create in level + 1
-                    Cluster newCluster = d.peerConfig.addCluster(Cluster.getNewCluster(this.cluster.level + 1, d.peerConfig));
-                    // share with peers in my cluster
-                    sendOnme(newCluster);
-
-                    // join in level + 2, if any exists
-                    newCluster = d.peerConfig.joinCluster(this.cluster.level + 2, false);
-                    // share with peers in my cluster
-                    if (newCluster != null) sendOnme(newCluster);
+                    // join in level + 1, if any exists
+                    // and share with peers in my cluster
+                    sendOnme(d.peerConfig.joinCluster(this.cluster.level + 1));
                 }
             }
         }
     }
 
-    private void sendOnme(Cluster c){
+    private void sendOnme(Cluster c) {
         this.cluster.multicast.control.send(Message.create("ONME %s %d %d:%d", d.peerConfig.protocolVersion, d.peerConfig.id, c.level, c.id));
     }
 }
