@@ -33,7 +33,6 @@ public class Dispatcher implements Runnable {
             } catch (LockException e) {
                 logger.err(e.getMessage());
             } catch (UnknownHostException e) {
-                //TODO: complete TCP in AVAILABLE
                 logger.err("Unable to acquire host IP: " + e.getMessage());
             }
         } else {
