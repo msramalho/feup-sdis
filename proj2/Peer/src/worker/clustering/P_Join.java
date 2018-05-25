@@ -61,13 +61,19 @@ public class P_Join extends ProtocolCluster {
                 if (cluster.isFull() && d.peerConfig.clusters.size() == cluster.level + 1) {
                     // create in level + 1
                     Cluster newCluster = d.peerConfig.addCluster(Cluster.getNewCluster(this.cluster.level + 1, d.peerConfig));
+                    // share with peers in my cluster
+                    sendOnme(newCluster);
+
                     // join in level + 2, if any exists
-                    d.peerConfig.joinCluster(this.cluster.level + 2, false);
-                    //TODO: send information to peers in the previous highest cluster, so that they can also join
-                    this.cluster.multicast.control.send(Message.create("ONME %s %d %d:%d", d.peerConfig.protocolVersion, d.peerConfig.id, newCluster.level, newCluster.id));
+                    newCluster = d.peerConfig.joinCluster(this.cluster.level + 2, false);
+                    // share with peers in my cluster
+                    if (newCluster != null) sendOnme(newCluster);
                 }
             }
         }
+    }
 
+    private void sendOnme(Cluster c){
+        this.cluster.multicast.control.send(Message.create("ONME %s %d %d:%d", d.peerConfig.protocolVersion, d.peerConfig.id, c.level, c.id));
     }
 }
