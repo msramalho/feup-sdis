@@ -1,5 +1,9 @@
 package src.util;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
 import java.net.DatagramPacket;
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -13,6 +17,7 @@ public class Message {
     public String protocolVersion;
     public int senderId;
     public String fileId;
+    public JsonObject fileMetadata;
     public int level = -1;
     public int clusterId = -1;
     public int receiverId;
@@ -31,7 +36,7 @@ public class Message {
     }
 
     /**
-     * <MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
+     * <MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg> <Metadata>] <CRLF><CRLF>[<Body>]
      * or
      * <MessageType> <Version> <SenderId> [<Level>[:<ClusterId>] <receiverId>] <CRLF><CRLF>[<Body>]
      */
@@ -64,11 +69,20 @@ public class Message {
             this.fileId = (args.length >= 4) ? args[3] : ""; // save file id if it exists
             this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
             this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
+            this.fileMetadata = (args.length >= 7) ? jsonObjectFromString(args[6]) : Json.createObjectBuilder().build(); // save metadata if it exists
         }
-
 
         // retrieve the bytes received that belong to the body
         if (parts.length == 2) this.body = Arrays.copyOfRange(packet.getData(), headerBytes + 4, packet.getLength());//save body if it exists (64kB chunks)
+    }
+
+    private JsonObject jsonObjectFromString(String jsonObjectStr) {
+
+        JsonReader jsonReader = Json.createReader(new StringReader(jsonObjectStr));
+        JsonObject jsonObject = jsonReader.readObject();
+        jsonReader.close();
+
+        return jsonObject;
     }
 
     boolean isOwnMessage(int selfId) { return this.senderId == selfId; }

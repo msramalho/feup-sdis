@@ -6,15 +6,21 @@ import src.main.PeerConfig;
 import src.worker.DeleteFile;
 import src.worker.RestoreChunk;
 
+import javax.json.Json;
+import javax.json.JsonObject;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -31,17 +37,28 @@ public class LocalFile {
     private ArrayList<LocalChunk> chunks;
     private int numChunks;
 
+    public JsonObject metadata;
+
     private Logger logger = new Logger("LocalFile");
 
-
-    public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
+    public LocalFile(Integer replicationDegree, PeerConfig peerConfig) {
         this.peerConfig = peerConfig;
-        this.filename = filename;
         this.replicationDegree = replicationDegree;
-        loadFileId();
         File file = new File(this.filename);
         int file_size = (int) file.length();
         numChunks = (int) Math.ceil(file_size / CHUNK_SIZE);
+    }
+
+    public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
+        this(replicationDegree, peerConfig);
+        this.filename = filename;
+        loadFileId(filename, "", "", -1);
+    }
+
+    public LocalFile(String filename, String creationTime, String lastModifiedTime, long size, Integer replicationDegree, PeerConfig peerConfig) {
+        this(replicationDegree, peerConfig);
+        this.filename = filename;
+        loadFileId(filename, creationTime, lastModifiedTime, size);
     }
 
     public void backup() {
@@ -58,11 +75,9 @@ public class LocalFile {
             return;
         }
 
-
         // split file and add to worker thread
         int i = 0, totalBytesRead = 0;
         while (totalBytesRead < file_size) {
-            logger.print("");
             int chunkSize = min(LocalFile.CHUNK_SIZE, (file_size - totalBytesRead));
             byte[] temporaryChunk = new byte[chunkSize]; //Temporary Byte Array
             try {
@@ -70,17 +85,15 @@ public class LocalFile {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            LocalChunk localChunk = new LocalChunk(fileId, i, replicationDegree, temporaryChunk);
-            logger.print(localChunk.expirationDate.toString());
+            LocalChunk localChunk = new LocalChunk(fileId, metadata, i, replicationDegree, temporaryChunk);
             BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk, true);
             peerConfig.threadPool.submit(bcWorker);
             i++;
             logger.print(String.format("Chunk %d has %d bytes (read: %d out of %d)", i, chunkSize, totalBytesRead, file_size));
         }
-        logger.print("");
+
         if ((file_size % CHUNK_SIZE) == 0) // if last chunk is 64K send chunk with size 0
-            peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, i, replicationDegree, new byte[0]), true));
-        logger.print("");
+            peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, metadata, i, replicationDegree, new byte[0]), true));
         try {
             inStream.close();
         } catch (IOException e) {
@@ -133,15 +146,44 @@ public class LocalFile {
         peerConfig.threadPool.submit(new DeleteFile(peerConfig, new LocalChunk(fileId, -2)));
     }
 
-
-    private void loadFileId() {
-        String hashSource = filename;
-        try {
-            BasicFileAttributes metadata = Files.readAttributes(Paths.get(filename), BasicFileAttributes.class);
-            hashSource = filename + metadata.creationTime() + metadata.lastModifiedTime() + metadata.size();
-        } catch (IOException e) {
-            logger.err("Unable to read file's metadata, using filename only for the chunk");
+    public void loadFileId(String fileName, String creationTime, String lastModifiedTime, long size) {
+        if (creationTime.isEmpty() || lastModifiedTime.isEmpty() || size == -1) {
+            try {
+                BasicFileAttributes metadata = Files.readAttributes(Paths.get(filename), BasicFileAttributes.class);
+                logger.print(metadata.creationTime().toString());
+                logger.print(metadata.lastModifiedTime().toString());
+                createFileId(fileName, metadata.creationTime(), metadata.lastModifiedTime(), metadata.size());
+            } catch (IOException e) {
+                logger.err("Unable to read file's metadata, using filename only for the chunk");
+            }
+        } else {
+            createFileId(fileName, convertToFileTime(creationTime), convertToFileTime(lastModifiedTime), size);
         }
+    }
+
+    private FileTime convertToFileTime(String strTime) {
+        Date date = null;
+        FileTime time = null;
+
+        try {
+            date = new SimpleDateFormat("dd/MM/yy HH:mm:ss").parse(strTime);
+            time = FileTime.fromMillis(date.getTime());
+        } catch(ParseException e) {
+            logger.err("Unable to convert string to FileTime");
+        }
+
+        return time;
+    }
+
+    private void createFileId(String fileName, FileTime creationTime, FileTime lastModifiedTime, long size) {
+        String hashSource = filename + creationTime + lastModifiedTime + size;
+
+        this.metadata = Json.createObjectBuilder()
+                .add("filename", filename)
+                .add("creationTime", creationTime.toString())
+                .add("lastModifiedTime", lastModifiedTime.toString())
+                .add("size", size)
+                .build();
 
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
