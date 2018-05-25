@@ -25,8 +25,6 @@ public class P_Join extends ProtocolCluster {
         cluster.lock("processing_join");
         cluster.clearPeers();// restart the count of peers in this cluster
 
-        // TODO: should PRESENT include the requesting peer?
-        // TODO: should PRESENT change a flag to ASSESSING so that if two peers send JOIN there isn't a cock up? especially if the peers hashset dor the cluster is reset
         // every peer sends PRESENT
         cluster.multicast.control.send(Message.create("PRESENT %s %d", d.peerConfig.protocolVersion, d.peerConfig.id));
 
@@ -52,10 +50,11 @@ public class P_Join extends ProtocolCluster {
 
         tcp = new TcpServer();
         if (tcp.start()) {
+            // send MC message with my TCP coordinates
             d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d:%d %d", tcp.getCoordinates().getBytes(), d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, cluster.id, d.message.senderId));
-
-            if (tcp.readLine().equals("ACCEPTED")) {
-                tcp.sendLine(upper.toString()).close();
+            if (tcp.readLine().equals("ACCEPTED")) { // if my offer is accepted
+                tcp.sendLine(upper.toString()); // send information about the clusters i belong to
+                //TODO: repeat the full logic for all the upper clusters the peer has joined
                 cluster.peers.add(d.message.senderId);
 
                 // if the cluster is now full and there is no upper cluster -> create an upper and see if that can join another
