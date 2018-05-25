@@ -14,7 +14,6 @@ import java.net.UnknownHostException;
  * If I have a slot and I saw no AVAILABLE response to this, I will shut up (OPTIONAL as long as the joining peer only considers one)
  */
 public class P_Join extends ProtocolCluster {
-    TcpServer tcp;
 
     public P_Join(Dispatcher d) { super(d); }
 
@@ -48,7 +47,7 @@ public class P_Join extends ProtocolCluster {
         for (int i = d.message.level; i < d.peerConfig.clusters.size(); i++)
             upper.append(i).append(":").append(d.peerConfig.clusters.get(i).id).append(" ");
 
-        tcp = new TcpServer();
+        TcpServer tcp = new TcpServer();
         if (tcp.start()) {
             // send MC message with my TCP coordinates
             d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d:%d %d", tcp.getCoordinates().getBytes(), d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, cluster.id, d.message.senderId));
