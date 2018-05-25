@@ -80,7 +80,7 @@ public class PeerConfig extends Locks {
     /**
      * Make this peer join or create a cluster at a given level
      */
-    public void joinCluster(int level, boolean createIfNoJoin) {
+    public Cluster joinCluster(int level, boolean createIfNoJoin) {
         multicast.control.send(Message.create("JOIN %s %d %d", protocolVersion, id, level));
         Utils.sleep(3000);
         if (createIfNoJoin && clusters.size() <= level) {
@@ -91,6 +91,7 @@ public class PeerConfig extends Locks {
             newC.loadMulticast(this);
         }
         unlock("joining_cluster_" + level);
+        return clusters.size() <= level?clusters.get(level):null;
     }
 
     /**
