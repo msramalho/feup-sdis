@@ -25,11 +25,12 @@ public class P_Join extends ProtocolCluster {
         cluster.lock("processing_join");
         cluster.clearPeers();// restart the count of peers in this cluster
 
+        sleepRandom();
         // every peer sends PRESENT
         cluster.multicast.control.send(Message.create("PRESENT %s %d", d.peerConfig.protocolVersion, d.peerConfig.id));
 
         // sleep for 1 second (While I am asleep, the other Peer's PRESENT Messages will be counted)
-        sleep(1000);
+        sleep(2000);
 
         // send AVAILABLE <version> <id> <level> <receiverId> if there is an available slot and no one silenced me
         if (!cluster.isFull() && !cluster.locked("available_silenced"))
