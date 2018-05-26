@@ -3,6 +3,7 @@ package src.util;
 import java.net.DatagramPacket;
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * parses a packet string into a queryable object
@@ -35,8 +36,9 @@ public class Message {
      * <MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg> <Metadata>] <CRLF><CRLF>[<Body>]
      * or
      * <MessageType> <Version> <SenderId> [<Level>[:<ClusterId>] <receiverId>] <CRLF><CRLF>[<Body>]
+     * @throws Exception 
      */
-    private void parseMessage(DatagramPacket packet) {
+    private void parseMessage(DatagramPacket packet) throws Exception {
         String packetMessage = new String(packet.getData()); // byte[] -> String
         packetMessage = packetMessage.substring(0, Math.min(packet.getLength(), packetMessage.length())); // trim
         String[] parts = packetMessage.split("\r\n\r\n", 2); // split only once
@@ -101,6 +103,7 @@ public class Message {
 
         System.arraycopy(head, 0, combined, 0, head.length);
         System.arraycopy(body, 0, combined, head.length, body.length);
+        
         return combined;
     }
 

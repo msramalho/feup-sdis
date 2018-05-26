@@ -45,7 +45,7 @@ public class MulticastSocketC extends MulticastSocket implements Runnable {
 
     @Override
     public void run() {
-        logger.print("Waiting for multicast on address " + group.toString());
+        logger.print("Waiting for multicast on " + group.toString());
         while (active) {
             //wait for multicast message + receive the response (blocking)
             byte[] responseBytes = new byte[65507]; // create buffer to receive response, max UDP Datagram size
