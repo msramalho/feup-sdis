@@ -6,21 +6,16 @@ import src.main.PeerConfig;
 import src.worker.DeleteFile;
 import src.worker.RestoreChunk;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import javax.json.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -37,27 +32,29 @@ public class LocalFile {
     private ArrayList<LocalChunk> chunks;
     private int numChunks;
 
-    public JsonObject metadata;
+    private boolean hasMetadata;
+    public String metadata;
 
     private Logger logger = new Logger("LocalFile");
 
-    public LocalFile(Integer replicationDegree, PeerConfig peerConfig) {
+    public LocalFile(String filename, String notUseful, Integer replicationDegree, PeerConfig peerConfig) {
         this.peerConfig = peerConfig;
         this.replicationDegree = replicationDegree;
+        this.filename = filename;
         File file = new File(this.filename);
         int file_size = (int) file.length();
         numChunks = (int) Math.ceil(file_size / CHUNK_SIZE);
     }
 
     public LocalFile(String filename, Integer replicationDegree, PeerConfig peerConfig) {
-        this(replicationDegree, peerConfig);
-        this.filename = filename;
+        this(filename, "", replicationDegree, peerConfig);
+        this.hasMetadata = false;
         loadFileId(filename, "", "", -1);
     }
 
     public LocalFile(String filename, String creationTime, String lastModifiedTime, long size, Integer replicationDegree, PeerConfig peerConfig) {
-        this(replicationDegree, peerConfig);
-        this.filename = filename;
+        this(filename, "", replicationDegree, peerConfig);
+        this.hasMetadata = true;
         loadFileId(filename, creationTime, lastModifiedTime, size);
     }
 
@@ -107,6 +104,17 @@ public class LocalFile {
         ArrayList<Future<LocalChunk>> futureChunks = new ArrayList<>();
         chunks = new ArrayList<>();
 
+        if(hasMetadata) {
+            LocalChunk tempLocalChunk = new LocalChunk(fileId, 0);
+            if(peerConfig.internalState.getLocalChunk(tempLocalChunk.getUniqueId()) == null) {
+                for(int i = 0; i <= numChunks; i++) {
+                    peerConfig.internalState.addLocalChunk(new LocalChunk(fileId, i));
+                }
+            }
+
+            peerConfig.internalState.save();
+        }
+
         for (int i = 0; i <= numChunks; i++) {
             futureChunks.add((Future<LocalChunk>) peerConfig.threadPool.submit(new RestoreChunk(peerConfig, new LocalChunk(fileId, i))));
             chunks.add(null);
@@ -146,36 +154,22 @@ public class LocalFile {
         peerConfig.threadPool.submit(new DeleteFile(peerConfig, new LocalChunk(fileId, -2)));
     }
 
-    public void loadFileId(String fileName, String creationTime, String lastModifiedTime, long size) {
+    public void loadFileId(String filename, String creationTime, String lastModifiedTime, long size) {
         if (creationTime.isEmpty() || lastModifiedTime.isEmpty() || size == -1) {
             try {
                 BasicFileAttributes metadata = Files.readAttributes(Paths.get(filename), BasicFileAttributes.class);
                 logger.print(metadata.creationTime().toString());
                 logger.print(metadata.lastModifiedTime().toString());
-                createFileId(fileName, metadata.creationTime(), metadata.lastModifiedTime(), metadata.size());
+                createFileId(filename, metadata.creationTime().toString(), metadata.lastModifiedTime().toString(), metadata.size());
             } catch (IOException e) {
                 logger.err("Unable to read file's metadata, using filename only for the chunk");
             }
         } else {
-            createFileId(fileName, convertToFileTime(creationTime), convertToFileTime(lastModifiedTime), size);
+            createFileId(filename, creationTime, lastModifiedTime, size);
         }
     }
 
-    private FileTime convertToFileTime(String strTime) {
-        Date date = null;
-        FileTime time = null;
-
-        try {
-            date = new SimpleDateFormat("dd/MM/yy HH:mm:ss").parse(strTime);
-            time = FileTime.fromMillis(date.getTime());
-        } catch(ParseException e) {
-            logger.err("Unable to convert string to FileTime");
-        }
-
-        return time;
-    }
-
-    private void createFileId(String fileName, FileTime creationTime, FileTime lastModifiedTime, long size) {
+    private void createFileId(String filename, String creationTime, String lastModifiedTime, long size) {
         String hashSource = filename + creationTime + lastModifiedTime + size;
 
         this.metadata = Json.createObjectBuilder()
@@ -183,7 +177,7 @@ public class LocalFile {
                 .add("creationTime", creationTime.toString())
                 .add("lastModifiedTime", lastModifiedTime.toString())
                 .add("size", size)
-                .build();
+                .build().toString();
 
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

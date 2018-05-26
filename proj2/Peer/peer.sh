@@ -4,7 +4,7 @@ clear
 rm bin -rf
 mkdir bin
 
-javac -cp .:./bin/:./ -d bin src/*/*.java src/*/*/*.java #-Xlint:unchecked
+javac -classpath .:./bin/:./:./lib/javax.json-api-1.1.2.jar:./lib/javax.json-1.1.2.jar -d bin src/*/*.java src/*/*/*.java #-Xlint:unchecked
 echo "Source code compiled"
 
 # get peerID or use default
@@ -17,7 +17,6 @@ then
     echo Deleting internal_state_peer_$PEERID.
     rm -rf internal_state_peer_$PEERID
 fi
-
 
 if [ "$3" = "1" ]
 then
@@ -32,6 +31,6 @@ VERSION=${VERSION:-"1.0"}  # If variable not set, use default.
 
 #Usage: <protocolVersion> <peerId> <serviceAccessPoint> <mccIP> <mccPort> <mdbIp> <mdbPort> <mdrIp> <mdrPort>
 #java -cp .:./bin/ -Djavax.net.debug=all src.main.Peer $VERSION $PEERID 8499 239.255.255.255 9000 239.255.255.255 9001 239.255.255.255 9002 # for ssl debug
-java -cp .:./bin/ src.main.Peer $VERSION $PEERID 8499 239.255.255.255 9000 239.255.255.255 9001 239.255.255.255 9002
+java -classpath .:./bin/:./lib/javax.json-api-1.1.2.jar:./lib/javax.json-1.1.2.jar src.main.Peer $VERSION $PEERID 8499 239.255.255.255 9000 239.255.255.255 9001 239.255.255.255 9002
 
 # Usage: <peerId:default=1> <resetDatabase:default=false> <startRMI:default=false>

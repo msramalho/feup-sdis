@@ -3,7 +3,6 @@ package src.localStorage;
 import src.util.Logger;
 import src.util.Message;
 
-import javax.json.JsonObject;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -14,7 +13,7 @@ import java.util.HashSet;
 
 public abstract class Chunk implements Serializable {
     public String fileId = null; //file fileId sent in the backup request
-    public JsonObject fileMetadata;
+    public String fileMetadata;
     public int chunkNo = -1;
     public int replicationDegree = 0;
     public static long TIME_TO_LIVE = 3600;
@@ -33,7 +32,7 @@ public abstract class Chunk implements Serializable {
 
     public Chunk(String fileId, int chunkNo) {this(fileId, null, chunkNo, 0, null);}
 
-    public Chunk(String fileId, JsonObject fileMetadata, int chunkNo, int replicationDegree, byte[] chunk) {
+    public Chunk(String fileId, String fileMetadata, int chunkNo, int replicationDegree, byte[] chunk) {
         this.fileId = fileId;
         this.chunkNo = chunkNo;
         this.chunk = chunk;
@@ -66,8 +65,6 @@ public abstract class Chunk implements Serializable {
     public Date getExpirationDate() {
         return expirationDate;
     }
-
-    public String getFileMetadata() { return fileMetadata.toString(); };
 
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;

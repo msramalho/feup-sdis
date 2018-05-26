@@ -2,7 +2,8 @@
 clear
 mkdir bin
 
-javac -cp .:./bin/:./ -d bin src/*/*.java
+javac -classpath .:./bin/:./:./lib/javax.json-api-1.1.2.jar:./lib/javax.json-1.1.2.jar -d bin src/*/*.java
+
 echo "Source code compiled"
 
 # get filename or use default
@@ -21,7 +22,7 @@ ACTION=${ACTION:-"1"}
 OPT="$4"
 OPT=${OPT:-"2"}
 
-JAVAARGS="-cp .:./bin/ src.client.TestApp"
+JAVAARGS="-classpath .:./bin/:./lib/javax.json-api-1.1.2.jar:./lib/javax.json-1.1.2.jar src.client.TestApp"
 
 if [ $ACTION = "1" ]; then
     java $JAVAARGS $PEERID BACKUP $FILENAME $OPT
@@ -32,9 +33,9 @@ elif [ $ACTION = "2" ]; then
 elif [ $ACTION = "2e" ]; then
     java $JAVAARGS $PEERID RESTOREENH $FILENAME
 elif [ $ACTION = "2m" ]; then
-    CREATIONTIME="$5"
-    LASTMODIFIEDTIME="$6"
-    SIZE="$7"
+    CREATIONTIME="$4"
+    LASTMODIFIEDTIME="$5"
+    SIZE="$6"
     java $JAVAARGS $PEERID RESTOREMETADATA $FILENAME $CREATIONTIME $LASTMODIFIEDTIME $SIZE
 elif [ $ACTION = "3" ]; then
     java $JAVAARGS $PEERID DELETE $FILENAME
@@ -51,6 +52,5 @@ elif [ $ACTION = "e5" ]; then
 else
     echo Invalid action $ACTION must be 1-5
 fi
-
 
 #Usage: <fileName:default=file.txt> <peerId:default=1> <action:default=1=BACKUP> <replicationDegree|spaceReclaim:default=2>
