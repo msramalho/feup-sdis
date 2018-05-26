@@ -20,4 +20,6 @@ public interface InitiatorPeer extends Remote {
     void updateProtocolVersion(String newVersion) throws RemoteException;
 
     InternalState state() throws RemoteException;
+    
+    void clusterState() throws RemoteException;
 }

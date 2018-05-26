@@ -4,15 +4,22 @@ import src.main.PeerConfig;
 import src.util.Logger;
 import src.util.Message;
 import src.worker.RemoveChunk;
+import src.worker.RenewChunk;
 
 import java.io.*;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class InternalState implements Serializable {
     static transient String internalStateFolder = "internal_state_peer_%d";
@@ -21,6 +28,8 @@ public class InternalState implements Serializable {
     public long occupiedSpace; // bytes that this peer can occupy in the file system
     public long allowedSpace = (long) (16 * Math.pow(2, 20)); // bytes that this peer can occupy in the file system
     // public long allowedSpace = (long) (1 * Math.pow(2, 17)); // bytes that this peer can occupy in the file system
+    
+    public String encryptionKey;
 
     private static int peerId;
 
@@ -152,6 +161,41 @@ public class InternalState implements Serializable {
             peerConfig.threadPool.submit(rChunk);
         return true;
     }
+
+    public boolean checkLocalChunksExpirationDate(PeerConfig peerConfig) {
+        for (LocalChunk lChunk : localChunks.values()) {
+            Date expirationDate = lChunk.getExpirationDate();
+
+            LocalDateTime now = LocalDateTime.now();
+            Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
+            Date dateFromNow = Date.from(instant);
+
+            if (expirationDate.getTime() - dateFromNow.getTime() < (lChunk.TIME_TO_LIVE * 20) / 100) {
+                peerConfig.threadPool.submit(new RenewChunk(peerConfig, lChunk));
+            } 
+        }
+            
+        return true;
+    }
+
+    public boolean checkStoredChunksExpirationDate() {
+
+        for (StoredChunk sChunk : storedChunks.values()) {
+            Date expirationDate = sChunk.getExpirationDate();
+
+            LocalDateTime now = LocalDateTime.now();
+            Instant instant = now.atZone(ZoneId.systemDefault()).toInstant();
+            Date dateFromNow = Date.from(instant);
+
+            if (!sChunk.deleted && sChunk.savedLocally) {
+                if (expirationDate.compareTo(dateFromNow) < 0) {
+                    deleteStoredChunk(sChunk, true);
+                }
+            }
+        }
+
+        return true;
+    }
     //------------------------------ local and stored chunks
 
     // return the local chunk or null if it does not exist
@@ -222,6 +266,13 @@ public class InternalState implements Serializable {
         return res;
     }
 
+    public void renewChunk(StoredChunk sChunk) {
+        Calendar sChunkExpirationDate = Calendar.getInstance();
+        sChunkExpirationDate.setTime(sChunk.getExpirationDate());
+
+        sChunk.setExpirationDate(new Date(sChunkExpirationDate.getTimeInMillis() + sChunk.TIME_TO_LIVE));
+    }
+
     public void reclaimKBytes(int maxDiskSpace) {
         allowedSpace = maxDiskSpace * 1000;
         if (maxDiskSpace == 0) // remove all files
@@ -235,6 +286,11 @@ public class InternalState implements Serializable {
 
     public void addMissingInfoForClient() {
 
+    }
+    
+    public void addKey(String key) {
+        encryptionKey = key;
+        save();
     }
     //------------------------------ util functions
 

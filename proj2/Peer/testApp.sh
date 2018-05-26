@@ -41,13 +41,14 @@ elif [ $ACTION = "4e" ]; then
     java $JAVAARGS $PEERID RECLAIMENH $OPT
 elif [ $ACTION = "5" ]; then
     java $JAVAARGS $PEERID STATE
-elif [ $ACTION = "6" ]; then
-      java $JAVAARGS $PEERID GOODBYE
-elif [ $ACTION = "e5" ]; then
+elif [ $ACTION = "5e" ]; then
     java $JAVAARGS $PEERID STATEENH
+elif [ $ACTION = "6" ]; then
+    java $JAVAARGS $PEERID CLUSTERSTATE
+elif [ $ACTION = "7" ]; then
+    java $JAVAARGS $PEERID GOODBYE
 else
-
-    echo Invalid action $ACTION must be 1-5
+    echo Invalid action $ACTION must be 1-7
 fi
 
 

@@ -23,6 +23,7 @@ import static java.lang.Integer.min;
 public class LocalFile {
     private PeerConfig peerConfig;
     public static Integer CHUNK_SIZE = 64000;
+    public static Integer ENCRYPTION_MARGIN = 200;
 
     public String fileId;
     public Integer replicationDegree; //desired replication degree
@@ -62,6 +63,7 @@ public class LocalFile {
         // split file and add to worker thread
         int i = 0, totalBytesRead = 0;
         while (totalBytesRead < file_size) {
+            logger.print("");
             int chunkSize = min(LocalFile.CHUNK_SIZE, (file_size - totalBytesRead));
             byte[] temporaryChunk = new byte[chunkSize]; //Temporary Byte Array
             try {
@@ -70,14 +72,16 @@ public class LocalFile {
                 e.printStackTrace();
             }
             LocalChunk localChunk = new LocalChunk(fileId, i, replicationDegree, temporaryChunk);
+            logger.print(localChunk.expirationDate.toString());
             BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk, true);
             peerConfig.threadPool.submit(bcWorker);
             i++;
             logger.print(String.format("Chunk %d has %d bytes (read: %d out of %d)", i, chunkSize, totalBytesRead, file_size));
         }
+        logger.print("");
         if ((file_size % CHUNK_SIZE) == 0) // if last chunk is 64K send chunk with size 0
             peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, i, replicationDegree, new byte[0]), true));
-
+        logger.print("");
         try {
             inStream.close();
         } catch (IOException e) {
@@ -99,17 +103,17 @@ public class LocalFile {
         for (Future<LocalChunk> fChunk : futureChunks) {
             LocalChunk lChunk;
             lChunk = fChunk.get();
+            
             if (lChunk == null || lChunk.chunk == null) {
                 logger.print("at least one chunk could not be retrieved from peers...aborting");
                 return;
             } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length == 0)) {
                 logger.print("received a 0 byte chunk that is not the last...aborting");
                 return;
-            } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length != LocalFile.CHUNK_SIZE)) {
-                logger.print("received a " + lChunk.chunk.length + " byte chunk that is not the last, should always be: " + LocalFile.CHUNK_SIZE + "...aborting");
+            } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length > (LocalFile.CHUNK_SIZE + ENCRYPTION_MARGIN))) {
+                logger.print("received a " + lChunk.chunk.length + " byte chunk that is not the last, should always be: " + (LocalFile.CHUNK_SIZE + ENCRYPTION_MARGIN) + "...aborting");
                 return;
             }
-
             chunks.set(lChunk.chunkNo, lChunk);
         }
 
@@ -120,8 +124,10 @@ public class LocalFile {
         f.createNewFile();
         FileOutputStream fos = new FileOutputStream(f, true); // true means append
         for (LocalChunk chunk : chunks)
-            if (chunk != null && chunk.chunk != null)
+            if (chunk != null && chunk.chunk != null) {
+            	chunk.decryptBytes();
                 fos.write(chunk.chunk);
+            }
         fos.close();
         logger.print("File reconstruction completed: " + path);
     }

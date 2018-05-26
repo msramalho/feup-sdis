@@ -92,6 +92,13 @@ public class TestApp {
                       
                     }
                     break;
+            case "CLUSTERSTATE":
+                try {
+                    stub.clusterState();
+                } catch (RemoteException e) {
+                    logger.err(e.getMessage());
+                }
+                break;
         }
     }
 }
