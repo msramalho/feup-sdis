@@ -20,6 +20,7 @@ public class P_Join extends ProtocolCluster {
     @Override
     public void run() throws LockException, UnknownHostException {
         if (!hasCluster()) return;
+        if (cluster.level != d.message.level) return;
 
         cluster.lock("processing_join");
         cluster.clearPeers();// restart the count of peers in this cluster
@@ -60,7 +61,7 @@ public class P_Join extends ProtocolCluster {
                 if (cluster.isFull() && d.peerConfig.clusters.size() == cluster.level + 1) {
                     // join in level + 1, if any exists
                     // and share with peers in my cluster
-                    sendOnme(d.peerConfig.joinCluster(this.cluster.level + 1));
+                    sendOnme(d.peerConfig.joinCluster(cluster.level + 1));
                 }
             }
         }
