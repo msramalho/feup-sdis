@@ -13,7 +13,6 @@ import java.util.HashSet;
 
 public abstract class Chunk implements Serializable {
     public String fileId = null; //file fileId sent in the backup request
-    public String fileMetadata;
     public int chunkNo = -1;
     public int replicationDegree = 0;
     public static long TIME_TO_LIVE = 3600;
@@ -27,18 +26,17 @@ public abstract class Chunk implements Serializable {
     public Chunk() {}
 
     public Chunk(Message m) {
-        this(m.fileId, m.fileMetadata, m.chunkNo, m.replicationDegree, m.body);
+        this(m.fileId, m.chunkNo, m.replicationDegree, m.body);
     }
 
-    public Chunk(String fileId, int chunkNo) {this(fileId, null, chunkNo, 0, null);}
+    public Chunk(String fileId, int chunkNo) {this(fileId, chunkNo, 0, null);}
 
-    public Chunk(String fileId, String fileMetadata, int chunkNo, int replicationDegree, byte[] chunk) {
+    public Chunk(String fileId, int chunkNo, int replicationDegree, byte[] chunk) {
         this.fileId = fileId;
         this.chunkNo = chunkNo;
         this.chunk = chunk;
         this.replicationDegree = replicationDegree;
         this.expirationDate = getDefaultExpirationdate();
-        this.fileMetadata = fileMetadata;
     }
 
     private Date getDefaultExpirationdate() {
@@ -77,7 +75,6 @@ public abstract class Chunk implements Serializable {
         Chunk that = (Chunk) o;
         return chunkNo == that.chunkNo && fileId.equals(that.fileId);
     }
-
 
     @Override
     public String toString() {

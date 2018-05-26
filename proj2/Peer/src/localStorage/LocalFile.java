@@ -6,7 +6,6 @@ import src.main.PeerConfig;
 import src.worker.DeleteFile;
 import src.worker.RestoreChunk;
 
-import javax.json.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +32,6 @@ public class LocalFile {
     private int numChunks;
 
     private boolean hasMetadata;
-    public String metadata;
 
     private Logger logger = new Logger("LocalFile");
 
@@ -82,7 +80,7 @@ public class LocalFile {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            LocalChunk localChunk = new LocalChunk(fileId, metadata, i, replicationDegree, temporaryChunk);
+            LocalChunk localChunk = new LocalChunk(fileId, i, replicationDegree, temporaryChunk);
             BackupChunk bcWorker = new BackupChunk(peerConfig, localChunk, true);
             peerConfig.threadPool.submit(bcWorker);
             i++;
@@ -90,7 +88,7 @@ public class LocalFile {
         }
 
         if ((file_size % CHUNK_SIZE) == 0) // if last chunk is 64K send chunk with size 0
-            peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, metadata, i, replicationDegree, new byte[0]), true));
+            peerConfig.threadPool.submit(new BackupChunk(peerConfig, new LocalChunk(fileId, i, replicationDegree, new byte[0]), true));
         try {
             inStream.close();
         } catch (IOException e) {
@@ -171,13 +169,6 @@ public class LocalFile {
 
     private void createFileId(String filename, String creationTime, String lastModifiedTime, long size) {
         String hashSource = filename + creationTime + lastModifiedTime + size;
-
-        this.metadata = Json.createObjectBuilder()
-                .add("filename", filename)
-                .add("creationTime", creationTime.toString())
-                .add("lastModifiedTime", lastModifiedTime.toString())
-                .add("size", size)
-                .build().toString();
 
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

@@ -13,7 +13,6 @@ public class Message {
     public String protocolVersion;
     public int senderId;
     public String fileId;
-    public String fileMetadata;
     public int level = -1;
     public int clusterId = -1;
     public int receiverId;
@@ -65,7 +64,6 @@ public class Message {
             this.fileId = (args.length >= 4) ? args[3] : ""; // save file id if it exists
             this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
             this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
-            this.fileMetadata = (args.length >= 7) ? args[6] : null; // save metadata if it exists
         }
 
         // retrieve the bytes received that belong to the body

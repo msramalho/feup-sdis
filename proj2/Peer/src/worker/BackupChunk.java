@@ -42,7 +42,7 @@ public class BackupChunk implements Runnable {
         }
 
         //create message to send and convert to byte array
-        byte[] message = Message.create("PUTCHUNK %s %d %s %d %d %s", c.chunk, peerConfig.protocolVersion, peerConfig.id, c.fileId, c.chunkNo, c.replicationDegree, c.fileMetadata);
+        byte[] message = Message.create("PUTCHUNK %s %d %s %d %d", c.chunk, peerConfig.protocolVersion, peerConfig.id, c.fileId, c.chunkNo, c.replicationDegree);
 
         //wait for STORED replies
         int i = 0;

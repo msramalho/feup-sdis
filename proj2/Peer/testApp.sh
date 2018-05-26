@@ -2,8 +2,7 @@
 clear
 mkdir bin
 
-javac -classpath .:./bin/:./:./lib/javax.json-api-1.1.2.jar:./lib/javax.json-1.1.2.jar -d bin src/*/*.java
-
+javac -cp .:./bin/:./ -d bin src/*/*.java
 echo "Source code compiled"
 
 # get filename or use default
@@ -22,7 +21,7 @@ ACTION=${ACTION:-"1"}
 OPT="$4"
 OPT=${OPT:-"2"}
 
-JAVAARGS="-classpath .:./bin/:./lib/javax.json-api-1.1.2.jar:./lib/javax.json-1.1.2.jar src.client.TestApp"
+JAVAARGS="-cp .:./bin/ src.client.TestApp"
 
 if [ $ACTION = "1" ]; then
     java $JAVAARGS $PEERID BACKUP $FILENAME $OPT
@@ -49,8 +48,11 @@ elif [ $ACTION = "5" ]; then
     java $JAVAARGS $PEERID STATE
 elif [ $ACTION = "e5" ]; then
     java $JAVAARGS $PEERID STATEENH
+elif [ $ACTION = "6" ]; then
+    java $JAVAARGS $PEERID CLUSTERSTATE
 else
-    echo Invalid action $ACTION must be 1-5
+    echo Invalid action $ACTION must be 1-6
 fi
+
 
 #Usage: <fileName:default=file.txt> <peerId:default=1> <action:default=1=BACKUP> <replicationDegree|spaceReclaim:default=2>
