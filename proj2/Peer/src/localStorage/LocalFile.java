@@ -23,6 +23,7 @@ import static java.lang.Integer.min;
 public class LocalFile {
     private PeerConfig peerConfig;
     public static Integer CHUNK_SIZE = 64000;
+    public static Integer ENCRYPTION_MARGIN = 200;
 
     public String fileId;
     public Integer replicationDegree; //desired replication degree
@@ -121,17 +122,17 @@ public class LocalFile {
         for (Future<LocalChunk> fChunk : futureChunks) {
             LocalChunk lChunk;
             lChunk = fChunk.get();
+            
             if (lChunk == null || lChunk.chunk == null) {
                 logger.print("at least one chunk could not be retrieved from peers...aborting");
                 return;
             } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length == 0)) {
                 logger.print("received a 0 byte chunk that is not the last...aborting");
                 return;
-            } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length != LocalFile.CHUNK_SIZE)) {
-                logger.print("received a " + lChunk.chunk.length + " byte chunk that is not the last, should always be: " + LocalFile.CHUNK_SIZE + "...aborting");
+            } else if ((lChunk.chunkNo != numChunks && lChunk.chunk.length > (LocalFile.CHUNK_SIZE + ENCRYPTION_MARGIN))) {
+                logger.print("received a " + lChunk.chunk.length + " byte chunk that is not the last, should always be: " + (LocalFile.CHUNK_SIZE + ENCRYPTION_MARGIN) + "...aborting");
                 return;
             }
-
             chunks.set(lChunk.chunkNo, lChunk);
         }
 
@@ -142,8 +143,10 @@ public class LocalFile {
         f.createNewFile();
         FileOutputStream fos = new FileOutputStream(f, true); // true means append
         for (LocalChunk chunk : chunks)
-            if (chunk != null && chunk.chunk != null)
+            if (chunk != null && chunk.chunk != null) {
+            	chunk.decryptBytes();
                 fos.write(chunk.chunk);
+            }
         fos.close();
         logger.print("File reconstruction completed: " + path);
     }

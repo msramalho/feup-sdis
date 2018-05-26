@@ -5,6 +5,7 @@ import src.util.*;
 // import src.main.Cluster;
 
 import java.net.*;
+import java.security.SecureRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,6 +20,8 @@ public class PeerConfig extends Locks {
     public ArrayListC<Cluster> clusters = new ArrayListC<>();
     private InetAddress sapIp; // service access point IP
     private Integer sapPort; // service access point port
+
+    public static String key;
 
     public Integer maxClusterId = -1; // the maximum cluster id observed
 
@@ -37,6 +40,13 @@ public class PeerConfig extends Locks {
         logger.print(internalState.toString());
 
         multicast = new MulticastChannels(this, args);
+        
+        if(internalState.encryptionKey == null) {
+        	key = generateKey();
+        	internalState.addKey(key);
+        } else {
+        	key = internalState.encryptionKey;
+        }
     }
 
 
@@ -78,6 +88,10 @@ public class PeerConfig extends Locks {
             newC.loadMulticast(this);
         }
         unlock("joining_cluster_" + level);
+    }
+    
+    private String generateKey() {
+    	return new RandomString().nextString();
     }
 
     public int nextClusterId() {
