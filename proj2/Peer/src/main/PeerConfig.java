@@ -92,7 +92,7 @@ public class PeerConfig extends Locks {
             newC.loadMulticast(this);
         }
         unlock("joining_cluster_" + level);
-        return clusters.size() < level ? clusters.get(level - 1) : null;
+        return level <= clusters.size() + 1 ? clusters.get(level) : null;
     }
 
     /**
