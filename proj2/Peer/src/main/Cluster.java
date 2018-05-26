@@ -12,7 +12,7 @@ public class Cluster extends Locks {
     public int id; // the unique identifier of this cluster
     public int level;
     public MulticastChannels multicast;
-    public HashSet<Integer> peers;
+    public HashSet<Integer> peers = new HashSet<>();
     private Logger logger = new Logger(this);
 
     public Cluster(int level, int id) {
@@ -75,7 +75,8 @@ public class Cluster extends Locks {
     }
 
     public boolean isFull() {
-        return peers.size() + 1 >= Cluster.MAX_SIZE;
+        logger.print("I HAVE " + (peers.size() + 1) + "/" + (level + 1) * Cluster.MAX_SIZE + " PEERS");
+        return peers.size() + 1 >= (level + 1) * Cluster.MAX_SIZE;
     }
 
     @Override
