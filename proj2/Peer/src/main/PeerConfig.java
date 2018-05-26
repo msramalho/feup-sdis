@@ -70,8 +70,9 @@ public class PeerConfig extends Locks {
 
     public static boolean isMessageEnhanced(Message m) { return !m.protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }
 
-    public void updateMaxClusterId(int clusterId) { maxClusterId = Math.max(maxClusterId, clusterId);
-        System.out.println("updating to max between " + maxClusterId + " and " + clusterId);}
+    public void updateMaxClusterId(int clusterId) {
+        maxClusterId = Math.max(maxClusterId, clusterId);
+    }
 
     /**
      * Make this peer join or create a cluster at a given level
