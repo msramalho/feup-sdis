@@ -18,6 +18,6 @@ public class RenewChunk implements Runnable {
     public void run() {
 
         // sendLine RENEW Message for others to hear
-        peerConfig.multicast.control.send(Message.create("RENEW %s %d %s", peerConfig.protocolVersion, peerConfig.id, localChunk.fileId));
+        peerConfig.multicast.control.send(Message.create("RENEW %s %d %s %d", peerConfig.protocolVersion, peerConfig.id, localChunk.fileId, localChunk.chunkNo));
     }
 }
