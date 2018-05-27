@@ -82,6 +82,16 @@ public class TestApp {
                     logger.err(e.getMessage());
                 }
                 break;
+            case "GOODBYE":
+                    try {
+                        System.out.println("GOODBEY MESSAGE IN TestApp...");
+                        int pId = Integer.parseInt(peerId);
+                        stub.goodbye(pId);
+
+                    } catch (RemoteException e) {
+                      
+                    }
+                    break;
             case "CLUSTERSTATE":
                 try {
                     stub.clusterState();
@@ -92,4 +102,3 @@ public class TestApp {
         }
     }
 }
-
