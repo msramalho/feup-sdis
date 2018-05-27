@@ -15,9 +15,10 @@ public class P_Onme extends ProtocolCluster {
 
     @Override
     public void run() throws LockException, UnknownHostException {
-        if (cluster != null && cluster.level < d.message.level) {
-            d.peerConfig.addCluster(new Cluster(d.message.level, d.message.clusterId));
+        if (cluster != null && cluster.level < d.message.level && d.peerConfig.locked("possible_on_me")) {
+            d.peerConfig.addCluster(new Cluster(d.message.level, d.message.clusterId)).loadMulticast(d.peerConfig);
             logger.print("ONME -> JOINED " + d.message.level + " - " + d.message.clusterId);
         }
+        d.peerConfig.unlock("possible_on_me");
     }
 }
