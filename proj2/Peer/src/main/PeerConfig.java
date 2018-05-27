@@ -77,15 +77,10 @@ public class PeerConfig extends Locks {
     /**
      * Make this peer join or create a cluster at a given level
      */
-    public Cluster joinCluster(int level) { return joinCluster(level, true); }
-
-    /**
-     * Make this peer join or create a cluster at a given level
-     */
-    public Cluster joinCluster(int level, boolean createIfNoJoin) {
+    public Cluster joinCluster(int level) {
         multicast.control.send(Message.create("JOIN %s %d %d", protocolVersion, id, level));
         Utils.sleep(3000);
-        if (createIfNoJoin && clusters.size() <= level) {
+        if (clusters.size() <= level) { // no success in JOIN+AVAILABLE flow means no one invited me
             logger.print("No cluster is available... creating my own");
             Cluster newC = Cluster.getNewCluster(level, this);
             logger.print("New Cluster: " + newC.id + ", after Protocol MAXCLUSTER");
