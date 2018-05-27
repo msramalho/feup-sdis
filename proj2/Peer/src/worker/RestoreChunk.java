@@ -13,17 +13,17 @@ import java.util.concurrent.Callable;
 public class RestoreChunk implements Callable {
     private static int RESTORE_ATTEMPTS = 5;
     private PeerConfig peerConfig;
-    private LocalChunk localChunk;
+    private LocalChunk lChunk;
     private Logger logger = new Logger("RestoreChunk");
 
-    public RestoreChunk(PeerConfig peerConfig, LocalChunk localChunk) {
+    public RestoreChunk(PeerConfig peerConfig, LocalChunk lChunk) {
         this.peerConfig = peerConfig;
-        this.localChunk = localChunk;
+        this.lChunk = lChunk;
     }
 
     @Override
     public Object call() {
-        LocalChunk lChunk = peerConfig.internalState.getLocalChunk(localChunk.getUniqueId());
+        LocalChunk lChunk = peerConfig.internalState.getLocalChunk(this.lChunk.getUniqueId());
         if (lChunk == null) return null; // this is not a local file
         lChunk.chunk = null; // equivalent to empty cache
 

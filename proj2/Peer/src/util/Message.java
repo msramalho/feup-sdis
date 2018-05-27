@@ -32,7 +32,7 @@ public class Message {
     }
 
     /**
-     * <MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg>] <CRLF><CRLF>[<Body>]
+     * <MessageType> <Version> <SenderId> <FileId> [<ChunkNo> <ReplicationDeg> <Metadata>] <CRLF><CRLF>[<Body>]
      * or
      * <MessageType> <Version> <SenderId> [<Level>[:<ClusterId>] <receiverId>] <CRLF><CRLF>[<Body>]
      * @throws Exception 
@@ -67,7 +67,6 @@ public class Message {
             this.chunkNo = (args.length >= 5) ? Integer.parseInt(args[4]) : -1;//save chunkNo if it exists
             this.replicationDegree = (args.length >= 6) ? Integer.parseInt(args[5]) : -1;//save replicationDegree if it exists
         }
-
 
         // retrieve the bytes received that belong to the body
         if (parts.length == 2) this.body = Arrays.copyOfRange(packet.getData(), headerBytes + 4, packet.getLength());//save body if it exists (64kB chunks)

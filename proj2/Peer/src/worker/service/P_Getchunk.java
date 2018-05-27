@@ -1,4 +1,4 @@
-package service;
+package src.worker.service;
 
 import src.localStorage.StoredChunk;
 import src.main.PeerConfig;
