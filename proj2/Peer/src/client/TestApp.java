@@ -55,6 +55,17 @@ public class TestApp {
                     logger.err(e.getMessage());
                 }
                 break;
+            case "RESTOREMETADATA":
+                try {
+                    String file = args[2]; // falta os outros argumentos
+                    String creationTme = args[3];
+                    String lastModifiedTime = args[4];
+                    long size = Long.parseLong(args[5]);
+                    stub.restoreMetadata(file, creationTme, lastModifiedTime, size);
+                } catch (RemoteException e) {
+                    logger.err(e.getMessage());
+                }
+                break;
             case "DELETEENH":
             case "DELETE":
                 try {
@@ -82,6 +93,16 @@ public class TestApp {
                     logger.err(e.getMessage());
                 }
                 break;
+            case "GOODBYE":
+                    try {
+                        System.out.println("GOODBEY MESSAGE IN TestApp...");
+                        int pId = Integer.parseInt(peerId);
+                        stub.goodbye(pId);
+
+                    } catch (RemoteException e) {
+                      
+                    }
+                    break;
             case "CLUSTERSTATE":
                 try {
                     stub.clusterState();
@@ -92,4 +113,3 @@ public class TestApp {
         }
     }
 }
-

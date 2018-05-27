@@ -43,7 +43,7 @@ public class Peer implements InitiatorPeer {
 
 
         logger.print(String.format("Hello, this is peer with id %d running version %s", peerConfig.id, peerConfig.protocolVersion));
-        
+
         peerConfig.multicast.listen();
         peerConfig.joinCluster(0);
 
@@ -80,10 +80,31 @@ public class Peer implements InitiatorPeer {
     }
 
     @Override
+    public void restoreMetadata(String fileName, String creationTime, String lastModifiedTime, long size) {
+        logger.print("RESTOREMETADATA started");
+        localFile = new LocalFile(fileName, creationTime, lastModifiedTime, size, 0, peerConfig);
+        try {
+            localFile.reconstructFile();
+        } catch (Exception e) {
+            logger.print("Unable to reconstruct file:");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void delete(String pathname) {
         logger.print("DELETE started");
         localFile = new LocalFile(pathname, 0, peerConfig);
         localFile.deleteFile();
+    }
+
+    @Override
+    public void goodbye( int peer) {
+        logger.print("GOODBYE Group... Turning Off..");
+        //peerConfig.sendClose(); //criar metodo no peerconfig
+        //no peerconfig aceder ao ultino cluster e .send message
+        peerConfig.multicast.control.send(Message.create("GOODBYE %s %d 0", peerConfig.protocolVersion, peerConfig.id));
+        System.exit(0);
     }
 
     @Override

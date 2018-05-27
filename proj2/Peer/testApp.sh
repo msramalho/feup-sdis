@@ -10,7 +10,7 @@ FILENAME="$1"
 FILENAME=${FILENAME:-"file.txt"} # If variable not set, use default.
 
 # get peerID or use default
-PEERID="$2"
+  PEERID="$2"
 PEERID=${PEERID:-"1"}
 
 #get the action
@@ -31,6 +31,11 @@ elif [ $ACTION = "2" ]; then
     java $JAVAARGS $PEERID RESTORE $FILENAME
 elif [ $ACTION = "2e" ]; then
     java $JAVAARGS $PEERID RESTOREENH $FILENAME
+elif [ $ACTION = "2m" ]; then
+    CREATIONTIME="$4"
+    LASTMODIFIEDTIME="$5"
+    SIZE="$6"
+    java $JAVAARGS $PEERID RESTOREMETADATA $FILENAME $CREATIONTIME $LASTMODIFIEDTIME $SIZE
 elif [ $ACTION = "3" ]; then
     java $JAVAARGS $PEERID DELETE $FILENAME
 elif [ $ACTION = "3e" ]; then
@@ -41,12 +46,14 @@ elif [ $ACTION = "4e" ]; then
     java $JAVAARGS $PEERID RECLAIMENH $OPT
 elif [ $ACTION = "5" ]; then
     java $JAVAARGS $PEERID STATE
-elif [ $ACTION = "e5" ]; then
+elif [ $ACTION = "5e" ]; then
     java $JAVAARGS $PEERID STATEENH
 elif [ $ACTION = "6" ]; then
     java $JAVAARGS $PEERID CLUSTERSTATE
+elif [ $ACTION = "7" ]; then
+    java $JAVAARGS $PEERID GOODBYE
 else
-    echo Invalid action $ACTION must be 1-6
+    echo Invalid action $ACTION must be 1-7
 fi
 
 

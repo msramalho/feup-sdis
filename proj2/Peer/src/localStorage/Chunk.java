@@ -32,7 +32,7 @@ public abstract class Chunk implements Serializable {
         this(m.fileId, m.chunkNo, m.replicationDegree, m.body);
     }
 
-	public Chunk(String fileId, int chunkNo) {this(fileId, chunkNo, 0, null);}
+    public Chunk(String fileId, int chunkNo) {this(fileId, chunkNo, 0, null);}
 
     public Chunk(String fileId, int chunkNo, int replicationDegree, byte[] chunk) {
         this.fileId = fileId;

@@ -11,10 +11,14 @@ public class LocalChunk extends Chunk implements Serializable {
 
     public LocalChunk(String fileId, int chunkNo) { super(fileId, chunkNo); }
 
-    public LocalChunk(String fileId, int chunkNo, Integer replicationDegree, byte[] chunk) {    	
-    	super(fileId, chunkNo, replicationDegree, chunk); 
-    	this.encryptBytes();
-    }
+<<<<<<< HEAD
+    public LocalChunk(String fileId, int chunkNo, Integer replicationDegree, byte[] chunk) { super(fileId, chunkNo, replicationDegree, chunk); }
+=======
+    public LocalChunk(String fileId, String fileMetadata, int chunkNo, Integer replicationDegree, byte[] chunk) { 
+      super(fileId, fileMetadata, chunkNo, replicationDegree, chunk); 
+      this.encryptBytes();
+   }
+>>>>>>> 91e26e3407bd9df0ea6fabb40b445577bb4a431a
 
     // uses the previously opened ServerSocket to receive the chunk bytes through TCP
     public boolean loadFromTCP() {
