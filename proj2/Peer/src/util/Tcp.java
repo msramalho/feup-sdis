@@ -12,7 +12,7 @@ public abstract class Tcp {
 
     public abstract void socketChecks() throws IOException;
 
-    public void sendLine(String data) {
+    public Tcp sendLine(String data) {
         try {
             socketChecks();
             DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
@@ -22,6 +22,7 @@ public abstract class Tcp {
         } catch (IOException e) {
             logger.err("Unable to connect to send through TCP: " + e.getMessage());
         }
+        return this;
     }
 
     public String readLine() {

@@ -18,8 +18,10 @@ public class P_Available extends ProtocolCluster {
     public void run() throws LockException {
         if (isGlobal() && d.message.receiverId == d.peerConfig.id && d.peerConfig.clusters.size() <= d.message.level && d.peerConfig.lock("joining_cluster_" + d.message.level)) { // case 1
             TcpClient tcp = new TcpClient(d.message);
+            d.peerConfig.lock("possible_on_me");
             tcp.sendLine("ACCEPTED");
             String clusterInfo = tcp.readLine();
+            tcp.close();
             logger.print("Received clusters to join: " + clusterInfo);
             for (String clusterId : clusterInfo.split(" ")) {
                 logger.print(clusterId);
@@ -30,7 +32,6 @@ public class P_Available extends ProtocolCluster {
                 d.peerConfig.clusters.set(c.level, newC);
                 newC.loadMulticast(d.peerConfig);
 
-                tcp.close();
                 logger.print("Joined cluster " + newC.id + " at level " + newC.level);
             }
         } else if (hasCluster() && cluster.locked("processing_join")) { // case 2

@@ -12,7 +12,7 @@ public class Cluster extends Locks {
     public int id; // the unique identifier of this cluster
     public int level;
     public MulticastChannels multicast;
-    public HashSet<Integer> peers;
+    public HashSet<Integer> peers = new HashSet<>();
     private Logger logger = new Logger(this);
 
     public Cluster(int level, int id) {
@@ -66,26 +66,29 @@ public class Cluster extends Locks {
     /**
      * query the other clusters for their ID so that a new cluster, with a new ID, can be found
      */
-    static Cluster getNewCluster(int level, PeerConfig peerConfig) {
-        peerConfig.multicast.control.send(Message.create("MAXCLUSTER %s %d", peerConfig.protocolVersion, peerConfig.id));
-        Utils.sleep(1000);
+    public static Cluster getNewCluster(int level, PeerConfig peerConfig) {
+        if (peerConfig.maxClusterId == -1) {
+            peerConfig.multicast.control.send(Message.create("MAXCLUSTER %s %d", peerConfig.protocolVersion, peerConfig.id));
+            Utils.sleep(1000);
+        }
         return new Cluster(level, peerConfig.nextClusterId());
     }
 
     public boolean isFull() {
-        return peers.size() + 1 >= Cluster.MAX_SIZE;
+        logger.print("I HAVE " + (peers.size() + 1) + "/" + (level + 1) * Cluster.MAX_SIZE + " PEERS");
+        return peers.size() + 1 >= (level + 1) * Cluster.MAX_SIZE;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
-    	if(this == obj)
-    		return true;
-    	if(obj == null)
-    		return false;
-    	if(!(obj instanceof Cluster))
-    		return false;
-    	Cluster cluster = (Cluster) obj;
-    	return this.level == cluster.level && this.id == cluster.id; 
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof Cluster))
+            return false;
+        Cluster cluster = (Cluster) obj;
+        return this.level == cluster.level && this.id == cluster.id;
     }
 
     @Override

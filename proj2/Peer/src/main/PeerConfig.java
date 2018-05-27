@@ -2,10 +2,8 @@ package src.main;
 
 import src.localStorage.InternalState;
 import src.util.*;
-// import src.main.Cluster;
 
 import java.net.*;
-import java.security.SecureRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,12 +38,12 @@ public class PeerConfig extends Locks {
         logger.print(internalState.toString());
 
         multicast = new MulticastChannels(this, args);
-        
-        if(internalState.encryptionKey == null) {
-        	key = generateKey();
-        	internalState.addKey(key);
+
+        if (internalState.encryptionKey == null) {
+            key = generateKey();
+            internalState.addKey(key);
         } else {
-        	key = internalState.encryptionKey;
+            key = internalState.encryptionKey;
         }
     }
 
@@ -72,15 +70,17 @@ public class PeerConfig extends Locks {
 
     public static boolean isMessageEnhanced(Message m) { return !m.protocolVersion.equals(PeerConfig.DEFAULT_VERSION); }
 
-    public void updateMaxClusterId(int clusterId) { maxClusterId = Math.max(maxClusterId, clusterId); }
+    public void updateMaxClusterId(int clusterId) {
+        maxClusterId = Math.max(maxClusterId, clusterId);
+    }
 
     /**
      * Make this peer join or create a cluster at a given level
      */
-    void joinCluster(int level) {
+    public Cluster joinCluster(int level) {
         multicast.control.send(Message.create("JOIN %s %d %d", protocolVersion, id, level));
         Utils.sleep(3000);
-        if (clusters.size() <= level) {
+        if (clusters.size() <= level) { // no success in JOIN+AVAILABLE flow means no one invited me
             logger.print("No cluster is available... creating my own");
             Cluster newC = Cluster.getNewCluster(level, this);
             logger.print("New Cluster: " + newC.id + ", after Protocol MAXCLUSTER");
@@ -88,10 +88,19 @@ public class PeerConfig extends Locks {
             newC.loadMulticast(this);
         }
         unlock("joining_cluster_" + level);
+        return level <= clusters.size() + 1 ? clusters.get(level) : null;
     }
-    
+
+    /**
+     * Add a cluster to the cluster list and return it
+     */
+    public Cluster addCluster(Cluster c) {
+        clusters.add(c);
+        return c;
+    }
+
     private String generateKey() {
-    	return new RandomString().nextString();
+        return new RandomString().nextString();
     }
 
     public int nextClusterId() {

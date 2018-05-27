@@ -14,30 +14,31 @@ import java.net.UnknownHostException;
  * If I have a slot and I saw no AVAILABLE response to this, I will shut up (OPTIONAL as long as the joining peer only considers one)
  */
 public class P_Join extends ProtocolCluster {
-    TcpServer tcp;
 
     public P_Join(Dispatcher d) { super(d); }
 
     @Override
     public void run() throws LockException, UnknownHostException {
         if (!hasCluster()) return;
+        if (cluster.level != d.message.level) return;
 
-        cluster.lock("processing_join");
-        cluster.clearPeers();// restart the count of peers in this cluster
-
-        // TODO: should PRESENT include the requesting peer?
-        // TODO: should PRESENT change a flag to ASSESSING so that if two peers send JOIN there isn't a cock up? especially if the peers hashset dor the cluster is reset
+        sleepRandom();
         // every peer sends PRESENT
-        cluster.multicast.control.send(Message.create("PRESENT %s %d", d.peerConfig.protocolVersion, d.peerConfig.id));
+        cluster.multicast.control.send(Message.create("PRESENT %s %d %d", d.peerConfig.protocolVersion, d.peerConfig.id, cluster.level));
+
+        cluster.lock("processing_join_" + cluster.level);
+        // cluster.clearPeers();// restart the count of peers in this cluster
 
         // sleep for 1 second (While I am asleep, the other Peer's PRESENT Messages will be counted)
-        sleep(1000);
+        sleep(2000);
 
         // send AVAILABLE <version> <id> <level> <receiverId> if there is an available slot and no one silenced me
         if (!cluster.isFull() && !cluster.locked("available_silenced"))
             sendAvailable();
+        // else if(cluster.isFull() && cluster.level + 2 > d.peerConfig.clusters.size())
+        //     sendOnme();
 
-        cluster.unlock("processing_join");
+        cluster.unlock("processing_join_" + cluster.level);
         cluster.unlock("available_silenced");
     }
 
@@ -48,21 +49,29 @@ public class P_Join extends ProtocolCluster {
         //TODO: simplify for
         StringBuilder upper = new StringBuilder(); // upperClustersInfo
         for (int i = d.message.level; i < d.peerConfig.clusters.size(); i++)
-            upper.append(i + ":" + d.peerConfig.clusters.get(i).id).append(" ");
+            upper.append(i).append(":").append(d.peerConfig.clusters.get(i).id).append(" ");
 
-        tcp = new TcpServer();
+        TcpServer tcp = new TcpServer();
         if (tcp.start()) {
+            // send MC message with my TCP coordinates
             d.peerConfig.multicast.control.send(Message.create("AVAILABLE %s %d %d:%d %d", tcp.getCoordinates().getBytes(), d.peerConfig.protocolVersion, d.peerConfig.id, d.message.level, cluster.id, d.message.senderId));
-            if (tcp.readLine().equals("ACCEPTED")) {
-                tcp.sendLine(upper.toString());
+            if (tcp.readLine().equals("ACCEPTED")) { // if my offer is accepted
+                tcp.sendLine(upper.toString()); // send information about the clusters i belong to
                 //TODO: repeat the full logic for all the upper clusters the peer has joined
                 cluster.peers.add(d.message.senderId);
-                if (cluster.isFull()) {
-                    //TODO: if the cluster is full after adding the new peer, CREATE an upper level and AFTER see if there is any available with level higher by one than the upper created
+
+                // if the cluster is now full and there is no upper cluster -> create an upper and see if that can join another
+                if (cluster.isFull() && d.peerConfig.clusters.size() == cluster.level + 1) {
+                    // join in level + 1, if any exists
+                    // and share with peers in my cluster
+                    sendOnme();
                 }
             }
-            tcp.close();
         }
+    }
 
+    private void sendOnme() {
+        Cluster c = d.peerConfig.joinCluster(cluster.level + 1);
+        this.cluster.multicast.control.send(Message.create("ONME %s %d %d:%d", d.peerConfig.protocolVersion, d.peerConfig.id, c.level, c.id));
     }
 }
