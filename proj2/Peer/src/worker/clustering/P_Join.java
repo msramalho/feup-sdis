@@ -35,6 +35,8 @@ public class P_Join extends ProtocolCluster {
         // send AVAILABLE <version> <id> <level> <receiverId> if there is an available slot and no one silenced me
         if (!cluster.isFull() && !cluster.locked("available_silenced"))
             sendAvailable();
+        // else if(cluster.isFull() && cluster.level + 2 > d.peerConfig.clusters.size())
+        //     sendOnme();
 
         cluster.unlock("processing_join_" + cluster.level);
         cluster.unlock("available_silenced");
@@ -62,13 +64,14 @@ public class P_Join extends ProtocolCluster {
                 if (cluster.isFull() && d.peerConfig.clusters.size() == cluster.level + 1) {
                     // join in level + 1, if any exists
                     // and share with peers in my cluster
-                    sendOnme(d.peerConfig.joinCluster(cluster.level + 1));
+                    sendOnme();
                 }
             }
         }
     }
 
-    private void sendOnme(Cluster c) {
+    private void sendOnme() {
+        Cluster c = d.peerConfig.joinCluster(cluster.level + 1);
         this.cluster.multicast.control.send(Message.create("ONME %s %d %d:%d", d.peerConfig.protocolVersion, d.peerConfig.id, c.level, c.id));
     }
 }
