@@ -11,19 +11,13 @@ public class P_Renew extends Protocol {
     @Override
     public void run() {
 
-        int count = 0;
-        boolean hasChunk = false;
-
         for (StoredChunk storedChunk : d.peerConfig.internalState.storedChunks.values()) {
-            if (storedChunk.fileId.equals(d.message.fileId)) {
-                hasChunk = true;
+            if (storedChunk.fileId.equals(d.message.fileId) && storedChunk.chunkNo == d.message.chunkNo) {
                 if (storedChunk.isSavedLocally()) {
                     d.peerConfig.internalState.renewChunk(storedChunk);
-                    count++;
+                    logger.print(String.format("1 expiration date(s) updated: fileId: %s, chunkNo: %d, expiration date: %s", storedChunk.fileId, storedChunk.chunkNo, storedChunk.getExpirationDate().toString()));
                 }
             }
         }
-
-        logger.print(String.format("%d expiration date(s) updated", count));
     }
 }
