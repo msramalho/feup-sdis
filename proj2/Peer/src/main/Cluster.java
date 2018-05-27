@@ -87,9 +87,9 @@ public class Cluster extends Locks {
     	Cluster cluster = (Cluster) obj;
     	return this.level == cluster.level && this.id == cluster.id; 
     }
-    
+
     @Override
     public int hashCode() {
-    	return level * id;
+        return level * 31 + id;
     }
 }
