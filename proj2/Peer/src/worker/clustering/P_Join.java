@@ -22,12 +22,12 @@ public class P_Join extends ProtocolCluster {
         if (!hasCluster()) return;
         if (cluster.level != d.message.level) return;
 
-        cluster.lock("processing_join");
-        cluster.clearPeers();// restart the count of peers in this cluster
-
         sleepRandom();
         // every peer sends PRESENT
-        cluster.multicast.control.send(Message.create("PRESENT %s %d", d.peerConfig.protocolVersion, d.peerConfig.id));
+        cluster.multicast.control.send(Message.create("PRESENT %s %d %d", d.peerConfig.protocolVersion, d.peerConfig.id, cluster.level));
+
+        cluster.lock("processing_join_" + cluster.level);
+        // cluster.clearPeers();// restart the count of peers in this cluster
 
         // sleep for 1 second (While I am asleep, the other Peer's PRESENT Messages will be counted)
         sleep(2000);
@@ -36,7 +36,7 @@ public class P_Join extends ProtocolCluster {
         if (!cluster.isFull() && !cluster.locked("available_silenced"))
             sendAvailable();
 
-        cluster.unlock("processing_join");
+        cluster.unlock("processing_join_" + cluster.level);
         cluster.unlock("available_silenced");
     }
 
