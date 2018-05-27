@@ -93,6 +93,6 @@ public class Cluster extends Locks {
 
     @Override
     public int hashCode() {
-        return level * id;
+        return level * 31 + id;
     }
 }

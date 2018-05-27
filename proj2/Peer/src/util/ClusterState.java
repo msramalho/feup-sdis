@@ -54,14 +54,14 @@ public class ClusterState implements Runnable {
 			//PEERS
 			info.append("   Peers in clusters: \n");
 			for (Cluster cluster : clusterInfo.keySet()) {
-				info.append(String.format("   - Cluster %3d: ", cluster.id));
+				info.append(String.format("   - Cluster %3d/%2d: ", cluster.id, cluster.level));
 				info.append(clusterInfo.get(cluster)).append("\n");
 			}
 			
 			//CLUSTER OCCUPATION
 			info.append("   Cluster Occupation: \n");
 			for (Cluster cluster : clusterInfo.keySet()) {
-				info.append(String.format("   - Cluster %3d: ", cluster.id));
+				info.append(String.format("   - Cluster %3d/%2d: ", cluster.id, cluster.level));
 				//info.append(clusterInfo.get(cluster).size() + "/" + Cluster.MAX_SIZE 
 				//		+ " = " + String.valueOf(Math.round(100 * clusterInfo.get(cluster).size() / Cluster.MAX_SIZE))).append("%\n");
 				String aux = clusterInfo.get(cluster).size() + "/" + Cluster.MAX_SIZE;
