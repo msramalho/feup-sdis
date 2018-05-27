@@ -18,6 +18,7 @@ public class P_Available extends ProtocolCluster {
     public void run() throws LockException {
         if (isGlobal() && d.message.receiverId == d.peerConfig.id && d.peerConfig.clusters.size() <= d.message.level && d.peerConfig.lock("joining_cluster_" + d.message.level)) { // case 1
             TcpClient tcp = new TcpClient(d.message);
+            d.peerConfig.lock("possible_on_me");
             tcp.sendLine("ACCEPTED");
             String clusterInfo = tcp.readLine();
             tcp.close();
