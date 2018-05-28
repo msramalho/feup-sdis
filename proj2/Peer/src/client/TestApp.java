@@ -61,7 +61,8 @@ public class TestApp {
                     String creationTme = args[3];
                     String lastModifiedTime = args[4];
                     long size = Long.parseLong(args[5]);
-                    stub.restoreMetadata(file, creationTme, lastModifiedTime, size);
+                    String decryptionKey = args[6];
+                    stub.restoreMetadata(file, creationTme, lastModifiedTime, size, decryptionKey);
                 } catch (RemoteException e) {
                     logger.err(e.getMessage());
                 }

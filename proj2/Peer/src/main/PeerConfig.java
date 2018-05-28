@@ -45,6 +45,7 @@ public class PeerConfig extends Locks {
         } else {
             key = internalState.encryptionKey;
         }
+        logger.print("KEY : " + key );
     }
 
 
@@ -107,5 +108,9 @@ public class PeerConfig extends Locks {
         maxClusterId++;
         multicast.control.send(Message.create("CLUSTERID %s %d -1:%d", protocolVersion, id, maxClusterId));
         return maxClusterId;
+    }
+
+    public static void setKey(String key) {
+        PeerConfig.key = key;
     }
 }

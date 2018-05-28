@@ -18,7 +18,7 @@ public abstract class Chunk implements Serializable {
     public String fileId = null; //file fileId sent in the backup request
     public int chunkNo = -1;
     public int replicationDegree = 0;
-    public static long TIME_TO_LIVE = 600000;
+    public static long TIME_TO_LIVE = 600000; // 10 minutes
     public boolean deleted = false;
     public Date expirationDate;
     public HashSet<Integer> peersAcks = new HashSet<>(); // a set of the IDs of Peers that have saved this chunk

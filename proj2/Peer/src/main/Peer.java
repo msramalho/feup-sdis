@@ -80,8 +80,9 @@ public class Peer implements InitiatorPeer {
     }
 
     @Override
-    public void restoreMetadata(String fileName, String creationTime, String lastModifiedTime, long size) {
+    public void restoreMetadata(String fileName, String creationTime, String lastModifiedTime, long size, String decryptionKey) {
         logger.print("RESTOREMETADATA started");
+        peerConfig.setKey(decryptionKey);
         localFile = new LocalFile(fileName, creationTime, lastModifiedTime, size, 0, peerConfig);
         try {
             localFile.reconstructFile();

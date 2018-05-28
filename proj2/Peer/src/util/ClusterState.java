@@ -42,7 +42,7 @@ public class ClusterState implements Runnable {
 				e.printStackTrace();
 			}
 			tcp.close();
-			
+
 			StringBuilder info = new StringBuilder();
 			//CLUSTER INFO
 			info.append("ClusterState{\n" + 

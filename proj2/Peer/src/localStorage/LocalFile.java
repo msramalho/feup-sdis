@@ -160,6 +160,8 @@ public class LocalFile {
             try {
                 BasicFileAttributes metadata = Files.readAttributes(Paths.get(filename), BasicFileAttributes.class);
                 createFileId(filename, metadata.creationTime().toString(), metadata.lastModifiedTime().toString(), metadata.size());
+                logger.print("creation time: "+ metadata.creationTime().toString());
+                logger.print("size: " + metadata.size());
             } catch (IOException e) {
                 logger.err("Unable to read file's metadata, using filename only for the chunk");
             }

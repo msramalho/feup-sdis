@@ -12,7 +12,7 @@ public interface InitiatorPeer extends Remote {
 
     void restore(String pathname) throws RemoteException;
 
-    void restoreMetadata(String fileName, String creationTime, String lastModifiedTime, long size) throws RemoteException;
+    void restoreMetadata(String fileName, String creationTime, String lastModifiedTime, long size, String decryptionKey) throws RemoteException;
 
     void delete(String pathname) throws RemoteException;
     

@@ -21,7 +21,7 @@ public class TcpServer extends Tcp {
             SSLServerSocketFactory sslServerSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
             serverSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(0);
             serverSocket.setNeedClientAuth(true);  // s is an SSLServerSocket
-            serverSocket.setSoTimeout(1000);
+            serverSocket.setSoTimeout(200);
             serverSocket.setReceiveBufferSize(LocalFile.CHUNK_SIZE);
 
             return true;
