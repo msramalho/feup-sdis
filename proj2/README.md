@@ -1,9 +1,8 @@
-# SDIS 2016/2017: Project 2 -- Distributed Backup Service w/ Peer Clustering
+# SDIS 2016/2017: Project 2
+# Distributed Backup Service w/ Peer Clustering
 
 SDIS 2016/2017 - 2nd Semester
 Project 2 -- Distributed Backup Service w/ Peer Clustering
-
-[Official script](https://web.fe.up.pt/~pfs/aulas/sd2018/projs/proj1/proj1.html)
 
 ### The script files
  * `peer.sh` starts a peer and can start the RMI(operation which must be done in the beginning): `<peerId:default=1> <resetDatabase:default=false> <startRMI:default=false> <protocolVersion:default=1.0>`
