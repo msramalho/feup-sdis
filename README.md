@@ -10,6 +10,7 @@ With the colaboration of [Afonso Sousa](https://github.com/AfonsoSalgadoSousa), 
 
 ## Interesting features
  - Brodacast, Multicast
+ - TCP (SSL)
  - Multithreading (ThreadPool)
  - Peer to Peer System
  - New Peer Clustering Algorithm
