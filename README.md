@@ -1,4 +1,20 @@
-# feup-sdis
+# FEUP SDIS
+
+Univeristy Subject - Distributed Systems (Sistemas Distribuídos)
+
+[Faculty of Engeneering of University of Porto](https://sigarra.up.pt/feup/en/WEB_PAGE.INICIAL)
+
+2017/2018
+
+With the colaboration of [Afonso Sousa](https://github.com/AfonsoSalgadoSousa), [Beatriz Velho](https://github.com/BeatrizVelho) and [Diogo Almeida Cunha](https://github.com/DiogoAlmeidaCunha)
+
+## Interesting features
+ - Brodacast, Multicast
+ - Multithreading (ThreadPool)
+ - Peer to Peer System
+ - New Peer Clustering Algorithm
+ - Leasing
+ - Fault Tolerance, Security
 
 # Labs
  * [L01 - Broadcast UDP](https://github.com/msramalho/feup-sdis/tree/master/lab01) script in [moodle](https://moodle.up.pt/mod/page/view.php?id=32719)
